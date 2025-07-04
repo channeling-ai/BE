@@ -41,7 +41,7 @@ jobs:
       # channeling-be 다시 실행
       - name: Deploy
         env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }
           SPRING_DATASOURCE_USERNAME: ${{ secrets.DB_USERNAME }}
           SPRING_DATASOURCE_PASSWORD: ${{ secrets.DB_PASSWORD }}
           S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
@@ -65,3 +65,5 @@ jobs:
             -e AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} \
             -e AWS_SECRET_ACCESS_KEY=${{ env.AWS_SECRET_ACCESS_KEY }} \
             ${{ env.DOCKER_USERNAME }}/channeling-be:latest
+
+
