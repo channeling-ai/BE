@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: channeling-be
+  profiles:
+    active: ["db", "s3"]
