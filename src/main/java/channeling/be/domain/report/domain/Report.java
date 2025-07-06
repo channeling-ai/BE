@@ -59,6 +59,9 @@ public class Report extends BaseEntity {
     private Long revisit; // 재방문률
 
     @Column(nullable = false)
+    private String summary; // 요약본
+
+    @Column(nullable = false)
     private Long neutralComment; // 중립 댓글 수
 
     @Column(nullable = false)
