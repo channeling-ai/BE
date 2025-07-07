@@ -1,11 +1,28 @@
 package channeling.be.domain.channel.application;
 
+import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.channel.domain.repository.ChannelRepository;
+import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
+import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+
+import static channeling.be.response.code.status.ErrorStatus.*;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class ChannelServiceImpl implements ChannelService {
+    private final ChannelRepository channelRepository;
+
+    @Override
+    @Transactional
+    public String editChannelConcept(ChannelRequestDto.EditChannelConceptReqDto request) {
+        Long channelId = request.getChannelId(); // id로 채널 조회 -> 추후 로그인 멤버 가져온 후, 멤버로 조회하는 걸로 바궈야 할 듯..? 일대일이니까..
+        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+        channel.editConcept(request.getConcept()); // 더티체킹
+        return "성공적으로 체널 컨셉을 수정하였습니다.";
+    }
 }
