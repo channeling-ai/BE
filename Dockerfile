@@ -1,6 +1,9 @@
 # Run Stage
 FROM openjdk:17-jdk-slim
 
+# curl 설치
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 # 빌드 결과물 복사
