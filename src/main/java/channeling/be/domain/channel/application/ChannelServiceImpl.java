@@ -23,6 +23,6 @@ public class ChannelServiceImpl implements ChannelService {
         Long channelId = request.getChannelId(); // id로 채널 조회 -> 추후 로그인 멤버 가져온 후, 멤버로 조회하는 걸로 바궈야 할 듯..? 일대일이니까..
         Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
         channel.editConcept(request.getConcept()); // 더티체킹
-        return "성공적으로 체널 컨셉을 수정하였습니다.";
+        return request.getConcept();
     }
 }

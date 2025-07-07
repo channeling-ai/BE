@@ -13,5 +13,6 @@ public class ChannelResponseDto {
     @AllArgsConstructor
     public static class EditChannelConceptResDto{
         String message; //응답 메세지
+        String updatedConcept; //수정한 컨셉 내용
     }
 }
