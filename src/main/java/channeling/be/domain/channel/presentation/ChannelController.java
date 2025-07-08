@@ -22,6 +22,8 @@ import static channeling.be.domain.channel.presentation.converter.ChannelConvert
 import static channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto.*;
 import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.*;
 
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/channels")
@@ -31,16 +33,29 @@ public class ChannelController {
 	private final ChannelService channelService;
 
 
+	// // TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
+	// @GetMapping("/{channel-id}/videos")
+	// @Operation(summary = "채널의 비디오 리스트 조회 API (page)", description = "특정 채널의 비디오 리스트를 페이지를 통해 조회합니다.")
+	// public ChannelResDTO.ChannelVideoList getChannelVideos(
+	// 	@PathVariable("channel-id") Long channelId,
+	// 	@RequestParam(value = "type") VideoCategory type,
+	// 	@RequestParam(value = "page", defaultValue = "1") int page,
+	// 	@RequestParam(value = "size", defaultValue = "8") int size) {
+	// 	channelService.validateChannelByIdAndMember(channelId);
+	// 	Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
+	// 	return ChannelConverter.toChannelVideoList(channelId, videoBriefSlice);
+	// }
+
 	// TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
 	@GetMapping("/{channel-id}/videos")
-	@Operation(summary = "채널의 비디오 리스트 조회 API", description = "특정 채널의 비디오 리스트를 조회합니다.")
-	public ChannelResDTO.ChannelVideoList getChannelVideos(
+	@Operation(summary = "채널의 비디오 리스트 조회 API (cursor)", description = "특정 채널의 비디오 리스트를 커서 기반으로 조회합니다.")
+	public ChannelResDTO.ChannelVideoList getChannelVideosByCursor(
 		@PathVariable("channel-id") Long channelId,
 		@RequestParam(value = "type") VideoCategory type,
-		@RequestParam(value = "page", defaultValue = "1") int page,
+		@RequestParam(value = "cursor",required = false) LocalDateTime cursor,
 		@RequestParam(value = "size", defaultValue = "8") int size) {
 		channelService.validateChannelByIdAndMember(channelId);
-		Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
+		Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByTypeAfterCursor(channelId,type,cursor, size);
 		return ChannelConverter.toChannelVideoList(channelId, videoBriefSlice);
 	}
 
