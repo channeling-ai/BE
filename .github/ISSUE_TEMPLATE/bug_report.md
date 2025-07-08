@@ -2,7 +2,7 @@
 name: Bug report
 about: 버그 리포트 이슈
 title: "[BUG]: "
-labels: ":bug: 버그"
+labels: ":bug: 버그, :rainbow: 기능"
 assignees: ''
 
 ---

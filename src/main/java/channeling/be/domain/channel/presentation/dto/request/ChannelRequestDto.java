@@ -1,0 +1,11 @@
+package channeling.be.domain.channel.presentation.dto.request;
+
+import lombok.Getter;
+
+public class ChannelRequestDto {
+    @Getter
+    public static class EditChannelConceptReqDto{
+        Long channelId; //수정할 체널의 아이디
+        String concept; // 수정할 컨셉 정보
+    }
+}
