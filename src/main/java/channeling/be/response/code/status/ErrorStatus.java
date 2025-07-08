@@ -17,9 +17,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON401", "인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403","금지된 요청입니다."),
 
-    //채널 관련 응답
-    _CHANNEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHANNEL400","존재하지 않는 체널입니다.") ;
 
+    //채널 관련 에러
+    _CHANNEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHANNEL400","존재하지 않는 체널입니다."),
+    _CHANNEL_NOT_MEMBER(HttpStatus.FORBIDDEN, "CHANNEL403", "해당 채널을 소유한 멤버가 아닙니다.");
 
 
 

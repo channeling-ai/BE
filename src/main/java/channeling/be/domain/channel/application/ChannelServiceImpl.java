@@ -8,14 +8,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 
-import static channeling.be.response.code.status.ErrorStatus.*;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
 public class ChannelServiceImpl implements ChannelService {
-    private final ChannelRepository channelRepository;
+
+	private final ChannelRepository channelRepository;
 
     @Override
     @Transactional
@@ -25,4 +26,14 @@ public class ChannelServiceImpl implements ChannelService {
         channel.editConcept(request.getConcept()); // 더티체킹
         return request.getConcept();
     }
+
+    @Override
+	public void validateChannelByIdAndMember(Long channelId) {
+		boolean isExist=channelRepository.existsById(channelId);
+		if (!isExist) {
+			throw new ChannelHandler(_CHANNEL_NOT_FOUND);
+		}
+		//TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
+	}
+
 }

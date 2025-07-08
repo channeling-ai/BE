@@ -6,6 +6,5 @@ import channeling.be.response.exception.GeneralException;
 public class ChannelHandler extends GeneralException {
     public ChannelHandler(BaseErrorCode errorCode) {
         super(errorCode);
-
     }
 }
