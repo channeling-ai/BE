@@ -19,7 +19,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
 
     //채널 관련 에러
-    _CHANNEL_NOT_FOUND(HttpStatus.NOT_FOUND, "CHANNEL404", "존재하지 않는 채널입니다."),
+    _CHANNEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHANNEL400","존재하지 않는 체널입니다."),
     _CHANNEL_NOT_MEMBER(HttpStatus.FORBIDDEN, "CHANNEL403", "해당 채널을 소유한 멤버가 아닙니다.");
 
 

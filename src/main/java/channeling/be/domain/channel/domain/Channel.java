@@ -63,4 +63,9 @@ public class Channel extends BaseEntity {
 
     @Column(nullable = false)
     private LocalDateTime channelUpdateAt; // 채널 정보 업데이트 시기
+
+
+    public void editConcept(String concept) {
+        this.concept = concept;
+    }
 }

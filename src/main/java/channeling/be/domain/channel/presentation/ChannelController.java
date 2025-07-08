@@ -1,15 +1,15 @@
 package channeling.be.domain.channel.presentation;
 
-import java.util.List;
-
 import channeling.be.domain.channel.application.ChannelService;
 import channeling.be.domain.video.application.VideoService;
-import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.presentaion.VideoResDTO;
+import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import static channeling.be.domain.channel.presentation.converter.ChannelConverter.*;
+import static channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto.*;
+import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -39,4 +43,10 @@ public class ChannelController {
 		Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
 		return ChannelConverter.toChannelVideoList(channelId, videoBriefSlice);
 	}
+
+    @PatchMapping("/editConcept")
+    public ApiResponse<EditChannelConceptResDto> editChannelConcept(@RequestBody EditChannelConceptReqDto request) {
+        return ApiResponse.onSuccess(toEditChannelConceptResDTo(channelService.editChannelConcept(request)));
+    }
+
 }

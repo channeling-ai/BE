@@ -1,9 +1,9 @@
 package channeling.be.domain.channel.application;
 
-import channeling.be.domain.channel.presentation.ChannelResDTO;
-import channeling.be.response.exception.GeneralException;
+import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
 
 public interface ChannelService {
+    String editChannelConcept(ChannelRequestDto.EditChannelConceptReqDto request);
 	/**
 	 * 채널 ID로 채널의 존재 여부를 검증합니다.
 	 *
