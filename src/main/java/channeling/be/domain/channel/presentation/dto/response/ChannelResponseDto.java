@@ -12,7 +12,7 @@ public class ChannelResponseDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class EditChannelConceptResDto{
-        String message; //응답 메세지
+        Long channelId; // 채널 아이디
         String updatedConcept; //수정한 컨셉 내용
     }
 
