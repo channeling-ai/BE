@@ -36,4 +36,12 @@ public class ChannelServiceImpl implements ChannelService {
 		//TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
 	}
 
+    @Override
+    @Transactional
+    public Channel editChannelTarget(Long channelId, ChannelRequestDto.EditChannelTargetReqDto request) {
+        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));// id로 채널 조회 -> 추후 로그인 멤버 가져온 후, 멤버로 조회하는 걸로 바궈야 할 듯..? 일대일이니까..
+        channel.editTarget(request.getTarget()); // 더티체킹
+        return channel;
+    }
+
 }

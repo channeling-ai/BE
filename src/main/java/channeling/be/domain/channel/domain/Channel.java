@@ -68,4 +68,7 @@ public class Channel extends BaseEntity {
     public void editConcept(String concept) {
         this.concept = concept;
     }
+    public void editTarget(String target) {
+        this.target = target;
+    }
 }

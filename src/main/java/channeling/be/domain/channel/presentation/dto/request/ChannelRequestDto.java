@@ -8,4 +8,9 @@ public class ChannelRequestDto {
         Long channelId; //수정할 체널의 아이디
         String concept; // 수정할 컨셉 정보
     }
+
+    @Getter
+    public static class EditChannelTargetReqDto{
+        String target; // 수정할 타겟 정보
+    }
 }
