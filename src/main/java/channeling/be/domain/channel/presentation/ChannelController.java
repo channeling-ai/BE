@@ -44,9 +44,14 @@ public class ChannelController {
 		return ChannelConverter.toChannelVideoList(channelId, videoBriefSlice);
 	}
 
-    @PatchMapping("/editConcept")
-    public ApiResponse<EditChannelConceptResDto> editChannelConcept(@RequestBody EditChannelConceptReqDto request) {
-        return ApiResponse.onSuccess(toEditChannelConceptResDTo(channelService.editChannelConcept(request)));
+    @PatchMapping("/{channel-id}/concept")
+    public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelConceptReqDto request) {
+        return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request)));
     }
+
+	@PatchMapping("/{channel-id}/target")
+	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelTargetReqDto request) {
+		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request))));
+	}
 
 }

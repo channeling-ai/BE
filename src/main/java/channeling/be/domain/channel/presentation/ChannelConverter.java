@@ -1,6 +1,5 @@
 package channeling.be.domain.channel.presentation;
 
-import java.util.List;
 
 import org.springframework.data.domain.Slice;
 
