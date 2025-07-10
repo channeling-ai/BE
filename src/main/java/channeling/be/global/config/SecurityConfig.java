@@ -31,11 +31,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // TODO OAuth2 로그인 설정 (사용 확인 필요)
+                // OAuth2 로그인 설정
                 .oauth2Login(oauth -> oauth
                         .userInfoEndpoint(userInfo -> userInfo.userService(memberOauth2UserService))
                         .failureHandler(oauth2LoginFailureHandler)
                         .successHandler(oAuth2LoginSuccessHandler)
+                        .authorizationEndpoint(authorization -> authorization
+                                .baseUri("/members/login")
+                        )
                 )
                 // TODO 커스텀 필터 등록 (자체 JWT 인가 필터, 예외처리 필터 등)
                 // .exceptionHandling(exception -> exception.authenticationEntryPoint(new AuthenticationEntryPointImpl()))

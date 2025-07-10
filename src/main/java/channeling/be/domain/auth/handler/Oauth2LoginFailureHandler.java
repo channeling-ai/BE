@@ -22,8 +22,6 @@ public class Oauth2LoginFailureHandler implements AuthenticationFailureHandler {
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         String jsonResponse = om.writeValueAsString(ApiResponse.onFailure(
                 HttpStatus.UNAUTHORIZED.name(),
@@ -31,6 +29,8 @@ public class Oauth2LoginFailureHandler implements AuthenticationFailureHandler {
                 exception.getMessage()
         ));
 
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter().write(jsonResponse);
     }
 }
