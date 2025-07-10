@@ -1,6 +1,6 @@
 package channeling.be.global.config;
 
-import channeling.be.domain.auth.MemberOauth2UserService;
+import channeling.be.domain.auth.application.MemberOauth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
