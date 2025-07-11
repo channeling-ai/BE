@@ -11,7 +11,13 @@ import org.springframework.http.HttpStatus;
 public enum SuccessStatus implements BaseCode {
 
     //성공상태 ENUM 값
-    _OK(HttpStatus.OK, "COMMON200", "성공입니다.");
+    _OK(HttpStatus.OK, "COMMON200", "성공입니다."),
+
+    //채널 관련 성공상태
+    _GET_CHANNEL_VIDEOS_OK(HttpStatus.OK, "CHANNEL200", "채널 비디오 조회 성공"),
+
+    //멤버 관련 성공상태
+    _MEMBER_UPDATE_SNS_OK(HttpStatus.OK, "MEMBER200", "멤버 SNS 정보 수정 성공");
 
     private final HttpStatus httpStatus;
     private final String code;
