@@ -47,21 +47,26 @@ public class ChannelController {
 	// }
 
 	// TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
-	@GetMapping("/{channel-id}/videos")
-	@Operation(summary = "채널의 비디오 리스트 조회 API (cursor)", description = "특정 채널의 비디오 리스트를 커서 기반으로 조회합니다.")
-	public ChannelResDTO.ChannelVideoList getChannelVideosByCursor(
-		@PathVariable("channel-id") Long channelId,
-		@RequestParam(value = "type") VideoCategory type,
-		@RequestParam(value = "cursor",required = false) LocalDateTime cursor,
-		@RequestParam(value = "size", defaultValue = "8") int size) {
-		channelService.validateChannelByIdAndMember(channelId);
-		Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByTypeAfterCursor(channelId,type,cursor, size);
-		return ChannelConverter.toChannelVideoList(channelId, videoBriefSlice);
-	}
+  @GetMapping("/{channel-id}/videos")
+  @Operation(summary = "채널의 비디오 리스트 조회 API", description = "특정 채널의 비디오 리스트를 조회합니다.")
+  public ApiResponse<ChannelResDTO.ChannelVideoList> getChannelVideos(
+    @PathVariable("channel-id") Long channelId,
+    @RequestParam(value = "type") VideoCategory type,
+    @RequestParam(value = "cursor",required = false) LocalDateTime cursor,
+    @RequestParam(value = "size", defaultValue = "8") int size) {
+    channelService.validateChannelByIdAndMember(channelId);
+    Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
+    return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefSlice));
+  }
 
-    @PatchMapping("/editConcept")
-    public ApiResponse<EditChannelConceptResDto> editChannelConcept(@RequestBody EditChannelConceptReqDto request) {
-        return ApiResponse.onSuccess(toEditChannelConceptResDTo(channelService.editChannelConcept(request)));
-    }
+  @PatchMapping("/{channel-id}/concept")
+  public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelConceptReqDto request) {
+      return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request)));
+  }
+
+	@PatchMapping("/{channel-id}/target")
+	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelTargetReqDto request) {
+		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request))));
+	}
 
 }
