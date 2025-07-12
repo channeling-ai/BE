@@ -1,6 +1,7 @@
 package channeling.be.domain.channel.presentation;
 
 import channeling.be.domain.channel.application.ChannelService;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.application.VideoService;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.presentaion.VideoResDTO;
@@ -8,6 +9,8 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -53,5 +56,9 @@ public class ChannelController {
 	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelTargetReqDto request) {
 		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request))));
 	}
-
+	@GetMapping("{channel-id}")
+	public ApiResponse<ChannelResDTO.Channel> getChannel(@PathVariable("channel-id") Long channelId,
+														 Member loginMember) {
+		 return ApiResponse.onSuccess(ChannelConverter.toChannelResDto(channelService.getChannel(channelId, loginMember)));
+	}
 }
