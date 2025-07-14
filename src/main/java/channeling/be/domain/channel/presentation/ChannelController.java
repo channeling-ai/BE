@@ -55,7 +55,7 @@ public class ChannelController {
     @RequestParam(value = "cursor",required = false) LocalDateTime cursor,
     @RequestParam(value = "size", defaultValue = "8") int size) {
     channelService.validateChannelByIdAndMember(channelId);
-    Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
+    Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByTypeAfterCursor(channelId,type,cursor, size);
     return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefSlice));
   }
 
