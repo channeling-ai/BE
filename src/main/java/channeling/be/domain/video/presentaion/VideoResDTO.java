@@ -16,7 +16,7 @@ public class VideoResDTO {
 		String  videoThumbnailUrl,
 		VideoCategory videoCategory,
 		Long viewCount,
-		LocalDateTime updatedAt
+		LocalDateTime uploadDate
 	){
 		public static VideoBrief from(Video video) {
 			return new VideoBrief(
@@ -25,7 +25,7 @@ public class VideoResDTO {
 				video.getThumbnail(),
 				video.getVideoCategory(),
 				video.getView(),
-				video.getUpdatedAt()
+				video.getUploadDate()
 			);
 		}
 	}

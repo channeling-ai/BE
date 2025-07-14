@@ -22,10 +22,12 @@ public enum ErrorStatus implements BaseErrorCode {
     _CHANNEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHANNEL400","존재하지 않는 체널입니다."),
     _CHANNEL_NOT_MEMBER(HttpStatus.FORBIDDEN, "CHANNEL403", "해당 채널을 소유한 멤버가 아닙니다."),
 
-
     // 회원동의
-    _MEMBER_AGREE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_AGREE400", "존재하지 않는 회원 동의입니다.");
+    _MEMBER_AGREE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_AGREE400", "존재하지 않는 회원 동의입니다."),
 
+    //멤버 관련 에러
+    _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "존재하지 않는 멤버입니다."),
+    _SNS_LINK_INVALID(HttpStatus.BAD_REQUEST, "MEMBER401", "SNS 링크가 유효하지 않습니다.");
 
 
     private final HttpStatus httpStatus;
