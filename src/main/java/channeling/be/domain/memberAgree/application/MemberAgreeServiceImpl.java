@@ -2,7 +2,7 @@ package channeling.be.domain.memberAgree.application;
 
 import channeling.be.domain.memberAgree.domain.MemberAgree;
 import channeling.be.domain.memberAgree.domain.repository.MemberAgreeRepository;
-import channeling.be.domain.memberAgree.presentation.MemberAgreeDto;
+import channeling.be.domain.memberAgree.presentation.MemberAgreeReqDto;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.MemberHandler;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +17,7 @@ public class MemberAgreeServiceImpl implements MemberAgreeService {
 
     @Transactional
     @Override
-    public MemberAgree editMemberAgree(MemberAgreeDto.EditReqDto dto) {
+    public MemberAgree editMemberAgree(MemberAgreeReqDto.Edit dto) {
         // TODO : 로그인 멤버 정보로 조회하는 로직 추가 필요
         MemberAgree memberAgree = memberAgreeRepository.findById(dto.getId())
                 .orElseThrow(() -> new MemberHandler(ErrorStatus._MEMBER_AGREE_NOT_FOUND));

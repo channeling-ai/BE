@@ -17,7 +17,7 @@ public interface MemberAgreeApi {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
                     description = "성공입니다.",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = MemberAgreeDto.EditResDto.class))}
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = MemberAgreeResDto.Edit.class))}
             ),
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "400",
@@ -25,5 +25,5 @@ public interface MemberAgreeApi {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorCodes.class))}
             )
     })
-    ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeDto.EditReqDto dto);
+    ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto);
 }

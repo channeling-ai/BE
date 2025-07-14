@@ -2,7 +2,6 @@ package channeling.be.domain.memberAgree.presentation;
 
 import channeling.be.domain.memberAgree.application.MemberAgreeService;
 import channeling.be.response.exception.handler.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -18,7 +17,7 @@ public class MemberAgreeController implements MemberAgreeApi {
     private final MemberAgreeService memberAgreeService;
 
     @PatchMapping("/{member-agree-id}")
-    public ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeDto.EditReqDto dto) {
+    public ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto) {
         // TODO @AuthenticationPrincipal 추가
         return ApiResponse.onSuccess(
             MemberAgreeConverter.toEditMemberAgreeResDto(

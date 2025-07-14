@@ -4,8 +4,8 @@ import channeling.be.domain.memberAgree.domain.MemberAgree;
 
 public class MemberAgreeConverter {
 
-    public static MemberAgreeDto.EditResDto toEditMemberAgreeResDto(MemberAgree memberAgree) {
-        return MemberAgreeDto.EditResDto.builder()
+    public static MemberAgreeReqDto.EditResDto toEditMemberAgreeResDto(MemberAgree memberAgree) {
+        return MemberAgreeReqDto.EditResDto.builder()
                 .id(memberAgree.getId())
                 .dayContentEmailAgree(memberAgree.getDayContentEmailAgree())
                 .marketingEmailAgree(memberAgree.getMarketingEmailAgree())
