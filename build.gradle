@@ -52,6 +52,14 @@ dependencies {
 
     // actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // JWT
+    implementation 'com.auth0:java-jwt:4.5.0'
+    implementation 'com.auth0:jwks-rsa:0.20.0'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 }
 
 def querydslDir = "src/main/generated"

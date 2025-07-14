@@ -30,7 +30,7 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         // TODO [지우기] 인증 사용자 정보 샘플
         System.out.println(" 엑세스 토큰 " + userRequest.getAccessToken().getTokenValue());
-        System.out.println(" 유저 정보 샘플 " + memberAttribute.get("name"));
+        System.out.println(" 유저 정보 샘플 " + memberAttribute);
 
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),

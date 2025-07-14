@@ -40,4 +40,9 @@ public class MemberServiceImpl implements MemberService {
 			member.getTwitterLink()
 		);
 	}
+  
+    @Override
+    public Member findOrCreateMember() {
+        return null;
+    }
 }
