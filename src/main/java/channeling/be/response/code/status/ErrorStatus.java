@@ -24,6 +24,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     // 회원동의
     _MEMBER_AGREE_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER_AGREE400", "존재하지 않는 회원 동의입니다."),
+    _MEMBER_AGREE_NOT_ALLOW(HttpStatus.BAD_REQUEST, "MEMBER_AGREE400", "로그인 된 멤버의 동의 정보만 수정 가능합니다."),
 
     //멤버 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "존재하지 않는 멤버입니다."),

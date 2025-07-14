@@ -1,8 +1,11 @@
 package channeling.be.domain.memberAgree.presentation;
 
 import ch.qos.logback.core.spi.ErrorCodes;
+import channeling.be.domain.auth.annotation.LoginMember;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,5 +28,5 @@ public interface MemberAgreeApi {
                     content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ErrorCodes.class))}
             )
     })
-    ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto);
+    ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto, @Parameter(hidden = true) @LoginMember Member member);
 }

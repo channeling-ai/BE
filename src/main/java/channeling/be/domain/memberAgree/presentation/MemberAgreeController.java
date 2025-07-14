@@ -1,5 +1,7 @@
 package channeling.be.domain.memberAgree.presentation;
 
+import channeling.be.domain.auth.annotation.LoginMember;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.memberAgree.application.MemberAgreeService;
 import channeling.be.response.exception.handler.ApiResponse;
 import jakarta.validation.Valid;
@@ -16,12 +18,12 @@ public class MemberAgreeController implements MemberAgreeApi {
 
     private final MemberAgreeService memberAgreeService;
 
-    @PatchMapping("/{member-agree-id}")
-    public ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto) {
+    @PatchMapping("")
+    public ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto, @LoginMember Member member) {
         // TODO @AuthenticationPrincipal 추가
         return ApiResponse.onSuccess(
             MemberAgreeConverter.toEditMemberAgreeResDto(
-                memberAgreeService.editMemberAgree(dto)
+                memberAgreeService.editMemberAgree(dto, member)
             )
         );
     }
