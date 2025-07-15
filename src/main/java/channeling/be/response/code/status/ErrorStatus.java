@@ -24,7 +24,13 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //멤버 관련 에러
     _MEMBER_NOT_FOUND(HttpStatus.BAD_REQUEST, "MEMBER400", "존재하지 않는 멤버입니다."),
-    _SNS_LINK_INVALID(HttpStatus.BAD_REQUEST, "MEMBER401", "SNS 링크가 유효하지 않습니다.");
+    _SNS_LINK_INVALID(HttpStatus.BAD_REQUEST, "MEMBER401", "SNS 링크가 유효하지 않습니다."),
+
+    //S3 관련 에러
+    _FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "S3400", "파일 업로드에 실패했습니다."),
+    _FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S3401", "파일 삭제에 실패했습니다."),
+
+    ;
 
 
 
