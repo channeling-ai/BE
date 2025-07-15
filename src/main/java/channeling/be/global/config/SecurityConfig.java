@@ -1,6 +1,10 @@
 package channeling.be.global.config;
 
+import channeling.be.domain.auth.application.CustomUserDetailsService;
 import channeling.be.domain.auth.application.MemberOauth2UserService;
+import channeling.be.domain.auth.filter.AuthenticationEntryPointImpl;
+import channeling.be.domain.auth.filter.JwtAuthenticationProcessingFilter;
+import channeling.be.global.infrastructure.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,9 +13,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -21,6 +28,8 @@ public class SecurityConfig {
     private final MemberOauth2UserService memberOauth2UserService;
     private final AuthenticationSuccessHandler oAuth2LoginSuccessHandler;
     private final AuthenticationFailureHandler oauth2LoginFailureHandler;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,20 +50,29 @@ public class SecurityConfig {
                         )
                 )
                 // TODO 커스텀 필터 등록 (자체 JWT 인가 필터, 예외처리 필터 등)
-                // .exceptionHandling(exception -> exception.authenticationEntryPoint(new AuthenticationEntryPointImpl()))
-                // .addFilterBefore(jwtAuthenticationProcessingFilter(), LogoutFilter.class)
+                //미인증 상태로, whiteList 에 접근했을 경우
+                .addFilterAfter(jwtAuthenticationProcessingFilter(), ExceptionTranslationFilter.class)
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
                 // TODO 엔드포인트 추가 (개발 후)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/test").authenticated()
                         .anyRequest().permitAll()
                 )
         ;
 
+
         return http.build();
     }
 
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return new AuthenticationEntryPointImpl();
+    }
+
     // TODO JWT 인증 필터
-//    @Bean
-//    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
-//        return new JwtAuthenticationProcessingFilter(jwtTokenProvider, memberRepository, redisUtil);
-//    }
+    @Bean
+    public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
+        return new JwtAuthenticationProcessingFilter(jwtUtil, customUserDetailsService);
+    }
 }
