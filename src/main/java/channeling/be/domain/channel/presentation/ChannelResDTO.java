@@ -16,7 +16,7 @@ public class ChannelResDTO {
 	) {
 	}
 
-	public record Channel(
+	public record ChannelInfo(
 		Long channelId,
 		String name,
 		Long view,

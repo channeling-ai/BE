@@ -23,8 +23,8 @@ public class ChannelConverter {
 		);
 	}
 
-	public static ChannelResDTO.Channel toChannelResDto(Channel channel) {
-		return new ChannelResDTO.Channel(
+	public static ChannelResDTO.ChannelInfo toChannelResDto(Channel channel) {
+		return new ChannelResDTO.ChannelInfo(
 			channel.getId(),
 			channel.getName(),
 			channel.getView(),
