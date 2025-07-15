@@ -40,13 +40,16 @@ public class MemberServiceImpl implements MemberService {
 			member.getTwitterLink()
 		);
 	}
-  
-    @Override
-    public Member findOrCreateMember(String googleId) {
+
+	@Override
+	@Transactional
+    public Member findOrCreateMember(String googleId, String email, String nickname) {
 		return memberRepository.findByGoogleId(googleId)
 			.orElseGet(() -> memberRepository.save(
 				Member.builder()
 					.googleId(googleId)
+					.googleEmail(email)
+					.nickname(nickname)
 					.build()
 			));
 	}
