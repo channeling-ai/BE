@@ -1,7 +1,9 @@
 package channeling.be.domain.channel.presentation;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+import channeling.be.domain.channel.domain.ChannelHashTag;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 
 public class ChannelResDTO {
@@ -11,6 +13,25 @@ public class ChannelResDTO {
 		int size,
 		boolean hasNextPage,
 		List<VideoResDTO.VideoBrief> videoList
+	) {
+	}
+
+	public record ChannelInfo(
+		Long channelId,
+		String name,
+		Long view,
+		Long likeCount,
+		Long subscribe,
+		Long share,
+		Long videoCount,
+		Long comment,
+		String link,
+		LocalDateTime joinDate,
+		String target,
+		String concept,
+		String image,
+		ChannelHashTag channelHashTags,
+		LocalDateTime channelUpdateAt
 	) {
 	}
 }
