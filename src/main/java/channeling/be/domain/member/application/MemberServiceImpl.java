@@ -42,7 +42,12 @@ public class MemberServiceImpl implements MemberService {
 	}
   
     @Override
-    public Member findOrCreateMember() {
-        return null;
-    }
+    public Member findOrCreateMember(String googleId) {
+		return memberRepository.findByGoogleId(googleId)
+			.orElseGet(() -> memberRepository.save(
+				Member.builder()
+					.googleId(googleId)
+					.build()
+			));
+	}
 }

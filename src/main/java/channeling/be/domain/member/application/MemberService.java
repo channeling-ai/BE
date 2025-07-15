@@ -6,7 +6,7 @@ import channeling.be.domain.member.presentation.MemberResDTO;
 
 public interface MemberService {
 
-    Member findOrCreateMember();
-	  MemberResDTO.updateSnsRes updateSns(MemberReqDTO.updateSnsReq updateSnsReq);
+    Member findOrCreateMember(String googleId);
+	MemberResDTO.updateSnsRes updateSns(MemberReqDTO.updateSnsReq updateSnsReq);
 
 }
