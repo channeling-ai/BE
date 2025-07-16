@@ -1,6 +1,8 @@
 package channeling.be.domain.channel.presentation;
 
+import channeling.be.domain.auth.annotation.LoginMember;
 import channeling.be.domain.channel.application.ChannelService;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.application.VideoService;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.presentaion.VideoResDTO;
@@ -55,7 +57,7 @@ public class ChannelController {
     @RequestParam(value = "cursor",required = false) LocalDateTime cursor,
     @RequestParam(value = "size", defaultValue = "8") int size) {
     channelService.validateChannelByIdAndMember(channelId);
-    Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
+    Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByTypeAfterCursor(channelId,type,cursor, size);
     return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefSlice));
   }
 
@@ -68,5 +70,9 @@ public class ChannelController {
 	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelTargetReqDto request) {
 		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request))));
 	}
-
+	@GetMapping("{channel-id}")
+	public ApiResponse<ChannelResDTO.ChannelInfo> getChannel(@PathVariable("channel-id") Long channelId,
+                                                             @LoginMember Member loginMember) {
+		 return ApiResponse.onSuccess(ChannelConverter.toChannelResDto(channelService.getChannel(channelId, loginMember)));
+	}
 }

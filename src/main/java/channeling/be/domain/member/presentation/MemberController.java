@@ -2,7 +2,6 @@ package channeling.be.domain.member.presentation;
 
 import channeling.be.domain.auth.annotation.LoginMember;
 import channeling.be.domain.member.domain.Member;
-import channeling.be.global.infrastructure.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import channeling.be.domain.member.application.MemberService;
@@ -11,6 +10,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
 import static channeling.be.domain.member.presentation.MemberReqDTO.*;
+import static channeling.be.domain.member.presentation.MemberResDTO.*;
+
 
 @RequiredArgsConstructor
 @RestController
@@ -18,7 +19,6 @@ import static channeling.be.domain.member.presentation.MemberReqDTO.*;
 @RequestMapping("/members")
 public class MemberController {
 
-    private final RedisUtil redisUtil;
   	private final MemberService memberService;
     /**
      * 멤버의 sns 정보를 수정하는 API입니다.
@@ -29,13 +29,13 @@ public class MemberController {
       summary = "SNS 정보 수정 API",
       description = "멤버의 SNS 정보를 수정합니다. 현재는 임시로 1L로 설정된 멤버 ID를 사용합니다."
     )
-    public ApiResponse<MemberResDTO.updateSnsRes> updateSns(@RequestBody updateSnsReq updateSnsReq) {
-      MemberResDTO.updateSnsRes updateSnsRes=memberService.updateSns(updateSnsReq);
+    public ApiResponse<updateSnsRes> updateSns(@RequestBody updateSnsReq updateSnsReq) {
+      updateSnsRes updateSnsRes=memberService.updateSns(updateSnsReq);
       return ApiResponse.onSuccess(updateSnsRes);
     }
 
     @PatchMapping("/profile-image")
-    public ApiResponse<MemberResDTO.updateProfileImageRes> updateProfileImage(
+    public ApiResponse<updateProfileImageRes> updateProfileImage(
             @LoginMember Member member,
             @ModelAttribute MemberReqDTO.ProfileImageUpdateReq updateProfileImageReq) {
         return ApiResponse.onSuccess(memberService.updateProfileImage(member,updateProfileImageReq));

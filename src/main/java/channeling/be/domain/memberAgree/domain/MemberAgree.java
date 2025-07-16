@@ -27,4 +27,11 @@ public class MemberAgree extends BaseEntity {
     private Boolean dayContentEmailAgree; // 두 번째 질문 동의 여부
 
 
+    public void editMarketingEmailAgree(Boolean marketingEmailAgree) {
+        this.marketingEmailAgree = marketingEmailAgree;
+    }
+
+    public void editDayContentEmailAgree(Boolean dayContentEmailAgree) {
+        this.dayContentEmailAgree = dayContentEmailAgree;
+    }
 }

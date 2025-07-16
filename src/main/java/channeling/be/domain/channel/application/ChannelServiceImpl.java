@@ -3,12 +3,14 @@ package channeling.be.domain.channel.application;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
+import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
 
 
 @RequiredArgsConstructor
@@ -42,4 +44,15 @@ public class ChannelServiceImpl implements ChannelService {
         return channel;
     }
 
+    @Override
+    public Channel getChannel(Long channelId, Member loggedInMember) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+        if (!channel.getMember().getId().equals(loggedInMember.getId())) {
+            throw new ChannelHandler(_CHANNEL_NOT_MEMBER);
+        }
+
+        return channel;
+    }
 }
