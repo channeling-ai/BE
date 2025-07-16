@@ -1,6 +1,7 @@
 package channeling.be.domain.channel.application;
 
 import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.response.exception.handler.ChannelHandler;
 
 import static channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto.*;
@@ -37,4 +38,8 @@ public interface ChannelService {
 	 * @return 채널 객체
 	 */
 	Channel findOrCreateChannelByMember(channeling.be.domain.member.domain.Member member);
+	/*
+	 * 채널 정보를 조회합니다.
+	 */
+	Channel getChannel(Long channelId, Member member);
 }
