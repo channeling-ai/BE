@@ -74,4 +74,8 @@ public class Member extends BaseEntity {
         }
         return trimmed;
     }
+
+    public void profileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 }
