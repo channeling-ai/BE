@@ -19,64 +19,64 @@ public class Report extends BaseEntity {
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
 
-    @Column(nullable = false)
+    @Column
     private String title; // 영상 제목
 
-    @Column(nullable = false)
+    @Column
     private Long view; // 조회수
 
-    @Column(nullable = false)
+    @Column
     private Long viewTopicAvg; // 동일 주제 평균 조회수
 
-    @Column(nullable = false)
+    @Column
     private Long viewChannelAvg; // 체널 평균 조회수
 
-    @Column(nullable = false)
+    @Column
     private Long likeCount; // 좋아요 수
 
-    @Column(nullable = false)
+    @Column
     private Long likeTopicAvg; // 동일 주제 평균 좋아요 수
 
-    @Column(nullable = false)
+    @Column
     private Long likeChannelAvg; // 채널 평균 좋아요 수
 
-    @Column(nullable = false)
+    @Column
     private Long comment; // 댓글 수
 
-    @Column(nullable = false)
+    @Column
     private Long commentTopicAvg; // 동일 주제 평균 댓글 수
 
-    @Column(nullable = false)
+    @Column
     private Long commentChannelAvg; // 채널 평균 좋아요 수
 
-    @Column(nullable = false)
+    @Column
     private Integer concept; //컨셉 일관성
 
-    @Column(nullable = false)
+    @Column
     private Long seo; // seo 구성
 
-    @Column(nullable = false)
+    @Column
     private Long revisit; // 재방문률
 
-    @Column(nullable = false)
+    @Column
     private String summary; // 요약본
 
-    @Column(nullable = false)
+    @Column
     private Long neutralComment; // 중립 댓글 수
 
-    @Column(nullable = false)
+    @Column
     private Long adviceComment; // 조언 댓글 수
 
-    @Column(nullable = false)
+    @Column
     private Long positiveComment; // 긍정 댓글 수
 
-    @Column(nullable = false)
+    @Column
     private Long negativeComment; // 부정 댓글 수
 
-    @Column(nullable = false)
+    @Column
     private String leaveAnalyze; // 시청자 이탈 분석
 
-    @Column(nullable = false)
+    @Column
     private String optimization; // 알고리즘 최적화
 
 }
