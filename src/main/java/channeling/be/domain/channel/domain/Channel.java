@@ -21,6 +21,12 @@ public class Channel extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
+    @Column(nullable = false, unique = true)
+    private String youtubeChannelId; // 채널 ID (유튜브 채널 ID)
+
+    @Column(nullable = false, unique = true)
+    private String youtubePlaylistId; // 플레이리스트 ID (유튜브 플레이리스트 ID)
+
     @Column(nullable = false)
     private String name; // 채널 이름
 
@@ -70,5 +76,11 @@ public class Channel extends BaseEntity {
     }
     public void editTarget(String target) {
         this.target = target;
+    }
+
+    public void updateChannelStats(Long totalLikeCount, Long totalCommentCount) {
+        this.likeCount = totalLikeCount;
+        this.comment = totalCommentCount;
+        this.channelUpdateAt = LocalDateTime.now();
     }
 }
