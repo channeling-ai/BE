@@ -10,7 +10,7 @@ public interface ChannelService {
 	/**
 	 * 채널의 컨셉 정보를 수정합니다.
 	 */
-	Channel editChannelConcept(Long channelId, EditChannelConceptReqDto request);
+	Channel editChannelConcept(Long channelId, EditChannelConceptReqDto request, Member member);
 	/**
 	 * 채널 ID로 채널의 존재 여부를 검증합니다.
 	 *
