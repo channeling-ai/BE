@@ -1,5 +1,7 @@
 package channeling.be.domain.auth.handler;
 
+import channeling.be.domain.auth.application.MemberOauth2UserService;
+import channeling.be.domain.auth.application.MemberOauth2UserService.*;
 import channeling.be.domain.channel.application.ChannelService;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.member.application.MemberService;
@@ -34,9 +36,8 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final ObjectMapper om;
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final JwtUtil jwtUtil;    // JWT 토큰 생성기
-    private final RedisUtil redisUtil;
     private final MemberService memberService;
-    private final ChannelService channelService;
+    private final MemberOauth2UserService memberOauth2UserService;
 
     // 로그인 성공 시 처리하는 메서드
     @Override
@@ -76,21 +77,10 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             attrs.get("name").toString()
         );
 
-        log.info("회원 구글 아이디로 db 조회 = {}" , member.getNickname());
+        LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
 
-        //멤버 아이디를 키값으로 해서 redis 에 구글 엑세스 토큰 저장
-        redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
-        log.info("멤버 아이디를 키값으로 해서 redis 에 구글 엑세스 토큰 저장 ");
-
-        // 멤버로 채널 조회/생성
-        Channel channel = channelService.updateOrCreateChannelByMember(member);
-
-        log.info("회원 아이디로 db 채널 조회 = {}" , channel.getId());
-
-
-        // jwt 생성 -> 우리 서버 자체 access 토큰
-        String accessToken = jwtUtil.createAccessToken(member);
-        log.info(" 우리 서버 자체 access 토큰 생성 = {} ",accessToken);
+        String accessToken = jwtUtil.createAccessToken(result.member());
+        jwtUtil.setAccessTokenHeader(response, accessToken);
 
 
         // 응답 생성
