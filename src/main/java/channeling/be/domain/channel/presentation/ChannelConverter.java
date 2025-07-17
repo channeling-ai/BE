@@ -7,39 +7,46 @@ import org.springframework.data.domain.Slice;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 
 public class ChannelConverter {
-	/**
-	 * 채널의 비디오 목록을 ChannelResDTO.ChannelVideoList로 변환합니다.
-	 * @param channelId
-	 * @param slice
-	 * @return ChannelResDTO.ChannelVideoList
-	 */
-	public static ChannelResDTO.ChannelVideoList toChannelVideoList(Long channelId, Slice<VideoResDTO.VideoBrief> slice) {
-		return new ChannelResDTO.ChannelVideoList(
-			channelId,
-			slice.getNumber(),
-			slice.getSize(),
-			slice.hasNext(),
-			slice.getContent()
-		);
-	}
+    /**
+     * 채널의 비디오 목록을 ChannelResDTO.ChannelVideoList로 변환합니다.
+     *
+     * @param channelId
+     * @param slice
+     * @return ChannelResDTO.ChannelVideoList
+     */
+    public static ChannelResDTO.ChannelVideoList toChannelVideoList(Long channelId, Slice<VideoResDTO.VideoBrief> slice) {
+        return new ChannelResDTO.ChannelVideoList(
+                channelId,
+                slice.getNumber(),
+                slice.getSize(),
+                slice.hasNext(),
+                slice.getContent()
+        );
+    }
 
-	public static ChannelResDTO.ChannelInfo toChannelResDto(Channel channel) {
-		return new ChannelResDTO.ChannelInfo(
-			channel.getId(),
-			channel.getName(),
-			channel.getView(),
-			channel.getLikeCount(),
-			channel.getSubscribe(),
-			channel.getShare(),
-			channel.getVideoCount(),
-			channel.getComment(),
-			channel.getLink(),
-			channel.getJoinDate(),
-			channel.getTarget(),
-			channel.getConcept(),
-			channel.getImage(),
-			channel.getChannelHashTag(),
-			channel.getChannelUpdateAt()
-		);
-	}
+    /**
+     * Channel 객체를 ChannelResDTO.ChannelInfo로 변환합니다.
+     *
+     * @param channel
+     * @return ChannelResDTO.ChannelInfo
+     */
+    public static ChannelResDTO.ChannelInfo toChannelResDto(Channel channel) {
+        return new ChannelResDTO.ChannelInfo(
+                channel.getId(),
+                channel.getName(),
+                channel.getView(),
+                channel.getLikeCount(),
+                channel.getSubscribe(),
+                channel.getShare(),
+                channel.getVideoCount(),
+                channel.getComment(),
+                channel.getLink(),
+                channel.getJoinDate(),
+                channel.getTarget(),
+                channel.getConcept(),
+                channel.getImage(),
+                channel.getChannelHashTag(),
+                channel.getChannelUpdateAt()
+        );
+    }
 }
