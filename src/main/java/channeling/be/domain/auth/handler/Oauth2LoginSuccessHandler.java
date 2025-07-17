@@ -6,7 +6,6 @@ import channeling.be.domain.member.application.MemberService;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
 import channeling.be.global.infrastructure.redis.RedisUtil;
-import channeling.be.global.infrastructure.youtube.YoutubeUtil;
 import channeling.be.response.exception.handler.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,7 +67,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
          * 1. 멤버 생성/조회
          * 2. 채널 생성/조회
          * 3. 유튜브에서 채널정보 조회
-         * 4. 유튜브에서 채널 분석 정보 조회
+         * 4. youtube 조회 -> video id 획득
          * 5. 유튜브에서 비디오 정보 조회
          * ------------------------------------------------- */
         Member member = memberService.findOrCreateMember(
@@ -83,7 +82,8 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
         log.info("멤버 아이디를 키값으로 해서 redis 에 구글 엑세스 토큰 저장 ");
 
-        Channel channel = channelService.findOrCreateChannelByMember(member);
+        // 멤버로 채널 조회/생성
+        Channel channel = channelService.updateOrCreateChannelByMember(member);
 
         log.info("회원 아이디로 db 채널 조회 = {}" , channel.getId());
 
