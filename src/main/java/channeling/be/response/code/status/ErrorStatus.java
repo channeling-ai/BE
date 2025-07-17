@@ -17,6 +17,12 @@ public enum ErrorStatus implements BaseErrorCode {
     _UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "COMMON401", "인증이 필요합니다."),
     _FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON403","금지된 요청입니다."),
 
+    //서버로직도중 토큰 유실
+    _GOOGLE_ACCESS_TOKEN_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON501", "구글 액세스 토큰이 존재하지 않습니다."),
+
+    //유튜브 관련 에러
+    _YOUTUBE_PLAYLIST_PULLING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "YOUTUBE500", "유튜브 플레이리스트를 가져오는 중 에러가 발생했습니다."),
+
 
     //채널 관련 에러
     _CHANNEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "CHANNEL400","존재하지 않는 체널입니다."),
