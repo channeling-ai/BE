@@ -37,7 +37,7 @@ public interface ChannelService {
 	 * @param member 멤버 객체
 	 * @return 채널 객체
 	 */
-	Channel findOrCreateChannelByMember(channeling.be.domain.member.domain.Member member);
+	Channel updateOrCreateChannelByMember(channeling.be.domain.member.domain.Member member);
 	/*
 	 * 채널 정보를 조회합니다.
 	 */

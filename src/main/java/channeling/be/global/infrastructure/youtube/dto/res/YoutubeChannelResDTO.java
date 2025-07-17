@@ -1,4 +1,4 @@
-package channeling.be.global.infrastructure.youtube;
+package channeling.be.global.infrastructure.youtube.dto.res;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,8 +39,8 @@ public class YoutubeChannelResDTO {
 	public static class Thumbnails {
 		@JsonProperty("default")
 		private Thumbnail defaultThumbnail;
-		private Thumbnail medium;
-		private Thumbnail high;
+		// private Thumbnail medium;
+		// private Thumbnail high;
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
@@ -69,6 +69,6 @@ public class YoutubeChannelResDTO {
 	@Getter
 	public static class RelatedPlaylists {
 		private String uploads;
-		private String likes;
+		// private String likes;
 	}
 }
