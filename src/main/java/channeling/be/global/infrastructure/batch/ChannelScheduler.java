@@ -1,5 +1,7 @@
 package channeling.be.global.infrastructure.batch;
 
+import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.Job;
@@ -10,14 +12,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ChannelScheduler {
 
-    private final JobLauncher jobLauncher;
-    private final Job updateChannelJob; // BatchConfig에 정의된 Job Bean
+    private final ChannelRepository channelRepository;
 
     /**
      * 매일 새벽 1시에 채널 정보 업데이트 배치 실행
@@ -26,18 +28,18 @@ public class ChannelScheduler {
 //    @Scheduled(cron = "0 1 0 * * *")
     @Scheduled(fixedDelay = 60000) // TODO 테스트용으로 1분마다 실행
     public void runUpdateChannelJob() {
-        try {
-            log.info("채널 정보 업데이트 배치 잡을 실행합니다.");
 
-            // 동일한 잡을 반복 실행하기 위해 새 JobParameters 생성
-            JobParameters jobParameters = new JobParametersBuilder()
-                    .addString("datetime", LocalDateTime.now().toString())
-                    .toJobParameters();
+        log.info("채널 정보 동기화 스케줄러 시작");
+        List<Channel> allChannels = channelRepository.findAll();
 
-            jobLauncher.run(updateChannelJob, jobParameters);
-
-        } catch (Exception e) {
-            log.error("채널 업데이트 배치 잡 실행 중 오류가 발생했습니다.", e);
+        for (Channel channel : allChannels) {
+            try {
+                // TODO 채널 정보 조회 youtube api 호출 및 관련 컬럼 업데이트
+            } catch (Exception e) {
+                // 예외 발생 시 중단하지 않고 로그 출력 후 다음 채널 실행
+                log.error("채널 ID {} 정보 업데이트 실패: {}", channel.getId(), e.getMessage());
+            }
         }
+        log.info("채널 정보 동기화 스케줄러 종료");
     }
 }
