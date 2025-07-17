@@ -1,27 +1,41 @@
 package channeling.be.domain.video.domain;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 
 import channeling.be.domain.channel.domain.Channel;
-import channeling.be.global.infrastructure.youtube.YoutubeVideoDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
 
 public class VideoConverter {
-	public static Video toVideo(YoutubeVideoDTO dto, Channel channel) {
+	public static Video toVideo(YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO, Channel channel) {
 		return Video.builder()
 			.channel(channel)
-			.youtubeVideoId(dto.getVideoId())
-			.view(dto.getViewCount())
-			.likeCount(dto.getLikeCount())
-			.commentCount(dto.getCommentCount())
-			.thumbnail(dto.getThumbnailUrl())
-			.title(dto.getTitle())
-			.description(dto.getDescription())
-			.link("https://www.youtube.com/watch?v="+dto.getVideoId())
-			.uploadDate(OffsetDateTime.parse(dto.getUploadDate(), DateTimeFormatter.ISO_OFFSET_DATE_TIME
-			).toLocalDateTime()) // 업로드 날짜는 ISO 8601 형식으로 제공된다고 가정
-			.videoCategory(VideoCategory.LONG) //TODO: 추후 유튜브 API로부터 long, short 여부를 받아와야 함
+			.youtubeVideoId(briefDTO.getVideoId())
+			.view(detailDTO.getViewCount())
+			.likeCount(detailDTO.getLikeCount())
+			.commentCount(detailDTO.getCommentCount())
+			.thumbnail(briefDTO.getThumbnailUrl())
+			.title(briefDTO.getTitle())
+			.description(detailDTO.getDescription())
+			.link("https://www.youtube.com/watch?v="+briefDTO.getVideoId())
+			.uploadDate(OffsetDateTime.parse(briefDTO.getPublishedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME
+			).toLocalDateTime())
+			.videoCategory("42".equals(detailDTO.getCategoryId()) ? VideoCategory.SHORT : VideoCategory.LONG)
 			.build();
+	}
+	public static void toVideo(Video video,YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO) {
+		video.setLink("https://www.youtube.com/watch?v=" + briefDTO.getVideoId());
+		video.setThumbnail(briefDTO.getThumbnailUrl());
+		video.setTitle(briefDTO.getTitle());
+		video.setUploadDate(OffsetDateTime.parse(briefDTO.getPublishedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+			.toLocalDateTime());
+		video.setDescription(detailDTO.getDescription());
+		video.setView(detailDTO.getViewCount());
+		video.setLikeCount(detailDTO.getLikeCount());
+		video.setCommentCount(detailDTO.getCommentCount());
+		video.setVideoCategory(
+			"42".equals(detailDTO.getCategoryId()) ? VideoCategory.SHORT : VideoCategory.LONG
+		);
 	}
 }

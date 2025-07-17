@@ -9,7 +9,8 @@ import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.VideoConverter;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.domain.video.presentaion.VideoResDTO;
-import channeling.be.global.infrastructure.youtube.YoutubeVideoDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -51,24 +52,16 @@ public class VideoServiceImpl implements VideoService {
 
 	@Transactional
 	@Override
-	public Video updateVideo(YoutubeVideoDTO dto, Channel channel) {
-		Optional<Video> existing = videoRepository.findByYoutubeVideoId(dto.getVideoId());
+	public Video updateVideo(YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO, Channel channel) {
+		Optional<Video> existing = videoRepository.findByYoutubeVideoId(briefDTO.getVideoId());
 
 		if (existing.isPresent()) {
 			Video original = existing.get();
-			original.setView(dto.getViewCount());
-			original.setLikeCount(dto.getLikeCount());
-			original.setCommentCount(dto.getCommentCount());
-			original.setLink("https://www.youtube.com/watch?v="+dto.getVideoId());
-			original.setThumbnail(dto.getThumbnailUrl());
-			original.setTitle(dto.getTitle());
-			original.setDescription(dto.getDescription());
-			original.setVideoCategory(VideoCategory.LONG); // TODO: 추후 유튜브 API로부터 long, short 여부를 받아와야 함
-			log.info("original = {}", original);
+			VideoConverter.toVideo(original, briefDTO, detailDTO);
 			return videoRepository.save(original);
 		} else {
-			log.info("dto = {}", dto);
-			return videoRepository.save(VideoConverter.toVideo(dto,channel));
+			log.info("briefDTO = {}", briefDTO);
+			return videoRepository.save(VideoConverter.toVideo(briefDTO,detailDTO,channel));
 		}
 	}
 }

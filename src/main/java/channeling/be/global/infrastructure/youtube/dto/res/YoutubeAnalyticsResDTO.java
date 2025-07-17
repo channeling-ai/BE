@@ -1,4 +1,4 @@
-package channeling.be.global.infrastructure.youtube;
+package channeling.be.global.infrastructure.youtube.dto.res;
 
 import java.util.List;
 
