@@ -21,6 +21,12 @@ public class Channel extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
+    @Column(nullable = false, unique = true)
+    private String youtubeChannelId; // 채널 ID (유튜브 채널 ID)
+
+    @Column(nullable = false, unique = true)
+    private String youtubePlaylistId; // 플레이리스트 ID (유튜브 플레이리스트 ID)
+
     @Column(nullable = false)
     private String name; // 채널 이름
 
@@ -58,7 +64,6 @@ public class Channel extends BaseEntity {
     private String image; // 채널 프로필 이미지
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private ChannelHashTag channelHashTag; // 채널 해시태그
 
     @Column(nullable = false)
@@ -70,5 +75,30 @@ public class Channel extends BaseEntity {
     }
     public void editTarget(String target) {
         this.target = target;
+    }
+
+    public void updateChannelStats(Long totalLikeCount, Long totalCommentCount) {
+        this.likeCount = totalLikeCount;
+        this.comment = totalCommentCount;
+        this.channelUpdateAt = LocalDateTime.now();
+    }
+
+    public void updateChannelInfo(String title, String channelId, String uploadPlaylistId, String profileImageUrl, String channelUrl, LocalDateTime publishedAt, Long viewCount, Long subscriberCount, Long videoCount,
+        long likeCount, long commentCount) {
+        this.name = title;
+        this.youtubeChannelId = channelId;
+        this.youtubePlaylistId = uploadPlaylistId;
+        this.image = profileImageUrl;
+        this.link = channelUrl;
+        this.joinDate = publishedAt;
+        this.view = viewCount;
+        this.subscribe = subscriberCount;
+        this.videoCount = videoCount;
+        this.likeCount = likeCount;
+        this.comment = commentCount;
+        this.channelUpdateAt = LocalDateTime.now();
+        this.channelHashTag = ChannelHashTag.CHANNEL_HASH_TAG; // TODO : 해시태그는 추후에 프론트에서 선택할 수 있도록 해야 함
+        this.target = "default"; // TODO: 타겟은 추후에 프론트에서 입력받도록 해야 함
+        this.concept = "default"; // TODO: 컨셉은 추후에 프론트에서 입력받도록 해야 함
     }
 }

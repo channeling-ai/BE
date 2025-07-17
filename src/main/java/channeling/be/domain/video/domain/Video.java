@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -21,22 +22,35 @@ public class Video extends BaseEntity {
     @JoinColumn(name = "channel_id", nullable = false)
     private Channel channel;
 
+    @Column(nullable = false, unique = true)
+    private String youtubeVideoId; // 영상 ID (유튜브 영상 ID)
+
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private VideoCategory videoCategory; // long, short 여부
 
-    @Column(nullable = false)
+    @Column
     private String title; // 영상 제목
 
-    @Column(nullable = false)
+    @Column
     private Long view; // 영상 조회수
 
-    @Column(nullable = false)
+    @Column
+    private Long likeCount; // 영상 좋아요 수
+
+    @Column
+    private Long commentCount; // 영상 댓글 수
+
+    @Column
     private String link; // 영상 링크
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime uploadDate; // 업로드 날짜
 
-    @Column(nullable = false)
+    @Column
     private String thumbnail; // 썸네일 사진
+
+    @Column
+    private String description; // 영상 설명
+
 }

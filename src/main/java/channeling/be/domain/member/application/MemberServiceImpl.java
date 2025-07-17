@@ -5,6 +5,7 @@ import channeling.be.domain.member.domain.repository.MemberRepository;
 import channeling.be.domain.member.presentation.MemberConverter;
 import channeling.be.domain.member.presentation.MemberResDTO;
 import channeling.be.global.infrastructure.aws.S3Service;
+import channeling.be.global.infrastructure.aws.S3Service;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.MemberHandler;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,18 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 	@Override
-    public Member findOrCreateMember() {
-        return null;
-    }
+	@Transactional
+    public Member findOrCreateMember(String googleId, String email, String nickname) {
+		return memberRepository.findByGoogleId(googleId)
+			.orElseGet(() -> memberRepository.save(
+				Member.builder()
+					.googleId(googleId)
+					.googleEmail(email)
+					.nickname(nickname)
+					.build()
+			));
+	}
+
+
+
 }

@@ -1,6 +1,7 @@
 package channeling.be.domain.video.domain.repository;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
@@ -17,4 +18,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 	Slice<Video> findByChannelIdAndVideoCategoryOrderByUploadDateDesc(Long channelId, VideoCategory type, Pageable pageable);
 
 	Slice<Video> findByChannelIdAndVideoCategoryAndUploadDateLessThanOrderByUploadDateDesc(Long channelId, VideoCategory type, LocalDateTime cursor, Pageable pageable);
+
+	Optional<Video> findByYoutubeVideoId(String youtubeVideoId);
 }
