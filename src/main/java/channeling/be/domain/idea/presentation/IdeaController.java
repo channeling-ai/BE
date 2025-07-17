@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class IdeaController {
     private final IdeaService ideaService;
 
-    @PatchMapping("/{idea-id}")
+    @PatchMapping("/bookmarks/{idea-id}")
     public ApiResponse<IdeaResDto.ChangeIdeaBookmarkRes> changeIdeaBookmark(@PathVariable("idea-id") Long ideaId,
                                                                         @LoginMember Member loginMember) {
         return ApiResponse.onSuccess(ideaService.changeIdeaBookmark(ideaId, loginMember));
