@@ -5,6 +5,7 @@ import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
 import channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -69,4 +70,20 @@ public interface ChannelApi {
             )
     })
      ApiResponse<ChannelResDTO.ChannelInfo> getChannel(@PathVariable("channel-id") Long channelId, @Parameter(hidden = true) @LoginMember Member loginMember);
+
+
+
+    @Operation(summary = "채널 추천 영상 조회 API", description = "(홈화면) 자신의 채널의 추천 영상을 조회합니다.")
+    @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(
+                    responseCode = "200",
+                    description = "성공입니다.",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(implementation = ChannelResDTO.PageDto.class))}
+            )
+    })
+    ApiResponse<ChannelResDTO.PageDto> getRecommendedChannelVideos(
+            @PathVariable("channel-id") Long channelId,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @Parameter(hidden = true) @LoginMember Member loginMember);
 }

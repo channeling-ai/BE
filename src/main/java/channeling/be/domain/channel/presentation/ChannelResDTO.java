@@ -5,6 +5,7 @@ import java.util.List;
 
 import channeling.be.domain.channel.domain.ChannelHashTag;
 import channeling.be.domain.video.presentaion.VideoResDTO;
+import lombok.Builder;
 
 public class ChannelResDTO {
 	public record ChannelVideoList(
@@ -13,6 +14,17 @@ public class ChannelResDTO {
 		int size,
 		boolean hasNextPage,
 		List<VideoResDTO.VideoBrief> videoList
+	) {
+	}
+
+	@Builder
+	public record PageDto (
+			List<?> list,
+			Integer listSize,
+			Integer totalPage,
+			Long totalElements,
+			Boolean isFirst,
+			Boolean isLast
 	) {
 	}
 

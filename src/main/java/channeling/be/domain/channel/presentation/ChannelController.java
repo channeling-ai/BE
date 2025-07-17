@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/channels")
 @Tag(name = "채널 API", description = "채널 관련 API입니다.")
-public class ChannelController implements ChannelApi{
+public class ChannelController implements ChannelApi {
     private final VideoService videoService;
     private final ChannelService channelService;
 
@@ -49,6 +49,7 @@ public class ChannelController implements ChannelApi{
     // }
 
     // TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
+    @Override
     @GetMapping("/{channel-id}/videos")
     @Operation(summary = "채널의 비디오 리스트 조회 API", description = "특정 채널의 비디오 리스트를 조회합니다.")
     public ApiResponse<ChannelResDTO.ChannelVideoList> getChannelVideos(
@@ -60,20 +61,30 @@ public class ChannelController implements ChannelApi{
         Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByTypeAfterCursor(channelId, type, cursor, size);
         return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefSlice));
     }
-
+    @Override
     @PatchMapping("/{channel-id}/concept")
     public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelConceptReqDto request) {
         return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request)));
     }
-
+    @Override
     @PatchMapping("/{channel-id}/target")
     public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelTargetReqDto request) {
         return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request))));
     }
-
+    @Override
     @GetMapping("{channel-id}")
     public ApiResponse<ChannelResDTO.ChannelInfo> getChannel(@PathVariable("channel-id") Long channelId,
                                                              @LoginMember Member loginMember) {
         return ApiResponse.onSuccess(ChannelConverter.toChannelResDto(channelService.getChannel(channelId, loginMember)));
+    }
+
+    @Override
+    @GetMapping("/{channel-id}/recommended-videos")
+    public ApiResponse<ChannelResDTO.PageDto> getRecommendedChannelVideos(@PathVariable("channel-id") Long channelId,
+                                                                      @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                                      @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                                      @LoginMember Member loginMember) {
+        return ApiResponse.onSuccess(ChannelConverter.toVideoList(
+                videoService.getRecommendedVideos(channelId, page - 1, size, loginMember)));
     }
 }
