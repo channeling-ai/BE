@@ -20,11 +20,14 @@ public class Task extends BaseEntity {
     private Report report;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TaskStatus overviewStatus;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TaskStatus analysisStatus;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private TaskStatus ideaStatus;
 }
