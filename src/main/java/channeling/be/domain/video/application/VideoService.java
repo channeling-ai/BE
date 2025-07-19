@@ -5,8 +5,12 @@ import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Slice;
 
+import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.presentaion.VideoResDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
 
 public interface VideoService {
 	/**
@@ -40,4 +44,6 @@ public interface VideoService {
 		LocalDateTime cursorUploadDate, // 커서
 		int size
 	);
+
+	Video updateVideo(YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO,Channel channel);
 }

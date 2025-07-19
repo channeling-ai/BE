@@ -22,6 +22,22 @@ public interface ChannelService {
 	 * 채널의 타겟 정보를 수정합니다.
 	 */
 	Channel editChannelTarget(Long channelId, EditChannelTargetReqDto request, Member member);
+
+	/**
+	 * 채널의 비디오 정보를 업데이트합니다.
+	 *
+	 * @param channel 채널 객체
+	 * @param youtubeAccessToken 유튜브 액세스 토큰
+	 */
+	void updateChannelVideos(Channel channel, String youtubeAccessToken);
+
+	/**
+	 * 멤버에 해당하는 채널을 찾거나 생성합니다.
+	 *
+	 * @param member 멤버 객체
+	 * @return 채널 객체
+	 */
+	Channel updateOrCreateChannelByMember(channeling.be.domain.member.domain.Member member);
 	/*
 	 * 채널 정보를 조회합니다.
 	 */
