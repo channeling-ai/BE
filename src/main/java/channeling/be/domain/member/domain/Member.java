@@ -1,6 +1,8 @@
 package channeling.be.domain.member.domain;
 
 import channeling.be.domain.common.BaseEntity;
+import channeling.be.response.code.status.ErrorStatus;
+import channeling.be.response.exception.handler.MemberHandler;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -37,4 +39,43 @@ public class Member extends BaseEntity {
 
     @Column
     private String googleId; // 구글 아이디 (로그인 구별을 위한..)
+
+
+    private enum SnsPatterns {
+        INSTAGRAM("^https?://(www\\.)?instagram\\.com/.*$"),
+        TIKTOK("^https?://(www\\.)?tiktok\\.com/.*$"),
+        FACEBOOK("^https?://(www\\.)?facebook\\.com/.*$"),
+        TWITTER("^https?://(www\\.)?twitter\\.com/.*$");
+
+        private final String regex;
+
+        SnsPatterns(String regex) {
+            this.regex = regex;
+        }
+
+        public String getRegex() {
+            return regex;
+        }
+    }
+    public void updateSnsLinks(String instagramLink, String tiktokLink, String facebookLink, String twitterLink) {
+        this.instagramLink = validateSnsLink(instagramLink,SnsPatterns.INSTAGRAM.getRegex());
+        this.tiktokLink = validateSnsLink(tiktokLink, SnsPatterns.TIKTOK.getRegex());
+        this.facebookLink = validateSnsLink(facebookLink, SnsPatterns.FACEBOOK.getRegex());
+        this.twitterLink = validateSnsLink(twitterLink, SnsPatterns.TWITTER.getRegex());
+    }
+
+    private String validateSnsLink(String link, String regex) {
+        if (link == null || link.isBlank()) {
+            return null;
+        }
+        String trimmed = link.trim();
+        if (!trimmed.matches(regex)) {
+			throw new MemberHandler(ErrorStatus._SNS_LINK_INVALID);
+        }
+        return trimmed;
+    }
+
+    public void profileImage(String profileImage) {
+        this.profileImage = profileImage;
+    }
 }

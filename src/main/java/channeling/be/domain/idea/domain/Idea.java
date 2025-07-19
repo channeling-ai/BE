@@ -31,5 +31,10 @@ public class Idea extends BaseEntity {
     @Column(nullable = false)
     private Boolean isBookMarked; // 북마크 여부
 
+    public Boolean switchBookMarked() {
+        this.isBookMarked = !this.isBookMarked;
+        return this.isBookMarked;
+    }
+
 
 }
