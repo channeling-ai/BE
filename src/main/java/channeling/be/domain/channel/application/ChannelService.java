@@ -21,7 +21,7 @@ public interface ChannelService {
 	/**
 	 * 채널의 타겟 정보를 수정합니다.
 	 */
-	Channel editChannelTarget(Long channelId, EditChannelTargetReqDto request);
+	Channel editChannelTarget(Long channelId, EditChannelTargetReqDto request, Member member);
 	/*
 	 * 채널 정보를 조회합니다.
 	 */

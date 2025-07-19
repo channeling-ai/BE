@@ -43,8 +43,13 @@ public class ChannelServiceImpl implements ChannelService {
 
     @Override
     @Transactional
-    public Channel editChannelTarget(Long channelId, ChannelRequestDto.EditChannelTargetReqDto request) {
-        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));// id로 채널 조회 -> 추후 로그인 멤버 가져온 후, 멤버로 조회하는 걸로 바궈야 할 듯..? 일대일이니까..
+    public Channel editChannelTarget(Long channelId, ChannelRequestDto.EditChannelTargetReqDto request, Member loginMember) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+        if (!channel.getMember().getId().equals(loginMember.getId())) {
+            throw new ChannelHandler(_CHANNEL_NOT_MEMBER);
+        }
         channel.editTarget(request.getTarget()); // 더티체킹
         return channel;
     }
