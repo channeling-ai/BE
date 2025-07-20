@@ -34,6 +34,16 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
 
+      # 이전 Docker 이미지 제거
+      - name: Clean up old Docker images
+        run: |
+          # hadoroke/channeling-be의 이전 Docker 이미지 제거(latest 제외)
+          docker images hadoroke/channeling-be --format "{{.ID}}" | \
+          head -n -1 | xargs -r docker rmi -f
+                      
+          # dangling 이미지 제거
+          docker image prune -f
+
       # Docker 이미지 Pull
       - name: Pull Docker image
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/channeling-be:latest
@@ -63,6 +73,7 @@ jobs:
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
         run: |
           docker-compose up -d --no-deps spring-app
           
