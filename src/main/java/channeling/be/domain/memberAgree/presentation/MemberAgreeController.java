@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/member-agree")
+@RequestMapping("/api/member-agree")
 public class MemberAgreeController implements MemberAgreeApi {
 
     private final MemberAgreeService memberAgreeService;

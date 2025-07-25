@@ -28,7 +28,7 @@ import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/channels")
+@RequestMapping("/api/channels")
 @Tag(name = "채널 API", description = "채널 관련 API입니다.")
 public class ChannelController {
 	private final VideoService videoService;

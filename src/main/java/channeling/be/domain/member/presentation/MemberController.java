@@ -16,7 +16,7 @@ import static channeling.be.domain.member.presentation.MemberResDTO.*;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/members")
+@RequestMapping("/api/members")
 public class MemberController {
 
   	private final MemberService memberService;

@@ -46,7 +46,7 @@ public class SecurityConfig {
                         .failureHandler(oauth2LoginFailureHandler)
                         .successHandler(oAuth2LoginSuccessHandler)
                         .authorizationEndpoint(authorization -> authorization
-                                .baseUri("/members/login")
+                                .baseUri("/api/members/login")
                         )
                 )
                 // TODO 커스텀 필터 등록 (자체 JWT 인가 필터, 예외처리 필터 등)
