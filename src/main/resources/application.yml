@@ -3,3 +3,8 @@ spring:
     name: channeling-be
   profiles:
     active: ["db", "s3", "oauth", "jwt"]
+
+management:
+  endpoints:
+    web:
+      base-path: /api/actuator
