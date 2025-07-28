@@ -85,6 +85,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth/callback")// TODO  https://channeling.vercel.app/
                 .queryParam("token", accessToken)
                 .queryParam("message", "Success")
+                .queryParam("channelId", result.channel().getId())
                 .build()
                 .toUriString();
 
