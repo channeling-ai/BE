@@ -21,11 +21,11 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-
 
 
 @Slf4j
@@ -55,13 +55,13 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .getAccessToken()
                 .getTokenValue();
 
-        log.info("컨텍스트에서 구글 엑세스 토큰 추출 = {}" , googleAccessToken);
+        log.info("컨텍스트에서 구글 엑세스 토큰 추출 = {}", googleAccessToken);
         /* -------------------------------------------------
          * OAuth2User 꺼내기
          * ------------------------------------------------- */
-        OAuth2User oauthUser  = (OAuth2User) authentication.getPrincipal();
+        OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attrs = oauthUser.getAttributes(); // 멤버 속성
-        log.info("컨텍스트에서 토큰 내의 회원 정보 추출 = {}" , attrs);
+        log.info("컨텍스트에서 토큰 내의 회원 정보 추출 = {}", attrs);
 
 
         /* -------------------------------------------------
@@ -72,23 +72,23 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
          * 5. 유튜브에서 비디오 정보 조회
          * ------------------------------------------------- */
         Member member = memberService.findOrCreateMember(
-            attrs.get("sub").toString(), // 구글 아이디
-            attrs.get("email").toString(), // 구글 이메일
-            attrs.get("name").toString()
+                attrs.get("sub").toString(), // 구글 아이디
+                attrs.get("email").toString(), // 구글 이메일
+                attrs.get("name").toString()
         );
 
         LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
 
         String accessToken = jwtUtil.createAccessToken(result.member());
-        jwtUtil.setAccessTokenHeader(response, accessToken);
 
+        // 프론트 응답 생성
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth/callback")// TODO  https://channeling.vercel.app/
+                .queryParam("token", accessToken)
+                .queryParam("message", "Success")
+                .build()
+                .toUriString();
 
-        // 응답 생성
-        String jsonResponse = om.writeValueAsString(ApiResponse.onSuccess("로그인 성공"));
-        jwtUtil.setAccessTokenHeader(response, accessToken); //헤더에 엑세스 토큰 넣기
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write(jsonResponse);
+        response.sendRedirect(targetUrl);
 
     }
 
