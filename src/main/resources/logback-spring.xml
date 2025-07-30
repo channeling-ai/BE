@@ -44,12 +44,12 @@
     
     <!-- 개발 환경 설정 -->
     <springProfile name="!prod">
-        <root level="DEBUG">
+        <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="ALL_FILE"/>
             <appender-ref ref="WARN_FILE"/>
         </root>
-        <!-- 개발 환경에서는 SQL 로그도 출력 -->
+        <!-- 개발 환경에서는 SQL 로그도 파일에 출력 -->
         <logger name="org.springframework.jdbc" level="DEBUG"/>
         <logger name="org.hibernate.SQL" level="DEBUG"/>
         <logger name="org.hibernate.type" level="TRACE"/>
@@ -68,7 +68,11 @@
     </springProfile>
     
     <!-- 애플리케이션 로거 설정 -->
-    <logger name="channeling.be" level="DEBUG"/>
+    <logger name="channeling.be" level="INFO"/>
+    
+    <!-- 예외 처리 관련 로거 -->
+    <logger name="channeling.be.response.exception" level="DEBUG"/>
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" level="DEBUG"/>
     
     <!-- 외부 라이브러리 로그 레벨 조정 -->
     <logger name="com.zaxxer.hikari" level="INFO"/>
