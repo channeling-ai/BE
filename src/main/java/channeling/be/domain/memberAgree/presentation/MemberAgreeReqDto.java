@@ -9,8 +9,6 @@ public class MemberAgreeReqDto {
     @Data
     public static class Edit {
         @NotNull
-        private Long id;
-        @NotNull
         private Boolean marketingEmailAgree;
         @NotNull
         private Boolean dayContentEmailAgree;

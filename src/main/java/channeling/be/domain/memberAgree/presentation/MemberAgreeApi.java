@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Tag(name = "회원 동의 API", description = "회원 동의 관련 API입니다.")
 public interface MemberAgreeApi {
 
-    @Operation(summary = "회원 동의 수정 API", description = "회원 동의를 수정합니다.")
+    @Operation(summary = "회원 동의 수정 API", description = "회원 동의를 수정합니다. (토큰 필수)")
     @io.swagger.v3.oas.annotations.responses.ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(
                     responseCode = "200",
