@@ -13,9 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ideas")
-public class IdeaController {
+public class IdeaController implements IdeaSwagger{
     private final IdeaService ideaService;
 
+    @Override
     @PatchMapping("/bookmarks/{idea-id}")
     public ApiResponse<IdeaResDto.ChangeIdeaBookmarkRes> changeIdeaBookmark(@PathVariable("idea-id") Long ideaId,
                                                                         @LoginMember Member loginMember) {
