@@ -38,14 +38,14 @@ public class ChannelController {
 	// TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
 	@GetMapping("/{channel-id}/videos")
 	@Operation(summary = "채널의 비디오 리스트 조회 API (page)", description = "특정 채널의 비디오 리스트를 페이지를 통해 조회합니다.")
-	public ChannelResDTO.ChannelVideoList getChannelVideos(
+	public ApiResponse<ChannelResDTO.ChannelVideoList> getChannelVideos(
 		@PathVariable("channel-id") Long channelId,
 		@RequestParam(value = "type") VideoCategory type,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "8") int size) {
 		channelService.validateChannelByIdAndMember(channelId);
 		Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
-		return ChannelConverter.toChannelVideoList(channelId, videoBriefSlice);
+		return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefSlice));
 	}
 
 	// // TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
