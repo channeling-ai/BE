@@ -9,5 +9,6 @@ public interface MemberService {
     Member findOrCreateMember(String googleId,String email, String nickname);
     MemberResDTO.updateSnsRes updateSns(updateSnsReq updateSnsReq);
     MemberResDTO.updateProfileImageRes updateProfileImage(Member loginMember, ProfileImageUpdateReq updateProfileImageReq);
+    MemberResDTO.getMemberInfo getMemberInfo(Member loginMember);
 
 }
