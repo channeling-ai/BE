@@ -70,5 +70,11 @@ public class MemberServiceImpl implements MemberService {
 	}
 
 
+	@Override
+	public MemberResDTO.getMemberInfo getMemberInfo(Member loginMember) {
+		Member member = memberRepository.findById(loginMember.getId())
+				.orElseThrow(() -> new MemberHandler(ErrorStatus._MEMBER_NOT_FOUND));
+		return MemberConverter.toGetMemberInfo(member);
+	}
 
 }

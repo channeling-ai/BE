@@ -44,7 +44,7 @@ public class MemberController {
     @GetMapping("")
     public ApiResponse<getMemberInfo> getMemberInfo(
         @LoginMember Member member) {
-        return ApiResponse.onSuccess(memberService.updateProfileImage(member));
+        return ApiResponse.onSuccess(memberService.getMemberInfo(member));
     }
 
 }
