@@ -25,12 +25,10 @@ public class MemberController {
      * @return 멤버의 기본 정보
      */
     @PatchMapping("/update-sns")
-    @Operation(
-      summary = "SNS 정보 수정 API",
-      description = "멤버의 SNS 정보를 수정합니다. 현재는 임시로 1L로 설정된 멤버 ID를 사용합니다."
-    )
-    public ApiResponse<updateSnsRes> updateSns(@RequestBody updateSnsReq updateSnsReq) {
-      updateSnsRes updateSnsRes=memberService.updateSns(updateSnsReq);
+    public ApiResponse<updateSnsRes> updateSns(
+            @LoginMember Member member,
+            @RequestBody updateSnsReq updateSnsReq) {
+      updateSnsRes updateSnsRes=memberService.updateSns(member,updateSnsReq);
       return ApiResponse.onSuccess(updateSnsRes);
     }
 
