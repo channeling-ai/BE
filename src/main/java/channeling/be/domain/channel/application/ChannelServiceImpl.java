@@ -2,7 +2,6 @@ package channeling.be.domain.channel.application;
 
 import channeling.be.domain.channel.application.model.Stats;
 import channeling.be.domain.channel.domain.Channel;
-import channeling.be.domain.channel.domain.ChannelHashTag;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.channel.presentation.converter.ChannelConverter;
 import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,15 +44,18 @@ public class ChannelServiceImpl implements ChannelService {
 		List<YoutubeVideoDetailDTO> details;
 	}
 
-	@Override
-	@Transactional
-	public Channel editChannelConcept(Long channelId, ChannelRequestDto.EditChannelConceptReqDto request) {
-		Channel channel = channelRepository.findById(channelId)
-			.orElseThrow(() -> new ChannelHandler(
-				_CHANNEL_NOT_FOUND)); // id로 채널 조회 -> 추후 로그인 멤버 가져온 후, 멤버로 조회하는 걸로 바궈야 할 듯..? 일대일이니까..
-		channel.editConcept(request.getConcept()); // 더티체킹
-		return channel;
-	}
+    @Override
+    @Transactional
+    public Channel editChannelConcept(Long channelId, ChannelRequestDto.EditChannelConceptReqDto request,Member loginMember) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+        if (!channel.getMember().getId().equals(loginMember.getId())) {
+            throw new ChannelHandler(_CHANNEL_NOT_MEMBER);
+        }
+        channel.editConcept(request.getConcept()); // 더티체킹
+        return channel;
+    }
 
 	@Override
 	public void validateChannelByIdAndMember(Long channelId) {
@@ -65,15 +66,18 @@ public class ChannelServiceImpl implements ChannelService {
 		//TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
 	}
 
-	@Override
-	@Transactional
-	public Channel editChannelTarget(Long channelId, ChannelRequestDto.EditChannelTargetReqDto request) {
-		Channel channel = channelRepository.findById(channelId)
-			.orElseThrow(() -> new ChannelHandler(
-				_CHANNEL_NOT_FOUND));// id로 채널 조회 -> 추후 로그인 멤버 가져온 후, 멤버로 조회하는 걸로 바궈야 할 듯..? 일대일이니까..
-		channel.editTarget(request.getTarget()); // 더티체킹
-		return channel;
-	}
+    @Override
+    @Transactional
+    public Channel editChannelTarget(Long channelId, ChannelRequestDto.EditChannelTargetReqDto request, Member loginMember) {
+        Channel channel = channelRepository.findById(channelId)
+                .orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+        if (!channel.getMember().getId().equals(loginMember.getId())) {
+            throw new ChannelHandler(_CHANNEL_NOT_MEMBER);
+        }
+        channel.editTarget(request.getTarget()); // 더티체킹
+        return channel;
+    }
 
 	@Override
 	@Transactional

@@ -62,13 +62,17 @@ public class ChannelController {
   }
 
   @PatchMapping("/{channel-id}/concept")
-  public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelConceptReqDto request) {
-      return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request)));
+  public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId,
+                                                                  @RequestBody EditChannelConceptReqDto request,
+                                                                  @LoginMember Member member) {
+      return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request, member)));
   }
 
 	@PatchMapping("/{channel-id}/target")
-	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId, @RequestBody EditChannelTargetReqDto request) {
-		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request))));
+	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId,
+                                                                  @RequestBody EditChannelTargetReqDto request,
+                                                                  @LoginMember Member member) {
+		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request, member))));
 	}
 	@GetMapping("{channel-id}")
 	public ApiResponse<ChannelResDTO.ChannelInfo> getChannel(@PathVariable("channel-id") Long channelId,
