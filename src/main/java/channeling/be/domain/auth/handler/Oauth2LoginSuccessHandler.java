@@ -71,11 +71,6 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
          * 4. youtube 조회 -> video id 획득
          * 5. 유튜브에서 비디오 정보 조회
          * ------------------------------------------------- */
-        Member member = memberService.findOrCreateMember(
-                attrs.get("sub").toString(), // 구글 아이디
-                attrs.get("email").toString(), // 구글 이메일
-                attrs.get("name").toString()
-        );
 
         LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
 

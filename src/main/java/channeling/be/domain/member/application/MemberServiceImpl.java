@@ -57,13 +57,14 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	@Transactional
-    public Member findOrCreateMember(String googleId, String email, String nickname) {
+    public Member findOrCreateMember(String googleId, String email, String nickname, String profileImage) {
 		return memberRepository.findByGoogleId(googleId)
 			.orElseGet(() -> memberRepository.save(
 				Member.builder()
 					.googleId(googleId)
 					.googleEmail(email)
 					.nickname(nickname)
+					.profileImage(profileImage)
 					.build()
 			));
 	}
