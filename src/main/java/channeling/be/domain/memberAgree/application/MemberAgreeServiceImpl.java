@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class MemberAgreeServiceImpl implements MemberAgreeService {
@@ -19,16 +21,18 @@ public class MemberAgreeServiceImpl implements MemberAgreeService {
     @Transactional
     @Override
     public MemberAgree editMemberAgree(MemberAgreeReqDto.Edit dto, Member member) {
-        MemberAgree memberAgree = memberAgreeRepository.findById(dto.getId())
-                .orElseThrow(() -> new MemberHandler(ErrorStatus._MEMBER_AGREE_NOT_FOUND));
-
-        if (!memberAgree.getMember().getId().equals(member.getId())) {
-            throw new MemberHandler(ErrorStatus._MEMBER_AGREE_NOT_ALLOW);
-        }
-
-        memberAgree.editDayContentEmailAgree(dto.getDayContentEmailAgree());
-        memberAgree.editMarketingEmailAgree(dto.getMarketingEmailAgree());
-
-        return memberAgree;
+        return memberAgreeRepository.findByMemberId(member.getId())
+                .map(existingAgree -> {
+                    existingAgree.editDayContentEmailAgree(dto.getDayContentEmailAgree());
+                    existingAgree.editMarketingEmailAgree(dto.getMarketingEmailAgree());
+                    return existingAgree;
+                })
+                .orElseGet(() -> memberAgreeRepository.save(
+                        MemberAgree.builder()
+                                .dayContentEmailAgree(dto.getDayContentEmailAgree())
+                                .marketingEmailAgree(dto.getMarketingEmailAgree())
+                                .member(member)
+                                .build()
+                ));
     }
 }

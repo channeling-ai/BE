@@ -20,7 +20,6 @@ public class MemberAgreeController implements MemberAgreeApi {
 
     @PatchMapping("")
     public ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto, @LoginMember Member member) {
-        // TODO @AuthenticationPrincipal 추가
         return ApiResponse.onSuccess(
             MemberAgreeConverter.toEditMemberAgreeResDto(
                 memberAgreeService.editMemberAgree(dto, member)
