@@ -39,3 +39,6 @@ out/
 ### env ###
 .env
 /src/main/generated/
+
+### log ###
+/logs
