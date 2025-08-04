@@ -53,7 +53,9 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         Member member = memberService.findOrCreateMember(
             attrs.get("sub").toString(),
             attrs.get("email").toString(),
-            attrs.get("name").toString()
+            attrs.get("name").toString(),
+            attrs.get("picture").toString()
+
         );
 
         redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);

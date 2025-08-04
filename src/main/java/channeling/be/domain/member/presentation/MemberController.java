@@ -41,4 +41,10 @@ public class MemberController {
         return ApiResponse.onSuccess(memberService.updateProfileImage(member,updateProfileImageReq));
     }
 
+    @GetMapping("")
+    public ApiResponse<getMemberInfo> getMemberInfo(
+        @LoginMember Member member) {
+        return ApiResponse.onSuccess(memberService.getMemberInfo(member));
+    }
+
 }
