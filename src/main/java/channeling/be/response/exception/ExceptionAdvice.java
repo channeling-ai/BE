@@ -60,7 +60,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     //그 외의 모든 예외에 대해서 작동하는 에러 핸들러
     @ExceptionHandler
     public ResponseEntity<Object> exception(Exception e, WebRequest request) {
-        e.printStackTrace();
+        log.error("예상치 못한 에러 발생: {}", e.getMessage(), e);
 
         return handleExceptionInternalFalse(e, ErrorStatus._INTERNAL_SERVER_ERROR, HttpHeaders.EMPTY, ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus(),request, e.getMessage());
     }
@@ -69,6 +69,7 @@ public class ExceptionAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = GeneralException.class)
     public ResponseEntity onThrowException(GeneralException generalException, HttpServletRequest request) {
         ErrorReasonDTO errorReasonHttpStatus = generalException.getErrorReasonHttpStatus();
+        log.error("GeneralException 발생: {}, Request URI: {}", errorReasonHttpStatus.getMessage(), request.getRequestURI(), generalException);
         return handleExceptionInternal(generalException,errorReasonHttpStatus,null,request);
     }
 

@@ -1,5 +1,7 @@
 package channeling.be.domain.member.presentation;
 
+import channeling.be.domain.member.domain.Member;
+
 import java.time.LocalDateTime;
 import java.util.PrimitiveIterator;
 
@@ -23,5 +25,19 @@ public class MemberConverter {
 		return MemberResDTO.updateProfileImageRes.builder()
 				.updatedProfileImage(updatedProfileUrl)
 				.build();
+	}
+
+	public static MemberResDTO.getMemberInfo toGetMemberInfo(Member member) {
+		return MemberResDTO.getMemberInfo.builder()
+				.memberId(member.getId())
+				.nickname(member.getNickname())
+				.googleEmail(member.getGoogleEmail())
+				.profileImage(member.getProfileImage())
+				.instagramLink(member.getInstagramLink())
+				.tiktokLink(member.getTiktokLink())
+				.facebookLink(member.getFacebookLink())
+				.twitterLink(member.getTwitterLink())
+				.build();
+
 	}
 }

@@ -1,6 +1,7 @@
 package channeling.be.domain.member.presentation;
 
 
+import jakarta.persistence.Column;
 import lombok.Builder;
 
 public class MemberResDTO {
@@ -26,6 +27,23 @@ public class MemberResDTO {
 	@Builder
 	public record updateProfileImageRes(
 			String updatedProfileImage
+	) {
+	}
+
+
+	/**
+	 * 멤버의 기본 정보를 반환하는 API의 응답 DTO 입니다.
+	 */
+	@Builder
+	public record getMemberInfo(
+			Long memberId,
+			String nickname,
+			String googleEmail,
+			String profileImage,
+			String instagramLink,
+			String tiktokLink,
+			String facebookLink,
+			String twitterLink
 	) {
 	}
 }
