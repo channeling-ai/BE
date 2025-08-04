@@ -40,6 +40,7 @@ public class MemberController implements MemberSwagger{
         return ApiResponse.onSuccess(memberService.updateProfileImage(member,updateProfileImageReq));
     }
 
+    @Override
     @GetMapping("")
     public ApiResponse<getMemberInfo> getMemberInfo(
         @LoginMember Member member) {
