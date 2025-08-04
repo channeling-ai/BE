@@ -18,6 +18,7 @@ public class MemberAgreeController implements MemberAgreeApi {
 
     private final MemberAgreeService memberAgreeService;
 
+    @Override
     @PatchMapping("")
     public ApiResponse<?> editMemberAgree(@RequestBody @Valid MemberAgreeReqDto.Edit dto, @LoginMember Member member) {
         return ApiResponse.onSuccess(
