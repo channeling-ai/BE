@@ -55,17 +55,24 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	@Transactional
-    public Member findOrCreateMember(String googleId, String email, String nickname) {
+    public Member findOrCreateMember(String googleId, String email, String nickname, String profileImage) {
 		return memberRepository.findByGoogleId(googleId)
 			.orElseGet(() -> memberRepository.save(
 				Member.builder()
 					.googleId(googleId)
 					.googleEmail(email)
 					.nickname(nickname)
+					.profileImage(profileImage)
 					.build()
 			));
 	}
 
 
+	@Override
+	public MemberResDTO.getMemberInfo getMemberInfo(Member loginMember) {
+		Member member = memberRepository.findById(loginMember.getId())
+				.orElseThrow(() -> new MemberHandler(ErrorStatus._MEMBER_NOT_FOUND));
+		return MemberConverter.toGetMemberInfo(member);
+	}
 
 }
