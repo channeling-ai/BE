@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static channeling.be.domain.auth.application.MemberOauth2UserService.*;
 import static channeling.be.domain.member.presentation.MemberReqDTO.*;
 
 @RequiredArgsConstructor
@@ -55,16 +56,20 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	@Transactional
-    public Member findOrCreateMember(String googleId, String email, String nickname, String profileImage) {
+    public MemberResult findOrCreateMember(String googleId, String email, String nickname, String profileImage) {
 		return memberRepository.findByGoogleId(googleId)
-			.orElseGet(() -> memberRepository.save(
-				Member.builder()
-					.googleId(googleId)
-					.googleEmail(email)
-					.nickname(nickname)
-					.profileImage(profileImage)
-					.build()
-			));
+				.map(member -> new MemberResult(member, false)) // 기존 회원
+				.orElseGet(() -> {
+					Member newMember = memberRepository.save(
+							Member.builder()
+									.googleId(googleId)
+									.googleEmail(email)
+									.nickname(nickname)
+									.profileImage(profileImage)
+									.build()
+					);
+					return  new MemberResult(newMember, true); // 신규 회원
+				});
 	}
 
 
