@@ -4,6 +4,7 @@ package channeling.be.domain.channel.presentation;
 import channeling.be.domain.channel.domain.Channel;
 import org.springframework.data.domain.Slice;
 
+import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 
 public class ChannelConverter {
@@ -15,6 +16,16 @@ public class ChannelConverter {
 	 */
 	public static ChannelResDTO.ChannelVideoList toChannelVideoList(Long channelId, Slice<VideoResDTO.VideoBrief> slice) {
 		return new ChannelResDTO.ChannelVideoList(
+			channelId,
+			slice.getNumber(),
+			slice.getSize(),
+			slice.hasNext(),
+			slice.getContent()
+		);
+	}
+
+	public static ChannelResDTO.ChannelReportList toChannelReportList(Long channelId, Slice<ReportResDTO.ReportBrief> slice){
+		return new ChannelResDTO.ChannelReportList(
 			channelId,
 			slice.getNumber(),
 			slice.getSize(),
