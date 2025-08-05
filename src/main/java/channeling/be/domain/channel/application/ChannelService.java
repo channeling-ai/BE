@@ -17,7 +17,7 @@ public interface ChannelService {
 	 * @param channelId 채널 ID
 	 * @throws ChannelHandler 채널이 존재하지 않을 경우 예외 발생
 	 */
-	void validateChannelByIdAndMember(Long channelId);
+	void validateChannelByIdAndMember(Long channelId,Member member);
 	/**
 	 * 채널의 타겟 정보를 수정합니다.
 	 */
@@ -42,4 +42,5 @@ public interface ChannelService {
 	 * 채널 정보를 조회합니다.
 	 */
 	Channel getChannel(Long channelId, Member member);
+
 }
