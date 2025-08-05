@@ -1,36 +1,35 @@
 package channeling.be.domain.auth.handler;
 
-import channeling.be.response.exception.handler.ApiResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class Oauth2LoginFailureHandler implements AuthenticationFailureHandler {
 
-    private final ObjectMapper om;
-
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
 
-        String jsonResponse = om.writeValueAsString(ApiResponse.onFailure(
-                HttpStatus.UNAUTHORIZED.name(),
-                "로그인 실패",
-                exception.getMessage()
-        ));
+        log.error("로그인 실패");
+        exception.getStackTrace();
 
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write(jsonResponse);
+        // 프론트 응답 생성
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth/callback")
+                .queryParam("token", "")
+                .queryParam("message", "Fail")
+                .build()
+                .toUriString();
+
+        response.sendRedirect(targetUrl);
+
     }
 }

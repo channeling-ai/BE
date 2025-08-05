@@ -1,7 +1,11 @@
 package channeling.be.domain.auth.handler;
 
+import channeling.be.domain.auth.application.MemberOauth2UserService;
+import channeling.be.domain.auth.application.MemberOauth2UserService.*;
+import channeling.be.domain.channel.application.ChannelService;
+import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.member.application.MemberService;
 import channeling.be.domain.member.domain.Member;
-import channeling.be.domain.member.domain.repository.MemberRepository;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.exception.handler.ApiResponse;
@@ -17,11 +21,11 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
-
 
 
 @Slf4j
@@ -32,8 +36,8 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final ObjectMapper om;
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final JwtUtil jwtUtil;    // JWT 토큰 생성기
-    private final RedisUtil redisUtil;
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
+    private final MemberOauth2UserService memberOauth2UserService;
 
     // 로그인 성공 시 처리하는 메서드
     @Override
@@ -51,36 +55,36 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .getAccessToken()
                 .getTokenValue();
 
-        log.info("컨텍스트에서 구글 엑세스 토큰 추출 = {}" , googleAccessToken);
+        log.info("컨텍스트에서 구글 엑세스 토큰 추출 = {}", googleAccessToken);
         /* -------------------------------------------------
          * OAuth2User 꺼내기
          * ------------------------------------------------- */
-        OAuth2User oauthUser  = (OAuth2User) authentication.getPrincipal();
+        OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attrs = oauthUser.getAttributes(); // 멤버 속성
-        log.info("컨텍스트에서 토큰 내의 회원 정보 추출 = {}" , attrs);
-
-        // TODO DB 조회해서, 실제 존재하는 사람인가? -> 있으면 기존에 있던 사람 -> 통과! + 멤버 반환, 없으면 -> 구글로그인 성공한 처음 요청 -> 회원가입 진행
-//        Member member = memberService.findOrCreateMember(attrs.get()); attr에서 구글 아이디로 조회해야 할 듯...?
-        Member member =  memberRepository.findByGoogleId(attrs.get("sub").toString()).get(); // 나중에 삭제해야함
-
-        log.info("회원 구글 아이디로 db 조회 = {}" , member.getNickname());
-
-        //멤버 아이디를 키값으로 해서 redis 에 구글 엑세스 토큰 저장
-        redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
-        log.info("멤버 아이디를 키값으로 해서 redis 에 구글 엑세스 토큰 저장 ");
+        log.info("컨텍스트에서 토큰 내의 회원 정보 추출 = {}", attrs);
 
 
-        // jwt 생성 -> 우리 서버 자체 access 토큰
-        String accessToken = jwtUtil.createAccessToken(member);
-        log.info(" 우리 서버 자체 access 토큰 생성 = {} ",accessToken);
+        /* -------------------------------------------------
+         * 1. 멤버 생성/조회
+         * 2. 채널 생성/조회
+         * 3. 유튜브에서 채널정보 조회
+         * 4. youtube 조회 -> video id 획득
+         * 5. 유튜브에서 비디오 정보 조회
+         * ------------------------------------------------- */
 
+        LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
 
-        // 응답 생성
-        String jsonResponse = om.writeValueAsString(ApiResponse.onSuccess("로그인 성공"));
-        jwtUtil.setAccessTokenHeader(response, accessToken); //헤더에 엑세스 토큰 넣기
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        response.getWriter().write(jsonResponse);
+        String accessToken = jwtUtil.createAccessToken(result.member());
+
+        // 프론트 응답 생성
+        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth/callback")// TODO  https://channeling.vercel.app/
+                .queryParam("token", accessToken)
+                .queryParam("message", "Success")
+                .queryParam("channelId", result.channel().getId())
+                .build()
+                .toUriString();
+
+        response.sendRedirect(targetUrl);
 
     }
 

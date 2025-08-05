@@ -1,24 +1,29 @@
 package channeling.be.domain.video.application;
 
-import java.time.LocalDateTime;
-
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoConverter;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.domain.video.presentaion.VideoResDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
 import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
 
+@Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 @Service
@@ -46,6 +51,21 @@ public class VideoServiceImpl implements VideoService {
 			: videoRepository.findByChannelIdAndVideoCategoryAndUploadDateLessThanOrderByUploadDateDesc(channelId, type, cursor, pageable);
 
 		return videos.map(VideoResDTO.VideoBrief::from);
+	}
+
+	@Transactional
+	@Override
+	public Video updateVideo(YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO, Channel channel) {
+		Optional<Video> existing = videoRepository.findByYoutubeVideoId(briefDTO.getVideoId());
+
+		if (existing.isPresent()) {
+			Video original = existing.get();
+			VideoConverter.toVideo(original, briefDTO, detailDTO);
+			return videoRepository.save(original);
+		} else {
+			log.info("briefDTO = {}", briefDTO);
+			return videoRepository.save(VideoConverter.toVideo(briefDTO,detailDTO,channel));
+		}
 	}
 
 	@Override

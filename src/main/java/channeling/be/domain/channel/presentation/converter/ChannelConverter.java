@@ -1,8 +1,14 @@
 package channeling.be.domain.channel.presentation.converter;
 
+import channeling.be.domain.channel.application.model.Stats;
 import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.channel.domain.ChannelHashTag;
+import channeling.be.domain.member.domain.Member;
+import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
 
 import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.*;
+
+import java.time.LocalDateTime;
 
 public class ChannelConverter {
     public static EditChannelConceptResDto toEditChannelConceptResDto(Channel channel) {
@@ -16,6 +22,45 @@ public class ChannelConverter {
                 .channelId(channel.getId())
                 .updatedTarget(channel.getTarget())
                 .build();
+    }
+
+    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item, Stats stats) {
+        channel.updateChannelInfo(
+            item.getSnippet().getTitle(),
+            item.getId(),
+            item.getContentDetails().getRelatedPlaylists().getUploads(),
+            item.getSnippet().getThumbnails().getDefaultThumbnail().getUrl(),
+            "https://www.youtube.com/channel/" + item.getId(),
+            item.getSnippet().getPublishedAt(),
+            item.getStatistics().getViewCount(),
+            item.getStatistics().getSubscriberCount(),
+            item.getStatistics().getVideoCount(),
+            stats.likeCount(),
+            stats.commentCount()
+        );
+        channel.updateChannelStats(stats.likeCount(), stats.commentCount());
+    }
+
+    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member) {
+        return Channel.builder()
+            .name(item.getSnippet().getTitle())
+            .youtubeChannelId(item.getId())
+            .youtubePlaylistId(item.getContentDetails().getRelatedPlaylists().getUploads())
+            .image(item.getSnippet().getThumbnails().getDefaultThumbnail().getUrl())
+            .link("https://www.youtube.com/channel/" + item.getId())
+            .joinDate(item.getSnippet().getPublishedAt())
+            .view(item.getStatistics().getViewCount())
+            .subscribe(item.getStatistics().getSubscriberCount())
+            .videoCount(item.getStatistics().getVideoCount())
+            .member(member)
+            .target("default")
+            .likeCount(0L)
+            .channelHashTag(ChannelHashTag.CHANNEL_HASH_TAG)
+            .channelUpdateAt(LocalDateTime.now())
+            .concept("default")
+            .comment(0L)
+            .share(0L)
+            .build();
     }
 
 }

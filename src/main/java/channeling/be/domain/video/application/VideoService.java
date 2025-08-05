@@ -1,16 +1,17 @@
 package channeling.be.domain.video.application;
 
 
-import java.time.LocalDateTime;
-
-import channeling.be.domain.auth.annotation.LoginMember;
+import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.Video;
+import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.presentaion.VideoResDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
+import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
-import channeling.be.domain.video.domain.VideoCategory;
-import channeling.be.domain.video.presentaion.VideoResDTO;
+import java.time.LocalDateTime;
 
 public interface VideoService {
 	/**
@@ -44,6 +45,8 @@ public interface VideoService {
 		LocalDateTime cursorUploadDate, // 커서
 		int size
 	);
+
+	Video updateVideo(YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO,Channel channel);
 
 	/**
 	 * (홈화면) 내 채널의 추천 비디오 목록을 조회합니다.
