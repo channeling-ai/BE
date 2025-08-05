@@ -1,12 +1,16 @@
 package channeling.be.domain.report.application;
 
+import channeling.be.domain.comment.domain.CommentType;
+import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.domain.Report;
+import channeling.be.domain.report.domain.repository.ReportRepository;
 import channeling.be.domain.report.presentation.ReportConverter;
 import channeling.be.domain.report.presentation.ReportResDto;
 import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.response.code.status.ErrorStatus;
+import channeling.be.response.exception.handler.ReportHandler;
 import channeling.be.response.exception.handler.TaskHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
-
+	private final ReportRepository reportRepository;
+	private final CommentRepository commentRepository;
     @Override
     public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId) {
         //task 조회 -> 없으면 애러 반환 -> 연관된 리포트 연관 조인
@@ -34,4 +39,16 @@ public class ReportServiceImpl implements ReportService {
         }
         return ReportConverter.toReportAnalysisStatus(task,report);
     }
+
+	@Override
+	public Report getReportByIdAndMember(Long reportId, Member member) {
+		Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+		return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
+
+	}
+
+	@Override
+	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
+		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+	}
 }

@@ -49,7 +49,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //리포트 관련 에러
     _REPORT_NOT_MEMBER(HttpStatus.BAD_REQUEST, "IDEA403", "해당 리포트를 소유한 멤버가 아닙니다."),
-
+    _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "IDEA400", "존재하지 않는 리포트입니다."),
     ;
 
 
