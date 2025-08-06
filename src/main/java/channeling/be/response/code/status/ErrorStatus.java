@@ -48,8 +48,17 @@ public enum ErrorStatus implements BaseErrorCode {
     _TASK_NOT_REPORT(HttpStatus.BAD_REQUEST, "TASK400", "해당 태스크와 연관된 리포트가 없습니다."),
 
     //리포트 관련 에러
-    _REPORT_NOT_MEMBER(HttpStatus.BAD_REQUEST, "IDEA403", "해당 리포트를 소유한 멤버가 아닙니다."),
-    _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "IDEA400", "존재하지 않는 리포트입니다."),
+    _REPORT_NOT_MEMBER(HttpStatus.BAD_REQUEST, "REPORT403", "해당 리포트를 소유한 멤버가 아닙니다."),
+    _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "존재하지 않는 리포트입니다."),
+
+    //영상 관련 에러
+    _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO400", "존재하지 않는 영상입니다."),
+    _VIDEO_NOT_MEMBER(HttpStatus.BAD_REQUEST, "VIDEO403", "해당 영상을 소유한 멤버가 아닙니다."),
+
+    //토큰 관련 에러
+    _TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN400", "토큰이 만료되었습니다. 재로그인 해주세요.")
+
+
     ;
 
 
