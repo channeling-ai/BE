@@ -81,6 +81,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                 .queryParam("token", accessToken)
                 .queryParam("message", "Success")
                 .queryParam("channelId", result.channel().getId())
+                .queryParam("isNew", result.isNew())
                 .build()
                 .toUriString();
 

@@ -1,7 +1,17 @@
 package channeling.be.domain.report.application;
 
+import channeling.be.domain.comment.domain.CommentType;
+import channeling.be.domain.comment.domain.repository.CommentRepository;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
+import channeling.be.domain.report.presentation.ReportConverter;
+import channeling.be.domain.report.presentation.ReportResDto;
+import channeling.be.domain.task.domain.Task;
+import channeling.be.domain.task.domain.repository.TaskRepository;
+import channeling.be.response.code.status.ErrorStatus;
+import channeling.be.response.exception.handler.ReportHandler;
+import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.domain.VideoCategory;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,8 +26,38 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @Service
 public class ReportServiceImpl implements ReportService {
+    private final TaskRepository taskRepository;
 	private final ReportRepository reportRepository;
+	private final CommentRepository commentRepository;
 
+    @Override
+    public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId) {
+        //task 조회 -> 없으면 애러 반환 -> 연관된 리포트 연관 조인
+        Task task =taskRepository.findByIdFetchWithReportAndMember(taskId)
+                .orElseThrow(()-> new TaskHandler(ErrorStatus._TASK_NOT_FOUND));
+        // 만약 연관된 리포트가 없다면..? 오류 처리
+        Report report = task.getReport();
+        if (report == null) {
+            throw new TaskHandler(ErrorStatus._TASK_NOT_REPORT);
+        }
+        // 만약 해당 리포트의 주인이 멤버가 아닌 경우 오류 처리
+        if (!report.getVideo().getChannel().getMember().getId().equals(member.getId())) {
+            throw new TaskHandler(ErrorStatus._REPORT_NOT_MEMBER);
+        }
+        return ReportConverter.toReportAnalysisStatus(task,report);
+    }
+
+	@Override
+	public Report getReportByIdAndMember(Long reportId, Member member) {
+		Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+		return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
+
+	}
+
+	@Override
+	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
+		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+	}
 	@Override
 	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
 		int size) {
