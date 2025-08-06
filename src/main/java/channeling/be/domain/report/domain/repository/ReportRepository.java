@@ -1,6 +1,10 @@
 package channeling.be.domain.report.domain.repository;
 
 import channeling.be.domain.report.domain.Report;
+import channeling.be.domain.video.domain.VideoCategory;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,4 +21,13 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     WHERE m.id = :memberId AND r.id = :reportId
 """)
     Optional<Report> findByReportAndMember(@Param("reportId") Long reportId, @Param("memberId") Long memberId);
+
+
+	Page<Report> findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(
+		Long channelId,
+		VideoCategory category,
+		Pageable pageable
+	);
+
+
 }

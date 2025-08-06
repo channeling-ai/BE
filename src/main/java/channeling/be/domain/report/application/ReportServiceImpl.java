@@ -12,7 +12,13 @@ import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.ReportHandler;
 import channeling.be.response.exception.handler.TaskHandler;
+import channeling.be.domain.report.presentation.dto.ReportResDTO;
+import channeling.be.domain.video.domain.VideoCategory;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +29,7 @@ public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
 	private final ReportRepository reportRepository;
 	private final CommentRepository commentRepository;
+
     @Override
     public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId) {
         //task 조회 -> 없으면 애러 반환 -> 연관된 리포트 연관 조인
@@ -50,5 +57,14 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
 		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+	}
+	@Override
+	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
+		int size) {
+		Pageable pageable= PageRequest.of(page-1,size);
+		Page<Report> reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,type,pageable);
+
+		return reports.map(ReportResDTO.ReportBrief::from);
+
 	}
 }
