@@ -50,20 +50,22 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     @Transactional
     public LoginResult executeGoogleLogin(Map<String, Object> attrs, String googleAccessToken) {
-        Member member = memberService.findOrCreateMember(
+        MemberResult memberResult = memberService.findOrCreateMember(
             attrs.get("sub").toString(),
             attrs.get("email").toString(),
             attrs.get("name").toString(),
             attrs.get("picture").toString()
 
         );
-
+        Member member = memberResult.member;
         redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
 
         Channel channel = channelService.updateOrCreateChannelByMember(member);
 
-        return new LoginResult(member, channel);
+        return new LoginResult(member, channel, memberResult.isNew);
     }
 
-    public record LoginResult(Member member, Channel channel) {}
+    public record LoginResult(Member member, Channel channel, boolean isNew) {}
+    public record MemberResult(Member member, boolean isNew) {}
+
 }
