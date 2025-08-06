@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/reports")
-public class ReportController implements ReportSwagger{
+public class ReportController implements ReportSwagger {
+
     private final ReportService reportService;
 
     @Override
@@ -32,5 +33,13 @@ public class ReportController implements ReportSwagger{
         Report report = reportService.getReportByIdAndMember(reportId, member);
         return ApiResponse.onSuccess(reportService.getCommentsByType(report, commentType));
 
+    }
+    @Override
+    @GetMapping("/{report-id}")
+    public ApiResponse<ReportResDto.ReportInfoDto> getReportOverview(
+            @PathVariable("report-id") Long reportId,
+            @LoginMember Member loginMember) {
+        Report report = reportService.getReportByIdAndMember(reportId, loginMember);
+        return ApiResponse.onSuccess(ReportConverter.toReportInfoRes(report));
     }
 }
