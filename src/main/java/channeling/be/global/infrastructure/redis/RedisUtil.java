@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 🔹 Redis 편의 메서드를 모아 둔 유틸리티 클래스
@@ -91,5 +92,11 @@ public class RedisUtil {
     public String getGoogleAccessToken(Long memberId) {
         String key = GOOGLE_ACCESS_TOKEN_PREFIX + memberId;
         return stringRedisTemplate.opsForValue().get(key);
+    }
+
+    public Long getGoogleAccessTokenExpire(Long memberId) {
+        String key = GOOGLE_ACCESS_TOKEN_PREFIX + memberId;
+        // TTL (Time To Live)을 초 단위로 가져옴
+        return stringRedisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
 }
