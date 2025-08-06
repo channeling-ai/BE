@@ -33,4 +33,13 @@ public class ReportController implements ReportSwagger{
         return ApiResponse.onSuccess(reportService.getCommentsByType(report, commentType));
 
     }
+    @Override
+    @PostMapping("/{video-id}")
+    public ApiResponse<ReportResDto.createReport> createReport(
+            @PathVariable("video-id") Long videoId,
+            @LoginMember Member member) {
+        return ApiResponse.onSuccess(reportService.createReport(member, videoId));
+    }
+
+
 }

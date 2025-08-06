@@ -27,4 +27,9 @@ public class ReportResDto {
             String content
     ) {
     }
+
+    public record createReport(
+            Long taskId
+    ) {
+    }
 }
