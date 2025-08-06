@@ -2,6 +2,8 @@ package channeling.be.domain.channel.presentation;
 
 
 import channeling.be.domain.channel.domain.Channel;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
@@ -24,13 +26,15 @@ public class ChannelConverter {
 		);
 	}
 
-	public static ChannelResDTO.ChannelReportList toChannelReportList(Long channelId, Slice<ReportResDTO.ReportBrief> slice){
+	public static ChannelResDTO.ChannelReportList toChannelReportList(Long channelId, Page<ReportResDTO.ReportBrief> page){
 		return new ChannelResDTO.ChannelReportList(
 			channelId,
-			slice.getNumber(),
-			slice.getSize(),
-			slice.hasNext(),
-			slice.getContent()
+			page.getNumber()+1,
+			page.getSize(),
+			page.hasNext(),
+			page.getTotalElements(),
+			page.getTotalPages(),
+			page.getContent()
 		);
 	}
 

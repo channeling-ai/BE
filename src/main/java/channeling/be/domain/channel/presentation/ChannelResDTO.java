@@ -21,6 +21,8 @@ public class ChannelResDTO {
 		int page,
 		int size,
 		boolean hasNextPage,
+		long totalElements,
+		int totalPages,
 		List<ReportResDTO.ReportBrief> reportList
 	) {
 	}

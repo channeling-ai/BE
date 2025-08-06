@@ -12,6 +12,8 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -71,8 +73,8 @@ public class ChannelController implements ChannelSwagger{
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "8") int size){
 		channelService.validateChannelByIdAndMember(channelId,member);
-		Slice<ReportResDTO.ReportBrief> reportBriefSlice=reportService.getChannelReportListByType(channelId,type,page,size);
-		return ApiResponse.onSuccess(ChannelConverter.toChannelReportList(channelId,reportBriefSlice));
+		Page<ReportResDTO.ReportBrief> reportBriefPage=reportService.getChannelReportListByType(channelId,type,page,size);
+		return ApiResponse.onSuccess(ChannelConverter.toChannelReportList(channelId,reportBriefPage));
 
 
 	}
