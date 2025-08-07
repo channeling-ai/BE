@@ -11,4 +11,6 @@ public interface ReportService {
 	Report getReportByIdAndMember(Long reportId, Member member);
 
 	ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType);
+
+	Report checkReport(Long reportId, Member member);
 }

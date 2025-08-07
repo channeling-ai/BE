@@ -18,4 +18,6 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     WHERE t.id = :taskId
 """)
     Optional<Task> findByIdFetchWithReportAndMember(@Param("taskId") Long taskId);
+
+    Optional<Task> findByReportId(Long reportId);
 }

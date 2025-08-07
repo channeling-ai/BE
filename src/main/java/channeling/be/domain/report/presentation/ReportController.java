@@ -39,7 +39,7 @@ public class ReportController implements ReportSwagger {
     public ApiResponse<ReportResDto.ReportInfoDto> getReportOverview(
             @PathVariable("report-id") Long reportId,
             @LoginMember Member loginMember) {
-        Report report = reportService.getReportByIdAndMember(reportId, loginMember);
+        Report report = reportService.checkReport(reportId, loginMember);
         return ApiResponse.onSuccess(ReportConverter.toReportInfoRes(report));
     }
 }

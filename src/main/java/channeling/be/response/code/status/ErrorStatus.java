@@ -48,8 +48,12 @@ public enum ErrorStatus implements BaseErrorCode {
     _TASK_NOT_REPORT(HttpStatus.BAD_REQUEST, "TASK400", "해당 태스크와 연관된 리포트가 없습니다."),
 
     //리포트 관련 에러
-    _REPORT_NOT_MEMBER(HttpStatus.BAD_REQUEST, "IDEA403", "해당 리포트를 소유한 멤버가 아닙니다."),
-    _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "IDEA400", "존재하지 않는 리포트입니다."),
+    _REPORT_NOT_MEMBER(HttpStatus.BAD_REQUEST, "REPO403", "해당 리포트를 소유한 멤버가 아닙니다."),
+    _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPO400", "존재하지 않는 리포트입니다."),
+    _REPORT_NOT_TASK(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트와 연관된 태스크가 없습니다."),
+    _REPORT_NOT_ANALYTICS(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 분석이 완료되지 않았습니다."),
+    _REPORT_NOT_OVERVIEW(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 개요 생성이 완료되지 않았습니다."),
+    _REPORT_NOT_IDEA(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 아이디어 생성이 완료되지 않았습니다."),
     ;
 
 
