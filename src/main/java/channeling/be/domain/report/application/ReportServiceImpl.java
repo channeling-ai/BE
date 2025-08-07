@@ -19,12 +19,18 @@ import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.response.exception.handler.VideoHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import channeling.be.domain.report.presentation.dto.ReportResDTO;
+import channeling.be.domain.video.domain.VideoCategory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -41,6 +47,7 @@ public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
 	private final ReportRepository reportRepository;
 	private final CommentRepository commentRepository;
+
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
     private final JwtUtil jwtUtil;
@@ -72,6 +79,15 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
 		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+	}
+	@Override
+	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
+		int size) {
+		Pageable pageable= PageRequest.of(page-1,size);
+		Page<Report> reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,type,pageable);
+
+		return reports.map(ReportResDTO.ReportBrief::from);
+
 	}
 
     @Override

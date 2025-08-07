@@ -58,12 +58,13 @@ public class ChannelServiceImpl implements ChannelService {
     }
 
 	@Override
-	public void validateChannelByIdAndMember(Long channelId) {
-		boolean isExist = channelRepository.existsById(channelId);
-		if (!isExist) {
-			throw new ChannelHandler(_CHANNEL_NOT_FOUND);
+	public void validateChannelByIdAndMember(Long channelId,Member member) {
+		Channel channel = channelRepository.findById(channelId)
+			.orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+		if (!channel.getMember().getId().equals(member.getId())) {
+			throw new ChannelHandler(_CHANNEL_NOT_MEMBER);
 		}
-		//TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
 	}
 
     @Override
