@@ -1,5 +1,6 @@
 package channeling.be.domain.report.presentation;
 
+import channeling.be.domain.TrendKeyword.domain.TrendKeywordType;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.task.domain.TaskStatus;
 import channeling.be.domain.video.domain.VideoCategory;
@@ -31,17 +32,34 @@ public class ReportResDto {
     }
 
     // 리포트 페이지 조회 응답 DTO
-    public record ReportInfoDto(
-        @Schema(description = "리포트 ID (기본키)")
-        Long reportId,
+    public record ReportRes (
+        @Schema(description = "리포트 상단 비디오 정보")
+        VideoInfo video,
+        @Schema(description = "리포트 - 개요 / 분석 페이지")
+        ReportInfo report,
+        @Schema(description = "리포트 - 아이디어")
+        List<IdeaInfo> idea,
+        @Schema(description = "리포트 - 트랜드 키워드")
+        List<TrendKeywordInfo> trend
+    ) {
+    }
+    // 리포트 페이지 조회 응답 DTO - 영상 정보
+    public record VideoInfo (
         @Schema(description = "리포트 대상 비디오 ID")
         Long videoId,
         @Schema(description = "영상 제목")
-        String videoTitle,
-        @Schema(description = "영상 카테고리(LONG/SHORT)")
-        VideoCategory videoCategory,
+        String title,
+        @Schema(description = "영상 카테고리")
+        VideoCategory category,
         @Schema(description = "영상 업로드 날짜")
-        LocalDateTime videoUploadDate,
+        LocalDateTime uploadDate
+    ) {
+    }
+
+    // 리포트 페이지 조회 응답 DTO - 리포트 정보
+    public record ReportInfo (
+        @Schema(description = "리포트 ID (기본키)")
+        Long reportId,
         @Schema(description = "개요-영상평가-조회수")
         Long view,
         @Schema(description = "개요-영상평가-조회수-동일주제평균")
@@ -85,4 +103,20 @@ public class ReportResDto {
         String optimization
     ) {
     }
+    // 리포트 페이지 조회 응답 DTO - 아이디어 정보
+    public record IdeaInfo (
+        Long ideaId,
+        String title,
+        String content,
+        String hashTag,
+        Boolean isBookMarked
+    ) {}
+    // 리포트 페이지 조회 응답 DTO - 트렌드 키워드 정보
+    public record TrendKeywordInfo(
+        Long trendKeywordId,
+        TrendKeywordType keywordType,
+        String keyword,
+        Integer score,
+        LocalDateTime createdAt
+    ) {}
 }

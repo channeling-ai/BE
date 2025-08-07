@@ -35,7 +35,7 @@ public interface ReportSwagger {
     @Operation(summary = "리포트 개요 조회", description = "요청한 리포트의 정보를 조회합니다.\n" +
             "응답 필드의 상세정보는 아래 [ Shemas-ReportInfoDto ]를 참고해주세요.")
     @GetMapping("/{report-id}")
-    ApiResponse<ReportResDto.ReportInfoDto> getReportOverview(
+    ApiResponse<ReportResDto.ReportRes> getReportOverview(
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true) Member loginMember);

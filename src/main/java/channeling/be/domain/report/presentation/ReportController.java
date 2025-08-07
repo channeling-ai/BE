@@ -36,7 +36,7 @@ public class ReportController implements ReportSwagger {
     }
     @Override
     @GetMapping("/{report-id}")
-    public ApiResponse<ReportResDto.ReportInfoDto> getReportOverview(
+    public ApiResponse<ReportResDto.ReportRes> getReportOverview(
             @PathVariable("report-id") Long reportId,
             @LoginMember Member loginMember) {
         Report report = reportService.checkReport(reportId, loginMember);

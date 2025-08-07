@@ -71,6 +71,7 @@ public class ReportServiceImpl implements ReportService {
             throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
 
         Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
 }

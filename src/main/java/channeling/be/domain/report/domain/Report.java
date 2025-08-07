@@ -1,9 +1,14 @@
 package channeling.be.domain.report.domain;
 
+import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
 import channeling.be.domain.common.BaseEntity;
+import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -78,5 +83,10 @@ public class Report extends BaseEntity {
 
     @Column
     private String optimization; // 알고리즘 최적화
+
+
+    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private List<TrendKeyword> trends;
 
 }
