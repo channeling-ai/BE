@@ -1,7 +1,9 @@
 package channeling.be.domain.report.application;
 
+import channeling.be.domain.TrendKeyword.domain.repository.TrendKeywordRepository;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
+import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
@@ -11,26 +13,24 @@ import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.repository.VideoRepository;
-import channeling.be.global.infrastructure.jwt.JwtUtil;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.ReportHandler;
 import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.response.exception.handler.VideoHandler;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.domain.VideoCategory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -38,6 +38,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -47,10 +48,10 @@ public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
 	private final ReportRepository reportRepository;
 	private final CommentRepository commentRepository;
-
+    private final IdeaRepository ideaRepository;
+    private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
-    private final JwtUtil jwtUtil;
 
     @Override
     public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId) {
@@ -93,14 +94,31 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportResDto.createReport createReport(Member member, Long videoId) {
-        // 요청 영상의 주인인지 확인
+        // 요청 영상 존재 여부 확인
         if (!videoRepository.existsById(videoId)) {
             throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
         }
-
+        // 요청 영상의 주인인지 확인
         Video video = videoRepository.findByIdWithMemberId(videoId, member.getId())
                 .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
 
+        // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
+        Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
+
+        //존재한다면
+        if (optionalReport.isPresent()) {
+            Report report = optionalReport.get();
+            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
+            ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
+            // 연관된 댓글 리스트 삭제
+            commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+            // 연관되 키워드 리스트 가져오기
+            trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+            // 연관된 task 삭제
+            taskRepository.deleteTaskByReportId(report.getId());
+            // 리포트 삭제
+            reportRepository.deleteById(report.getId());
+        }
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
@@ -112,12 +130,12 @@ public class ReportServiceImpl implements ReportService {
         log.info("구글 토큰 : {}" , googleAccessToken);
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
-        Long taskId= sendPostToFastAPI(videoId, googleAccessToken);
-        return new ReportResDto.createReport(taskId);
+        FastApiResDto resDto= sendPostToFastAPI(videoId, googleAccessToken);
+        return new ReportResDto.createReport(resDto.taskId, resDto.reportId);
     }
 
-    private static Long sendPostToFastAPI(Long videoId, String googleAccessToken) {
-
+    private static FastApiResDto sendPostToFastAPI(Long videoId, String googleAccessToken) {
+//
         // HTTP 요청 보내기
         RestTemplate restTemplate = new RestTemplate();
         // url 설정
@@ -128,7 +146,7 @@ public class ReportServiceImpl implements ReportService {
 
         // requestbody 생성
         Map<String, String> requestBody = new HashMap<>();
-//        requestBody.put("googleAccessToken", googleAccessToken);
+        requestBody.put("googleAccessToken", googleAccessToken);
 
         // 헤더 생성
         HttpHeaders headers = new HttpHeaders();
@@ -143,16 +161,17 @@ public class ReportServiceImpl implements ReportService {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode root = objectMapper.readTree(response.getBody());
 
-
             JsonNode resultNode = root.get("result");
             if (resultNode != null && resultNode.has("task_id")) {
-                return resultNode.get("task_id").asLong();
+                return new FastApiResDto(resultNode.get("task_id").asLong() , resultNode.get("report_id").asLong() );
             } else {
-                throw new IllegalStateException("응답에 result.task_id가 없습니다.");
+                throw new IllegalStateException("응답에 id가 없습니다.");
             }
-
-
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
-        }    }
+        }
+    }
+
+
+    private record FastApiResDto(Long taskId, Long reportId) {}
 }

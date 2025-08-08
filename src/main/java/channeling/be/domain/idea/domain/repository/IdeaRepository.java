@@ -4,9 +4,11 @@ import channeling.be.domain.idea.domain.Idea;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface IdeaRepository extends JpaRepository<Idea, Long> {
@@ -30,6 +32,11 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
 """)
     Page<Idea> findIdeasByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
-
-
+    @Modifying
+    @Query("""
+    DELETE
+    FROM Idea i
+    WHERE i.video.id = :videoId And i.video.channel.member.id = :memberId AND i.isBookMarked = false
+ """)
+    void deleteAllByVideoWithoutBookmarked(@Param("videoId") Long videoId, @Param("memberId")  Long memberId);
 }
