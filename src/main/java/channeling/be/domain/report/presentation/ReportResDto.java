@@ -29,7 +29,8 @@ public class ReportResDto {
     }
 
     public record createReport(
-            Long taskId
+            Long taskId,
+            Long reportId
     ) {
     }
 }
