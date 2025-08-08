@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -101,12 +102,13 @@ public class ChannelServiceImpl implements ChannelService {
 		// 유튜브 채널 정보 가져오기
 		YoutubeChannelResDTO.Item item = YoutubeUtil.getChannelDetails(
 			redisUtil.getGoogleAccessToken(member.getId()));
+        long shares=YoutubeUtil.getAllVideoShares(googleAccessToken, item.getSnippet().getPublishedAt(),LocalDateTime.now());
 		String playlistId = item.getContentDetails().getRelatedPlaylists().getUploads();
 
 		YoutubeChannelData data = fetchYoutubeVideoData(item, googleAccessToken, playlistId);
 
 		Channel channelEntity = channel.orElseGet(() ->
-			channelRepository.save(ChannelConverter.toNewChannel(data.item, member))
+			channelRepository.save(ChannelConverter.toNewChannel(data.item, member,shares))
 		);
 		Stats stats=updateVideosAndAccumulateStats(data.briefs, data.details, channelEntity);
 		ChannelConverter.updateChannel(channelEntity, data.item, stats);

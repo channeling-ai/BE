@@ -5,11 +5,13 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.ChannelHashTag;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.*;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 public class ChannelConverter {
     public static EditChannelConceptResDto toEditChannelConceptResDto(Channel channel) {
         return EditChannelConceptResDto.builder()
@@ -41,7 +43,7 @@ public class ChannelConverter {
         channel.updateChannelStats(stats.likeCount(), stats.commentCount());
     }
 
-    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member) {
+    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member,long shares) {
         return Channel.builder()
             .name(item.getSnippet().getTitle())
             .youtubeChannelId(item.getId())
@@ -59,7 +61,7 @@ public class ChannelConverter {
             .channelUpdateAt(LocalDateTime.now())
             .concept("default")
             .comment(0L)
-            .share(0L)
+            .share(shares)
             .build();
     }
 
