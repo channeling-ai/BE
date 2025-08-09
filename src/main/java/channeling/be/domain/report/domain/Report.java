@@ -63,7 +63,7 @@ public class Report extends BaseEntity {
     @Column
     private Long revisit; // 재방문률
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String summary; // 요약본
 
     @Column
@@ -78,10 +78,10 @@ public class Report extends BaseEntity {
     @Column
     private Long negativeComment; // 부정 댓글 수
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String leaveAnalyze; // 시청자 이탈 분석
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
 
 

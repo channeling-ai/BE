@@ -31,6 +31,12 @@ public class ReportResDto {
     ) {
     }
 
+    public record createReport(
+            Long taskId,
+            Long reportId
+    ) {
+    }
+
     // 리포트 페이지 조회 응답 DTO
     public record ReportRes (
         @Schema(description = "리포트 상단 비디오 정보")

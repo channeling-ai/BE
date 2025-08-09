@@ -42,4 +42,11 @@ public class ReportController implements ReportSwagger {
         Report report = reportService.checkReport(reportId, loginMember);
         return ApiResponse.onSuccess(ReportConverter.toReportInfoRes(report));
     }
+    @Override
+    @PostMapping("/{video-id}")
+    public ApiResponse<ReportResDto.createReport> createReport(
+            @PathVariable("video-id") Long videoId,
+            @LoginMember Member member) {
+        return ApiResponse.onSuccess(reportService.createReport(member, videoId));
+    }
 }

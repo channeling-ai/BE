@@ -54,6 +54,16 @@ public enum ErrorStatus implements BaseErrorCode {
     _REPORT_NOT_ANALYTICS(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 분석이 완료되지 않았습니다."),
     _REPORT_NOT_OVERVIEW(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 개요 생성이 완료되지 않았습니다."),
     _REPORT_NOT_IDEA(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 아이디어 생성이 완료되지 않았습니다."),
+    _REPORT_NOT_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "REPORT500", "리포트 생성 중 오류가 발생하였습니다."),
+
+    //영상 관련 에러
+    _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO400", "존재하지 않는 영상입니다."),
+    _VIDEO_NOT_MEMBER(HttpStatus.BAD_REQUEST, "VIDEO403", "해당 영상을 소유한 멤버가 아닙니다."),
+
+    //토큰 관련 에러
+    _TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN400", "토큰이 만료되었습니다. 재로그인 해주세요.")
+
+
     ;
 
 
