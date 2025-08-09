@@ -23,6 +23,7 @@ import channeling.be.domain.video.domain.VideoCategory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +53,10 @@ public class ReportServiceImpl implements ReportService {
     private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
+
+	//환경변수에서 FASTAPI_URL 환경변수 불러오기
+	@Value("${FASTAPI_URL:http://localhost:8000}")
+	private String baseFastApiUrl;
 
     @Override
     public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId) {
@@ -134,13 +139,13 @@ public class ReportServiceImpl implements ReportService {
         return new ReportResDto.createReport(resDto.taskId, resDto.reportId);
     }
 
-    private static FastApiResDto sendPostToFastAPI(Long videoId, String googleAccessToken) {
+    private FastApiResDto sendPostToFastAPI(Long videoId, String googleAccessToken) {
 //
         // HTTP 요청 보내기
         RestTemplate restTemplate = new RestTemplate();
         // url 설정
-        String url = UriComponentsBuilder
-                .fromHttpUrl("http://localhost:8000/reports")
+		String url = UriComponentsBuilder
+                .fromHttpUrl(baseFastApiUrl+"/reports")
                 .queryParam("video_id", videoId)
                 .toUriString();
 
