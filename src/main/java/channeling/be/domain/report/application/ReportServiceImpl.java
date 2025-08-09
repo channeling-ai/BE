@@ -9,22 +9,23 @@ import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
 import channeling.be.domain.report.presentation.ReportConverter;
 import channeling.be.domain.report.presentation.ReportResDto;
+import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.task.domain.Task;
+import channeling.be.domain.task.domain.TaskStatus;
 import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.domain.video.domain.Video;
+import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.ReportHandler;
 import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.response.exception.handler.VideoHandler;
-import channeling.be.domain.report.presentation.dto.ReportResDTO;
-import channeling.be.domain.video.domain.VideoCategory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +87,26 @@ public class ReportServiceImpl implements ReportService {
 	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
 		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
 	}
+
+    @Override
+    public Report checkReport(Long reportId, Member member) {
+        // TODO 태스크 삭제하지 않는다고 가정
+        Task task = taskRepository.findByReportId(reportId)
+                .orElseThrow(() -> new TaskHandler(ErrorStatus._REPORT_NOT_TASK));
+
+        if (task.getAnalysisStatus() != TaskStatus.COMPLETED)
+            throw new TaskHandler(ErrorStatus._REPORT_NOT_ANALYTICS);
+
+        if (task.getOverviewStatus() != TaskStatus.COMPLETED)
+            throw new TaskHandler(ErrorStatus._REPORT_NOT_OVERVIEW);
+
+        if (task.getIdeaStatus() != TaskStatus.COMPLETED)
+            throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
+
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+
+        return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
+    }
 	@Override
 	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
 		int size) {

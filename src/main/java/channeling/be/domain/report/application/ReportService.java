@@ -25,4 +25,6 @@ public interface ReportService {
 	ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType);
 
     ReportResDto.createReport createReport(Member member, Long videoId);
+
+	Report checkReport(Long reportId, Member member);
 }
