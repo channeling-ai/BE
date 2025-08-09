@@ -9,6 +9,8 @@ import channeling.be.domain.video.domain.VideoCategory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
@@ -20,4 +22,13 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 	Slice<Video> findByChannelIdAndVideoCategoryAndUploadDateLessThanOrderByUploadDateDesc(Long channelId, VideoCategory type, LocalDateTime cursor, Pageable pageable);
 
 	Optional<Video> findByYoutubeVideoId(String youtubeVideoId);
+
+	@Query("""
+    SELECT v
+    FROM Video v
+    JOIN v.channel c
+    JOIN c.member m
+    WHERE v.id = :videoId AND m.id = :memberId
+""")
+	Optional<Video> findByIdWithMemberId(@Param("videoId")Long videoId, @Param("memberId")Long memberId);
 }
