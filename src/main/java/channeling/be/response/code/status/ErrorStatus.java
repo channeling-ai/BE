@@ -50,6 +50,7 @@ public enum ErrorStatus implements BaseErrorCode {
     //리포트 관련 에러
     _REPORT_NOT_MEMBER(HttpStatus.BAD_REQUEST, "REPORT403", "해당 리포트를 소유한 멤버가 아닙니다."),
     _REPORT_NOT_FOUND(HttpStatus.BAD_REQUEST, "REPORT400", "존재하지 않는 리포트입니다."),
+    _REPORT_NOT_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "REPORT500", "리포트 생성 중 오류가 발생하였습니다."),
 
     //영상 관련 에러
     _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO400", "존재하지 않는 영상입니다."),

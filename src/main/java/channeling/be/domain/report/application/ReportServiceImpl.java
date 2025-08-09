@@ -135,11 +135,13 @@ public class ReportServiceImpl implements ReportService {
         log.info("구글 토큰 : {}" , googleAccessToken);
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
-        FastApiResDto resDto= sendPostToFastAPI(videoId, googleAccessToken);
-        return new ReportResDto.createReport(resDto.taskId, resDto.reportId);
+        Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
+        // fastapi 응답 값으로 생성된 리포트 조회
+        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+        return new ReportResDto.createReport(taskId, report.getId());
     }
 
-    private FastApiResDto sendPostToFastAPI(Long videoId, String googleAccessToken) {
+    private Long sendPostToFastAPI(Long videoId, String googleAccessToken) {
 //
         // HTTP 요청 보내기
         RestTemplate restTemplate = new RestTemplate();
@@ -168,7 +170,7 @@ public class ReportServiceImpl implements ReportService {
 
             JsonNode resultNode = root.get("result");
             if (resultNode != null && resultNode.has("task_id")) {
-                return new FastApiResDto(resultNode.get("task_id").asLong() , resultNode.get("report_id").asLong() );
+                return resultNode.get("task_id").asLong();
             } else {
                 throw new IllegalStateException("응답에 id가 없습니다.");
             }
@@ -177,6 +179,4 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
-
-    private record FastApiResDto(Long taskId, Long reportId) {}
 }

@@ -41,5 +41,11 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 		Pageable pageable
 	);
 
-
+	@Query("""
+    SELECT r
+    FROM Report r
+    JOIN Task t ON t.report = r
+    WHERE t.id = :taskId
+""")
+	Optional<Report> findByTaskId(@Param("taskId") Long taskId);
 }
