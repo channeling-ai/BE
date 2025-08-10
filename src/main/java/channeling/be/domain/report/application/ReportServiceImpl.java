@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 @Slf4j
 public class ReportServiceImpl implements ReportService {
@@ -118,7 +117,6 @@ public class ReportServiceImpl implements ReportService {
 	}
 
     @Override
-    @Transactional
     public ReportResDto.createReport createReport(Member member, Long videoId) {
         // 요청 영상 존재 여부 확인
         if (!videoRepository.existsById(videoId)) {
