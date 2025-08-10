@@ -32,7 +32,7 @@ public class VideoServiceImpl implements VideoService {
 
 	@Override
 	public Page<VideoResDTO.VideoBrief> getChannelVideoListByType(Long channelId, VideoCategory type ,int page, int size) {
-		Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.DESC, "uploadDate"));
+		Pageable pageable = PageRequest.of(page-1, size);
 		return videoRepository.findByChannelIdAndVideoCategoryOrderByUploadDateDesc(channelId,type ,pageable)
 			.map(VideoResDTO.VideoBrief::from);
 	}
