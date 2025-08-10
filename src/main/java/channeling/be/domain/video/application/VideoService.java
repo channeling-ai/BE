@@ -3,6 +3,7 @@ package channeling.be.domain.video.application;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
 import channeling.be.domain.channel.domain.Channel;
@@ -22,7 +23,7 @@ public interface VideoService {
 	 * @param size 페이지 크기
 	 * @return 비디오 목록의 슬라이스
 	 */
-	Slice<VideoResDTO.VideoBrief> getChannelVideoListByType(
+	Page<VideoResDTO.VideoBrief> getChannelVideoListByType(
 		Long channelId,
 		VideoCategory type,
 		int page,

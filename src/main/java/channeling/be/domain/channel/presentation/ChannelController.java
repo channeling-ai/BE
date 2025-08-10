@@ -48,8 +48,8 @@ public class ChannelController implements ChannelSwagger{
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "8") int size) {
 		channelService.validateChannelByIdAndMember(channelId,member);
-		Slice<VideoResDTO.VideoBrief> videoBriefSlice = videoService.getChannelVideoListByType(channelId,type,page, size);
-		return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefSlice));
+		Page<VideoResDTO.VideoBrief> videoBriefPage = videoService.getChannelVideoListByType(channelId,type,page, size);
+		return ApiResponse.onSuccess(ChannelConverter.toChannelVideoList(channelId, videoBriefPage));
 	}
 
 	// // TODO: 추후 유저 + 채널 연관 관계 확인 로직 필요
