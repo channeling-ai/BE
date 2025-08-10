@@ -22,8 +22,4 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByReportId(Long reportId);
 
     void deleteTaskByReportId(Long id);
-
-    @Query(value = "SELECT * FROM task WHERE id = :taskId", nativeQuery = true)
-    Optional<Task> findByIdNative(@Param("taskId") Long taskId);
-
 }
