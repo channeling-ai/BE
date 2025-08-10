@@ -157,8 +157,30 @@ public class ReportServiceImpl implements ReportService {
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
         Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
-        // fastapi 응답 값으로 생성된 리포트 조회
-        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+        
+        // FastAPI에서 리포트 생성을 위한 폴링 (최대 30초)
+        Report report = null;
+        int maxRetries = 3;
+        int retryCount = 0;
+        
+        while (retryCount < maxRetries) {
+            try {
+                Thread.sleep(3000); // 3초 간격으로 확인
+                report = reportRepository.findByTaskId(taskId).orElse(null);
+                if (report != null) {
+                    break;
+                }
+                retryCount++;
+                log.info("리포트 생성 대기 중... (시도: {}/{})", retryCount, maxRetries);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
+            }
+        }
+        
+        if (report == null) {
+            throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
+        }
         return new ReportResDto.createReport(taskId, report.getId());
     }
 
