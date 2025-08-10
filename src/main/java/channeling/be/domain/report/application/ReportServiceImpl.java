@@ -155,6 +155,7 @@ public class ReportServiceImpl implements ReportService {
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
         Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
+
         log.info("fastapi로부터 받은 task_id: {}", taskId);
         // task_id가 생성되기까지 대기 시간
         try {
