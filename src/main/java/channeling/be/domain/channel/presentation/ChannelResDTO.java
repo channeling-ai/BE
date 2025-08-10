@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import channeling.be.domain.channel.domain.ChannelHashTag;
+import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 
 public class ChannelResDTO {
@@ -12,7 +13,19 @@ public class ChannelResDTO {
 		int page,
 		int size,
 		boolean hasNextPage,
+		long totalElements,
+		int totalPages,
 		List<VideoResDTO.VideoBrief> videoList
+	) {
+	}
+	public record ChannelReportList(
+		Long channelId,
+		int page,
+		int size,
+		boolean hasNextPage,
+		long totalElements,
+		int totalPages,
+		List<ReportResDTO.ReportBrief> reportList
 	) {
 	}
 
