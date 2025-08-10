@@ -27,4 +27,6 @@ public interface ReportService {
     ReportResDto.createReport createReport(Member member, Long videoId);
 
 	Report checkReport(Long reportId, Member member);
+
+	ReportResDto.deleteReport deleteReport(Member member, Long reportId);
 }

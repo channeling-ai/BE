@@ -107,6 +107,31 @@ public class ReportServiceImpl implements ReportService {
 
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
+
+	@Override
+	@Transactional
+	public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
+		// 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
+		Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
+
+		//존재한다면
+		if (optionalReport.isPresent()) {
+			Report report = optionalReport.get();
+			Video video = report.getVideo();
+			// 연관된 북마크 하지 않은 아이디어 리스트 삭제
+			ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
+			// 연관된 댓글 리스트 삭제
+			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+			// 연관되 키워드 리스트 가져오기
+			trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+			// 연관된 task 삭제
+			taskRepository.deleteTaskByReportId(report.getId());
+			// 리포트 삭제
+			reportRepository.deleteById(report.getId());
+		}
+		return new ReportResDto.deleteReport(reportId);
+	}
+
 	@Override
 	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
 		int size) {
