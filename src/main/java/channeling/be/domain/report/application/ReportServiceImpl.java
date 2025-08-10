@@ -25,7 +25,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,6 +55,9 @@ public class ReportServiceImpl implements ReportService {
     private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
+    @Lazy
+    @Autowired
+    private ReportServiceImpl self;
 
 	//환경변수에서 FASTAPI_URL 환경변수 불러오기
 	@Value("${FASTAPI_URL:http://localhost:8000}")
@@ -130,19 +135,7 @@ public class ReportServiceImpl implements ReportService {
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
         //존재한다면
-        if (optionalReport.isPresent()) {
-            Report report = optionalReport.get();
-            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
-            ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
-            // 연관된 댓글 리스트 삭제
-            commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-            // 연관되 키워드 리스트 가져오기
-            trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-            // 연관된 task 삭제
-            taskRepository.deleteTaskByReportId(report.getId());
-            // 리포트 삭제
-            reportRepository.deleteById(report.getId());
-        }
+        optionalReport.ifPresent(report -> self.deleteExistingReport(report, video, member));
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
@@ -156,15 +149,7 @@ public class ReportServiceImpl implements ReportService {
         // 요청 바디에 보낼 객체 구성
         Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
         log.info("fastapi로부터 받은 task_id: {}", taskId);
-        // task_id가 생성되기까지 대기 시간
-        try {
-            Thread.sleep(3000);
-        }
-        catch (InterruptedException e) {
-            log.error("리포트 생성 대기 중 인터럽트 발생", e);
-            Thread.currentThread().interrupt(); // 인터럽트 상태 복원
-            throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
-        }
+
 
         // fastapi 응답 값으로 생성된 리포트 조회
 //        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
@@ -216,6 +201,26 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
+    }
+
+    @Transactional
+    public void deleteExistingReport(Report report, Video video, Member member) {
+        log.info("기존 리포트 삭제 시작 - reportId: {}", report.getId());
+        
+        // 연관된 북마크 하지 않은 아이디어 리스트 삭제
+        ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
+        // 연관된 댓글 리스트 삭제
+        commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+        // 연관되 키워드 리스트 가져오기
+        trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+        // 연관된 task 삭제
+        taskRepository.deleteTaskByReportId(report.getId());
+        // 리포트 삭제
+        reportRepository.deleteById(report.getId());
+        
+        // 명시적 flush로 삭제 즉시 실행
+        reportRepository.flush();
+        log.info("기존 리포트 삭제 완료 - reportId: {}", report.getId());
     }
 
 }
