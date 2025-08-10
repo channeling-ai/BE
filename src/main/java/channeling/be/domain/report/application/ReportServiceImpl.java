@@ -157,30 +157,28 @@ public class ReportServiceImpl implements ReportService {
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
         Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
-        
-        // FastAPI에서 리포트 생성을 위한 폴링 (최대 30초)
-        Report report = null;
-        int maxRetries = 3;
-        int retryCount = 0;
-        
-        while (retryCount < maxRetries) {
-            try {
-                Thread.sleep(3000); // 3초 간격으로 확인
-                report = reportRepository.findByTaskId(taskId).orElse(null);
-                if (report != null) {
-                    break;
-                }
-                retryCount++;
-                log.info("리포트 생성 대기 중... (시도: {}/{})", retryCount, maxRetries);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
-            }
+        log.info("fastapi로부터 받은 task_id: {}", taskId);
+        // task_id가 생성되기까지 대기 시간
+        try {
+            Thread.sleep(3000);
         }
-        
-        if (report == null) {
+        catch (InterruptedException e) {
+            log.error("리포트 생성 대기 중 인터럽트 발생", e);
+            Thread.currentThread().interrupt(); // 인터럽트 상태 복원
             throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
         }
+
+        // fastapi 응답 값으로 생성된 리포트 조회
+//        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+        Task task = taskRepository.findByIdNative(taskId).orElseThrow(() -> new TaskHandler(ErrorStatus._TASK_NOT_FOUND));
+        log.info("Task 조회 성공 - taskId: {}, reportId: {}", task.getId(), task.getReport() != null ? task.getReport().getId() : "null");
+        Report report = task.getReport();
+        
+        if (report == null) {
+            log.error("Task의 Report가 null - taskId: {}", taskId);
+            throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
+        }
+
         return new ReportResDto.createReport(taskId, report.getId());
     }
 
