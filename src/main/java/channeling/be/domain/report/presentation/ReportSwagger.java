@@ -7,10 +7,7 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "리포트 API", description = "리포트 관련 API입니다.")
 public interface ReportSwagger {
@@ -48,4 +45,12 @@ public interface ReportSwagger {
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true) Member loginMember);
+
+    @Operation(summary = "리포트 삭제", description = "요청한 리포트를 삭제합니다.")
+    @DeleteMapping("/{report-id}")
+    ApiResponse<ReportResDto.deleteReport> deleteReport(
+            @Parameter(description = "요청 리포트 아이디", example = "1")
+            @PathVariable("report-id") Long reportId,
+            @Parameter(hidden = true)
+            @LoginMember Member member);
 }
