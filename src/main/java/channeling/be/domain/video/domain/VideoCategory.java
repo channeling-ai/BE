@@ -8,6 +8,7 @@ import java.util.Arrays;
 @Getter
 @AllArgsConstructor
 public enum VideoCategory {
+    NONE("0", "None"),
     FILM_AND_ANIMATION("1", "Film & Animation"),
     AUTOS_AND_VEHICLES("2", "Autos & Vehicles"),
     MUSIC("10", "Music"),
