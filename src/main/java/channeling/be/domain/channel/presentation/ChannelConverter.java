@@ -13,16 +13,18 @@ public class ChannelConverter {
 	/**
 	 * 채널의 비디오 목록을 ChannelResDTO.ChannelVideoList로 변환합니다.
 	 * @param channelId
-	 * @param slice
+	 * @param page
 	 * @return ChannelResDTO.ChannelVideoList
 	 */
-	public static ChannelResDTO.ChannelVideoList toChannelVideoList(Long channelId, Slice<VideoResDTO.VideoBrief> slice) {
+	public static ChannelResDTO.ChannelVideoList toChannelVideoList(Long channelId, Page<VideoResDTO.VideoBrief> page) {
 		return new ChannelResDTO.ChannelVideoList(
 			channelId,
-			slice.getNumber(),
-			slice.getSize(),
-			slice.hasNext(),
-			slice.getContent()
+			page.getNumber()+1,
+			page.getSize(),
+			page.hasNext(),
+			page.getTotalElements(),
+			page.getTotalPages(),
+			page.getContent()
 		);
 	}
 
