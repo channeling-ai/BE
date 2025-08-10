@@ -2,6 +2,7 @@ package channeling.be.domain.channel.domain;
 
 import channeling.be.domain.common.BaseEntity;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.video.domain.VideoCategory;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -64,7 +65,7 @@ public class Channel extends BaseEntity {
     private String image; // 채널 프로필 이미지
 
     @Enumerated(EnumType.STRING)
-    private ChannelHashTag channelHashTag; // 채널 해시태그
+    private VideoCategory channelHashTag; // 채널 해시태그
 
     @Column(nullable = false)
     private LocalDateTime channelUpdateAt; // 채널 정보 업데이트 시기
@@ -84,7 +85,7 @@ public class Channel extends BaseEntity {
     }
 
     public void updateChannelInfo(String title, String channelId, String uploadPlaylistId, String profileImageUrl, String channelUrl, LocalDateTime publishedAt, Long viewCount, Long subscriberCount, Long videoCount,
-        long likeCount, long commentCount) {
+        long likeCount, long commentCount,String topCategoryId) {
         this.name = title;
         this.youtubeChannelId = channelId;
         this.youtubePlaylistId = uploadPlaylistId;
@@ -97,7 +98,7 @@ public class Channel extends BaseEntity {
         this.likeCount = likeCount;
         this.comment = commentCount;
         this.channelUpdateAt = LocalDateTime.now();
-        this.channelHashTag = ChannelHashTag.CHANNEL_HASH_TAG; // TODO : 해시태그는 추후에 프론트에서 선택할 수 있도록 해야 함
+        this.channelHashTag = VideoCategory.ofId(topCategoryId);
         this.target = "default"; // TODO: 타겟은 추후에 프론트에서 입력받도록 해야 함
         this.concept = "default"; // TODO: 컨셉은 추후에 프론트에서 입력받도록 해야 함
     }
