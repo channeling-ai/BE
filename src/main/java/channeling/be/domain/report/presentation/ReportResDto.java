@@ -36,6 +36,11 @@ public class ReportResDto {
             Long reportId
     ) {
     }
+    public record deleteReport(
+            @Schema(description = "삭제된 리포트 아이디")
+            Long reportId
+    ) {
+    }
 
     // 리포트 페이지 조회 응답 DTO
     public record ReportRes (

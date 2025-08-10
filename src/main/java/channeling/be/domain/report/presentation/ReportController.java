@@ -49,4 +49,12 @@ public class ReportController implements ReportSwagger {
             @LoginMember Member member) {
         return ApiResponse.onSuccess(reportService.createReport(member, videoId));
     }
+
+    @Override
+    @DeleteMapping("/{report-id}")
+    public ApiResponse<ReportResDto.deleteReport> deleteReport(
+            @PathVariable("report-id") Long reportId,
+            @LoginMember Member member) {
+        return ApiResponse.onSuccess(reportService.deleteReport(member, reportId));
+    }
 }
