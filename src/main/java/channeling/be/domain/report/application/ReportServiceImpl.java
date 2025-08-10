@@ -25,9 +25,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -55,9 +53,7 @@ public class ReportServiceImpl implements ReportService {
     private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
-    @Lazy
-    @Autowired
-    private ReportServiceImpl self;
+    private final ReportDeleteService reportDeleteService;
 
 	//환경변수에서 FASTAPI_URL 환경변수 불러오기
 	@Value("${FASTAPI_URL:http://localhost:8000}")
@@ -135,7 +131,7 @@ public class ReportServiceImpl implements ReportService {
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
         //존재한다면
-        optionalReport.ifPresent(report -> self.deleteExistingReport(report, video, member));
+        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member));
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
@@ -153,11 +149,8 @@ public class ReportServiceImpl implements ReportService {
 
 
         // fastapi 응답 값으로 생성된 리포트 조회
-//        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
-        Task task = taskRepository.findByIdNative(taskId).orElseThrow(() -> new TaskHandler(ErrorStatus._TASK_NOT_FOUND));
-        log.info("Task 조회 성공 - taskId: {}, reportId: {}", task.getId(), task.getReport() != null ? task.getReport().getId() : "null");
-        Report report = task.getReport();
-        
+        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+
         if (report == null) {
             log.error("Task의 Report가 null - taskId: {}", taskId);
             throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
@@ -202,26 +195,6 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
-    }
-
-    @Transactional
-    public void deleteExistingReport(Report report, Video video, Member member) {
-        log.info("기존 리포트 삭제 시작 - reportId: {}", report.getId());
-        
-        // 연관된 북마크 하지 않은 아이디어 리스트 삭제
-        ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
-        // 연관된 댓글 리스트 삭제
-        commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-        // 연관되 키워드 리스트 가져오기
-        trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-        // 연관된 task 삭제
-        taskRepository.deleteTaskByReportId(report.getId());
-        // 리포트 삭제
-        reportRepository.deleteById(report.getId());
-        
-        // 명시적 flush로 삭제 즉시 실행
-        reportRepository.flush();
-        log.info("기존 리포트 삭제 완료 - reportId: {}", report.getId());
     }
 
 }
