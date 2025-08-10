@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 @Service
 @Slf4j
 public class ReportServiceImpl implements ReportService {
@@ -54,6 +53,7 @@ public class ReportServiceImpl implements ReportService {
     private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
+    private final ReportDeleteService reportDeleteService;
 
 	//환경변수에서 FASTAPI_URL 환경변수 불러오기
 	@Value("${FASTAPI_URL:http://localhost:8000}")
@@ -118,7 +118,6 @@ public class ReportServiceImpl implements ReportService {
 	}
 
     @Override
-    @Transactional
     public ReportResDto.createReport createReport(Member member, Long videoId) {
         // 요청 영상 존재 여부 확인
         if (!videoRepository.existsById(videoId)) {
@@ -132,19 +131,7 @@ public class ReportServiceImpl implements ReportService {
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
         //존재한다면
-        if (optionalReport.isPresent()) {
-            Report report = optionalReport.get();
-            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
-            ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
-            // 연관된 댓글 리스트 삭제
-            commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-            // 연관되 키워드 리스트 가져오기
-            trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-            // 연관된 task 삭제
-            taskRepository.deleteTaskByReportId(report.getId());
-            // 리포트 삭제
-            reportRepository.deleteById(report.getId());
-        }
+        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member));
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
@@ -157,30 +144,18 @@ public class ReportServiceImpl implements ReportService {
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
         Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
-        
-        // FastAPI에서 리포트 생성을 위한 폴링 (최대 30초)
-        Report report = null;
-        int maxRetries = 3;
-        int retryCount = 0;
-        
-        while (retryCount < maxRetries) {
-            try {
-                Thread.sleep(3000); // 3초 간격으로 확인
-                report = reportRepository.findByTaskId(taskId).orElse(null);
-                if (report != null) {
-                    break;
-                }
-                retryCount++;
-                log.info("리포트 생성 대기 중... (시도: {}/{})", retryCount, maxRetries);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
-            }
-        }
-        
+
+        log.info("fastapi로부터 받은 task_id: {}", taskId);
+
+
+        // fastapi 응답 값으로 생성된 리포트 조회
+        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+
         if (report == null) {
+            log.error("Task의 Report가 null - taskId: {}", taskId);
             throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
         }
+
         return new ReportResDto.createReport(taskId, report.getId());
     }
 
