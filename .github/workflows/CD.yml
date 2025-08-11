@@ -57,6 +57,13 @@ jobs:
       - name: Pull Docker image
         run: docker pull ${{ secrets.DOCKER_USERNAME }}/channeling-be:latest
 
+      # logs 디렉토리 생성 및 권한 설정
+      - name: Create logs directory with proper permissions
+        working-directory: deploy-configs
+        run: |
+          sudo mkdir -p logs
+          sudo chown 1000:1000 logs
+
       # spring-app 다시 실행
       - name: Deploy spring-app
         working-directory: deploy-configs
