@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -16,11 +17,20 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
 	Slice<Video> findByChannelIdAndVideoCategory(Long channelId, VideoCategory videoCategory, Pageable pageable);
 
-	Slice<Video> findByChannelIdAndVideoCategoryOrderByUploadDateDesc(Long channelId, VideoCategory type, Pageable pageable);
+	Page<Video> findByChannelIdAndVideoCategoryOrderByUploadDateDesc(Long channelId, VideoCategory type, Pageable pageable);
 
 	Slice<Video> findByChannelIdAndVideoCategoryAndUploadDateLessThanOrderByUploadDateDesc(Long channelId, VideoCategory type, LocalDateTime cursor, Pageable pageable);
 
 	Optional<Video> findByYoutubeVideoId(String youtubeVideoId);
+
+	@Query("""
+    SELECT v
+    FROM Video v
+    JOIN v.channel c
+    JOIN c.member m
+    WHERE v.id = :videoId AND m.id = :memberId
+""")
+	Optional<Video> findByIdWithMemberId(@Param("videoId")Long videoId, @Param("memberId")Long memberId);
 
 	// 내 채널 추천 영상 : 조회 수 높은 영상, 리포트 안 받아본 영상
 	@Query("SELECT v FROM Video v " +
