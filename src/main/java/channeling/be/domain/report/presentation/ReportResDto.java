@@ -20,7 +20,7 @@ public class ReportResDto {
 
     public record getCommentsByType(
             CommentType commentType,
-            List<SingleCommentRes> commnetList
+            List<SingleCommentRes> commentList
     ) {
     }
     public record SingleCommentRes(
