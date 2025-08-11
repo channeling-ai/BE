@@ -6,6 +6,7 @@ import java.util.List;
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.presentaion.VideoResDTO;
+import lombok.Builder;
 
 public class ChannelResDTO {
 	public record ChannelVideoList(
@@ -26,6 +27,17 @@ public class ChannelResDTO {
 		long totalElements,
 		int totalPages,
 		List<ReportResDTO.ReportBrief> reportList
+	) {
+	}
+
+	@Builder
+	public record PageDto (
+			List<?> list,
+			Integer listSize,
+			Integer totalPage,
+			Long totalElements,
+			Boolean isFirst,
+			Boolean isLast
 	) {
 	}
 
