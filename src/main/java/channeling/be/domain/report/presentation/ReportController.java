@@ -17,11 +17,11 @@ public class ReportController implements ReportSwagger {
     private final ReportService reportService;
 
     @Override
-    @GetMapping("/status/{task-id}")
+    @GetMapping("/{report-id}/status")
     public ApiResponse<ReportResDto.getReportAnalysisStatus> getReportAnalysisStatus(
-            @PathVariable("task-id") Long taskId,
+            @PathVariable("report-id") Long reportId,
             @LoginMember Member member) {
-        return ApiResponse.onSuccess(reportService.getReportAnalysisStatus(member, taskId));
+        return ApiResponse.onSuccess(reportService.getReportAnalysisStatus(member, reportId));
     }
 
     @Override
