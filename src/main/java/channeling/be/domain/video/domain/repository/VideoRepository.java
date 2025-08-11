@@ -34,9 +34,9 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
 	// 내 채널 추천 영상 : 조회 수 높은 영상, 리포트 안 받아본 영상
 	@Query("SELECT v FROM Video v " +
-			"left join fetch Report r on v.id = r.video.id " +
+			"LEFT JOIN FETCH Report r ON v.id = r.video.id " +
 			"WHERE v.channel.id = :channelId " +
 			"AND r.id is null " +
-			"order by v.view desc ")
+			"ORDER BY v.view DESC ")
 	Page<Video> findAllRecommendationByChannel(Long channelId, Pageable pageable);
 }
