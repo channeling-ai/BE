@@ -11,7 +11,6 @@ import java.util.List;
 
 public class ReportResDto {
     public record getReportAnalysisStatus(
-            Long taskId,
             Long reportId,
             TaskStatus overviewStatus,
             TaskStatus analysisStatus,
@@ -32,7 +31,6 @@ public class ReportResDto {
     }
 
     public record createReport(
-            Long taskId,
             Long reportId
     ) {
     }

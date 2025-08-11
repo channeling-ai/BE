@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class ReportConverter {
     public static ReportResDto.getReportAnalysisStatus toReportAnalysisStatus(Task task, Report report) {
         return new ReportResDto.getReportAnalysisStatus(
-                task.getId(),
                 report.getId(),
                 task.getOverviewStatus(),
                 task.getAnalysisStatus(),
