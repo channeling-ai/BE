@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/reports")
-public class ReportController implements ReportSwagger{
+public class ReportController implements ReportSwagger {
+
     private final ReportService reportService;
 
     @Override
@@ -32,5 +33,28 @@ public class ReportController implements ReportSwagger{
         Report report = reportService.getReportByIdAndMember(reportId, member);
         return ApiResponse.onSuccess(reportService.getCommentsByType(report, commentType));
 
+    }
+    @Override
+    @GetMapping("/{report-id}")
+    public ApiResponse<ReportResDto.ReportRes> getReportOverview(
+            @PathVariable("report-id") Long reportId,
+            @LoginMember Member loginMember) {
+        Report report = reportService.checkReport(reportId, loginMember);
+        return ApiResponse.onSuccess(ReportConverter.toReportInfoRes(report));
+    }
+    @Override
+    @PostMapping("/{video-id}")
+    public ApiResponse<ReportResDto.createReport> createReport(
+            @PathVariable("video-id") Long videoId,
+            @LoginMember Member member) {
+        return ApiResponse.onSuccess(reportService.createReport(member, videoId));
+    }
+
+    @Override
+    @DeleteMapping("/{report-id}")
+    public ApiResponse<ReportResDto.deleteReport> deleteReport(
+            @PathVariable("report-id") Long reportId,
+            @LoginMember Member member) {
+        return ApiResponse.onSuccess(reportService.deleteReport(member, reportId));
     }
 }
