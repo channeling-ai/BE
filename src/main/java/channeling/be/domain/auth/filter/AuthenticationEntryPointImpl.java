@@ -27,10 +27,9 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 상태 코드
 
         Map<String, Object> responseBody = new HashMap<>();
-        responseBody.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-        responseBody.put("error", "Unauthorized");
+        responseBody.put("isSuccess", false);
+        responseBody.put("code", "AUTH401");
         responseBody.put("message", authException.getMessage());
-        responseBody.put("path", request.getRequestURI());
 
         String json = objectMapper.writeValueAsString(responseBody);
         response.getWriter().write(json);
