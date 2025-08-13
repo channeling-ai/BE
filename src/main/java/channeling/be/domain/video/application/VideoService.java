@@ -60,4 +60,6 @@ public interface VideoService {
 	Page<Video> getRecommendedVideos(Long channelId, Integer page, Integer size, Member loginMember);
 
     Video checkVideoUrlWithMember(Member member, @NotNull(message = "null이서는 안됩니다.") String url);
+
+	Video checkVideoWithMember(@NotNull(message = "null이서는 안됩니다.") Long videoId, Member member);
 }
