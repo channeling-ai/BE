@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface VideoSwagger {
 
     @Operation(summary = "영상 정보 조회", description = "요청한 영상의 정보를 조회합니다.\n" +
-            "하단 ReportVideoInfo 을 참고해주세요. (ctrl + f)")
+            "응답 필드의 상세정보는 아래 [ Shemas - ReportVideoInfo ] 을 참고해주세요. (ctrl + f)")
     @GetMapping("/{video-id}")
     ApiResponse<VideoResDTO.ReportVideoInfo> getVideoInfo (
             @Parameter(description = "요청 비디오 아이디", example = "1")
