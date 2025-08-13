@@ -4,6 +4,7 @@ import channeling.be.domain.auth.annotation.LoginMember;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.application.ReportService;
+import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.video.application.VideoService;
 import channeling.be.domain.video.domain.Video;
@@ -37,14 +38,34 @@ public class ReportController implements ReportSwagger {
         return ApiResponse.onSuccess(reportService.getCommentsByType(report, commentType));
 
     }
+
     @Override
-    @GetMapping("/{report-id}")
-    public ApiResponse<ReportResDto.ReportRes> getReportOverview(
+    @GetMapping("/{report-id}/overviews")
+    public ApiResponse<ReportResDto.OverviewReport> getReportOverview(
             @PathVariable("report-id") Long reportId,
             @LoginMember Member loginMember) {
-        Report report = reportService.checkReport(reportId, loginMember);
-        return ApiResponse.onSuccess(ReportConverter.toReportInfoRes(report));
+        Report report = reportService.checkReport(reportId, PageType.OVERVIEW, loginMember);
+        return ApiResponse.onSuccess(ReportConverter.toOverview(report));
     }
+
+    @Override
+    @GetMapping("/{report-id}/analyses")
+    public ApiResponse<ReportResDto.AnalysisReport> getReportAnalysis(
+            @PathVariable("report-id") Long reportId,
+            @LoginMember Member loginMember) {
+        Report report = reportService.checkReport(reportId, PageType.ANALYSIS, loginMember);
+        return ApiResponse.onSuccess(ReportConverter.toAnalysis(report));
+    }
+
+    @Override
+    @GetMapping("/{report-id}/ideas")
+    public ApiResponse<ReportResDto.IdeaReport> getReportIdea(
+            @PathVariable("report-id") Long reportId,
+            @LoginMember Member loginMember) {
+        Report report = reportService.checkReport(reportId, PageType.IDEA, loginMember);
+        return ApiResponse.onSuccess(ReportConverter.toIdea(report));
+    }
+
     @Override
     @PostMapping("/{video-id}")
     public ApiResponse<ReportResDto.createReport> createReport(

@@ -6,7 +6,6 @@ import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.task.domain.Task;
-import channeling.be.domain.video.domain.Video;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,20 +32,8 @@ public class ReportConverter {
         return new ReportResDto.SingleCommentRes(comment.getCommentType(), comment.getId(), comment.getContent());
     }
 
-    public static ReportResDto.ReportRes toReportInfoRes(Report report) {
-        return new ReportResDto.ReportRes(
-                toResVideoInfo(report.getVideo()),
-                toResReportInfo(report),
-                report.getVideo().getIdeas().stream()
-                        .map(ReportConverter::toResIdeaInfo)
-                        .collect(Collectors.toList()),
-                report.getTrends().stream()
-                        .map(ReportConverter::toResTrendKeywordInfo)
-                        .collect(Collectors.toList())
-        );
-    }
-    private static ReportResDto.ReportInfo toResReportInfo(Report report) {
-        return new ReportResDto.ReportInfo(
+    public static ReportResDto.OverviewReport toOverview(Report report) {
+        return new ReportResDto.OverviewReport(
                 report.getId(),
                 // 개요 - 영상평가
                 report.getView(),
@@ -66,18 +53,27 @@ public class ReportConverter {
                 report.getNeutralComment(),
                 report.getAdviceComment(),
                 report.getPositiveComment(),
-                report.getNegativeComment(),
-                // 분석
+                report.getNegativeComment()
+        );
+    }
+
+    public static ReportResDto.AnalysisReport toAnalysis(Report report) {
+        return new ReportResDto.AnalysisReport(
+                report.getId(),
                 report.getLeaveAnalyze(),
                 report.getOptimization()
         );
     }
-    private static ReportResDto.VideoInfo toResVideoInfo(Video video) {
-        return new ReportResDto.VideoInfo(
-                video.getId(),
-                video.getTitle(),
-                video.getVideoCategory(),
-                video.getUploadDate()
+
+    public static ReportResDto.IdeaReport toIdea(Report report) {
+        return new ReportResDto.IdeaReport(
+                report.getId(),
+                report.getVideo().getIdeas().stream()
+                        .map(ReportConverter::toResIdeaInfo)
+                        .collect(Collectors.toList()),
+                report.getTrends().stream()
+                        .map(ReportConverter::toResTrendKeywordInfo)
+                        .collect(Collectors.toList())
         );
     }
     private static ReportResDto.IdeaInfo toResIdeaInfo(Idea idea) {

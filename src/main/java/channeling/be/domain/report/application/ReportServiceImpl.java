@@ -5,6 +5,7 @@ import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
 import channeling.be.domain.report.presentation.ReportConverter;
@@ -92,19 +93,27 @@ public class ReportServiceImpl implements ReportService {
 	}
 
     @Override
-    public Report checkReport(Long reportId, Member member) {
+    public Report checkReport(Long reportId, PageType type, Member member) {
         // TODO 태스크 삭제하지 않는다고 가정
         Task task = taskRepository.findByReportId(reportId)
-                .orElseThrow(() -> new TaskHandler(ErrorStatus._REPORT_NOT_TASK));
+                .orElseThrow(() -> new TaskHandler(ErrorStatus._REPORT_NOT_FOUND));
 
-        if (task.getAnalysisStatus() != TaskStatus.COMPLETED)
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_ANALYTICS);
-
-        if (task.getOverviewStatus() != TaskStatus.COMPLETED)
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_OVERVIEW);
-
-        if (task.getIdeaStatus() != TaskStatus.COMPLETED)
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
+        switch (type) {
+            case OVERVIEW:
+                if (task.getOverviewStatus() != TaskStatus.COMPLETED)
+                    throw new TaskHandler(ErrorStatus._REPORT_NOT_OVERVIEW);
+                break;
+            case ANALYSIS:
+                if (task.getAnalysisStatus() != TaskStatus.COMPLETED)
+                    throw new TaskHandler(ErrorStatus._REPORT_NOT_ANALYTICS);
+                break;
+            case IDEA:
+                if (task.getIdeaStatus() != TaskStatus.COMPLETED)
+                    throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid PageType: " + type);
+        }
 
         Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
 

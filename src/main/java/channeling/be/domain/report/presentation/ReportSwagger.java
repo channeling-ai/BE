@@ -39,10 +39,26 @@ public interface ReportSwagger {
             @Parameter(hidden = true)
             @LoginMember Member member);
 
-    @Operation(summary = "리포트 개요 조회", description = "요청한 리포트의 정보를 조회합니다.\n" +
+    @Operation(summary = "리포트 개요 페이지 조회", description = "요청한 리포트의 개요 정보를 조회합니다.\n" +
             "응답 필드의 상세정보는 아래 [ Shemas-ReportInfoDto ]를 참고해주세요.")
-    @GetMapping("/{report-id}")
-    ApiResponse<ReportResDto.ReportRes> getReportOverview(
+    @GetMapping("/{report-id}/overviews")
+    ApiResponse<ReportResDto.OverviewReport> getReportOverview(
+            @Parameter(description = "요청 리포트 아이디", example = "1")
+            @PathVariable("report-id") Long reportId,
+            @Parameter(hidden = true) Member loginMember);
+
+    @Operation(summary = "리포트 분석 페이지 조회", description = "요청한 리포트의 분석 정보를 조회합니다.\n" +
+            "응답 필드의 상세정보는 아래 [ Shemas-ReportInfoDto ]를 참고해주세요.")
+    @GetMapping("/{report-id}/analyses")
+    ApiResponse<ReportResDto.AnalysisReport> getReportAnalysis(
+            @Parameter(description = "요청 리포트 아이디", example = "1")
+            @PathVariable("report-id") Long reportId,
+            @Parameter(hidden = true) Member loginMember);
+
+    @Operation(summary = "리포트 아이디어 페이지 조회", description = "요청한 리포트의 아이디어 정보를 조회합니다.\n" +
+            "응답 필드의 상세정보는 아래 [ Shemas-ReportInfoDto ]를 참고해주세요.")
+    @GetMapping("/{report-id}/ideas")
+    ApiResponse<ReportResDto.IdeaReport> getReportIdea(
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true) Member loginMember);
