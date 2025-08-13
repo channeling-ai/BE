@@ -31,7 +31,7 @@ public interface MemberSwagger {
             summary ="회원 프로필 이미지 수정 API",
             description = "멤버의 프로필 이미지 정보를 수정합니다."
     )
-    @PatchMapping("/profile-image")
+    @PatchMapping("/profile-images")
     ApiResponse<MemberResDTO.updateProfileImageRes> updateProfileImage(
             @Parameter(hidden = true)
             @LoginMember Member member,

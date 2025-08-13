@@ -2,6 +2,7 @@ package channeling.be.domain.member.presentation;
 
 import channeling.be.domain.auth.annotation.LoginMember;
 import channeling.be.domain.member.domain.Member;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import channeling.be.domain.member.application.MemberService;
@@ -33,10 +34,10 @@ public class MemberController implements MemberSwagger{
     }
 
     @Override
-    @PatchMapping("/profile-image")
+    @PatchMapping("/profile-images")
     public ApiResponse<updateProfileImageRes> updateProfileImage(
             @LoginMember Member member,
-            @ModelAttribute MemberReqDTO.ProfileImageUpdateReq updateProfileImageReq) {
+            @Valid @ModelAttribute MemberReqDTO.ProfileImageUpdateReq updateProfileImageReq) {
         return ApiResponse.onSuccess(memberService.updateProfileImage(member,updateProfileImageReq));
     }
 

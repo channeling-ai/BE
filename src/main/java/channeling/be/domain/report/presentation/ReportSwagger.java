@@ -7,19 +7,17 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PostMapping;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "리포트 API", description = "리포트 관련 API입니다.")
 public interface ReportSwagger {
 
     @Operation(summary = "리포트 분석 상태를 조회합니다.", description = "순서대로 개요, 분석, 아이디어.")
-    @GetMapping("/status/{task-id}")
+    @GetMapping("{report-id}/status")
     ApiResponse<ReportResDto.getReportAnalysisStatus> getReportAnalysisStatus(
-            @Parameter(description = "상태를 조회할 태스크 아이디 (리포트 분석 요청 시, 응답에 포함 되어 있습니다.)", example = "1")
-            @PathVariable("task-id") Long taskId,
+            @Parameter(description = "상태를 조회할 리포트 아이디 (리포트 분석 요청 시, 응답에 포함 되어 있습니다.)", example = "1")
+            @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true)
             @LoginMember Member member);
 
@@ -48,4 +46,19 @@ public interface ReportSwagger {
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true) Member loginMember);
+
+    @Operation(summary = "리포트 삭제", description = "요청한 리포트를 삭제합니다.")
+    @DeleteMapping("/{report-id}")
+    ApiResponse<ReportResDto.deleteReport> deleteReport(
+            @Parameter(description = "요청 리포트 아이디", example = "1")
+            @PathVariable("report-id") Long reportId,
+            @Parameter(hidden = true)
+            @LoginMember Member member);
+
+    @Operation(summary = "url 로 리포트 생성 요청", description = "url 주소로 리포트 생성을 요청합니다.")
+    @PostMapping("")
+    ApiResponse<ReportResDto.createReport> createReportByUrl(
+            @Valid @RequestBody ReportReqDto.createReportByUrl request,
+            @Parameter(hidden = true)
+            @LoginMember Member member);
 }
