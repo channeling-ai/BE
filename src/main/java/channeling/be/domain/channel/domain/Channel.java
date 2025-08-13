@@ -100,7 +100,5 @@ public class Channel extends BaseEntity {
         this.channelUpdateAt = LocalDateTime.now();
         this.channelHashTag = VideoCategory.ofId(topCategoryId);
         this.share=shares;
-        this.target = "default"; // TODO: 타겟은 추후에 프론트에서 입력받도록 해야 함
-        this.concept = "default"; // TODO: 컨셉은 추후에 프론트에서 입력받도록 해야 함
     }
 }
