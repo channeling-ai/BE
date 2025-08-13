@@ -34,6 +34,8 @@ public class VideoResDTO {
 	public record ReportVideoInfo (
 		@Schema(description = "비디오 ID")
 		Long videoId,
+		@Schema(description = "유튜브 비디오 ID")
+		String youtubeVideoId,
 		@Schema(description = "비디오 제목")
 		String videoTitle,
 		@Schema(description = "비디오 썸네일 URL")
@@ -52,6 +54,7 @@ public class VideoResDTO {
 		public static ReportVideoInfo from(Video video) {
 			return new ReportVideoInfo(
 				video.getId(),
+				video.getYoutubeVideoId(),
 				video.getTitle(),
 				video.getThumbnail(),
 				video.getVideoCategory(),
