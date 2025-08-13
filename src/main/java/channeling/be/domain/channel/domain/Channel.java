@@ -85,7 +85,7 @@ public class Channel extends BaseEntity {
     }
 
     public void updateChannelInfo(String title, String channelId, String uploadPlaylistId, String profileImageUrl, String channelUrl, LocalDateTime publishedAt, Long viewCount, Long subscriberCount, Long videoCount,
-        long likeCount, long commentCount,String topCategoryId) {
+        long likeCount, long commentCount,String topCategoryId,long shares) {
         this.name = title;
         this.youtubeChannelId = channelId;
         this.youtubePlaylistId = uploadPlaylistId;
@@ -99,7 +99,6 @@ public class Channel extends BaseEntity {
         this.comment = commentCount;
         this.channelUpdateAt = LocalDateTime.now();
         this.channelHashTag = VideoCategory.ofId(topCategoryId);
-        this.target = "default"; // TODO: 타겟은 추후에 프론트에서 입력받도록 해야 함
-        this.concept = "default"; // TODO: 컨셉은 추후에 프론트에서 입력받도록 해야 함
+        this.share=shares;
     }
 }
