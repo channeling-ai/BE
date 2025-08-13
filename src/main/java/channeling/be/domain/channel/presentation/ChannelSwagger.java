@@ -5,6 +5,7 @@ import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
 import channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,25 +22,27 @@ public interface ChannelSwagger {
 	@Operation(summary = "채널의 비디오 목록 조회", description = "채널의 영상 목록을 페이지네이션으로 조회합니다.")
 	@GetMapping("/{channel-id}/videos")
 	ApiResponse<ChannelResDTO.ChannelVideoList> getChannelVideos(
-			@Parameter(hidden = true)
-			@LoginMember Member member,
-			@Parameter(description = "요청 채널 아이디 (로그인 성공 시 바디에 포함 되어 있습니다.)", example = "1")
-			@PathVariable("channel-id") Long channelId,
-			@Parameter(description = "Long,Short 여부")
-			@RequestParam(value = "type") VideoCategory type,
-			@Parameter(description = "페이지 번호 (1부터 시작)", example = "1")
-			@RequestParam(defaultValue = "1") int page,
-			@Parameter(description = "페이지당 항목 수", example = "8")
-			@RequestParam(defaultValue = "8") int size);
+		@Parameter(hidden = true)
+		@LoginMember Member member,
+		@Parameter(description = "요청 채널 아이디 (로그인 성공 시 바디에 포함 되어 있습니다.)", example = "1")
+		@PathVariable("channel-id") Long channelId,
+		@Parameter(description = "Long,Short 여부")
+		@RequestParam(value = "type") VideoType type,
+		@Parameter(description = "페이지 번호 (1부터 시작)", example = "1")
+		@RequestParam(defaultValue = "1") int page,
+		@Parameter(description = "페이지당 항목 수", example = "8")
+		@RequestParam(defaultValue = "8") int size);
 
 
 	@GetMapping("/{channel-id}/reports")
 	@Operation(summary = "채널의 레포트 조회 API (page)", description = "특정 채널의 레포트 리스트를 페이지를 통해 조회합니다.")
-	ApiResponse<ChannelResDTO.ChannelReportList> getReports(@LoginMember Member member,
+	ApiResponse<ChannelResDTO.ChannelReportList> getReports(
+		@Parameter(hidden = true)
+		@LoginMember Member member,
 		@Parameter(description = "요청 채널 아이디 (로그인 성공 시 바디에 포함 되어 있습니다.)", example = "1")
 		@PathVariable("channel-id") Long channelId,
 		@Parameter(description = "Long,Short 여부")
-		@RequestParam(value = "type") VideoCategory type,
+		@RequestParam(value = "type") VideoType type,
 		@Parameter(description = "페이지 번호 (1부터 시작)", example = "1")
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@Parameter(description = "페이지당 항목 수", example = "8")

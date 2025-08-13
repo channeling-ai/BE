@@ -41,6 +41,12 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 		Pageable pageable
 	);
 
+	Page<Report> findByVideoChannelIdAndVideoVideoCategoryNotOrderByUpdatedAtDesc(
+		Long channelId,
+		VideoCategory category,
+		Pageable pageable
+	);
+
 	@Query("""
     SELECT r
     FROM Report r
