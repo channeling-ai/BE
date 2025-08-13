@@ -7,6 +7,7 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "리포트 API", description = "리포트 관련 API입니다.")
@@ -51,6 +52,13 @@ public interface ReportSwagger {
     ApiResponse<ReportResDto.deleteReport> deleteReport(
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("report-id") Long reportId,
+            @Parameter(hidden = true)
+            @LoginMember Member member);
+
+    @Operation(summary = "url 로 리포트 생성 요청", description = "url 주소로 리포트 생성을 요청합니다.")
+    @PostMapping("")
+    ApiResponse<ReportResDto.createReport> createReportByUrl(
+            @Valid @RequestBody ReportReqDto.createReportByUrl request,
             @Parameter(hidden = true)
             @LoginMember Member member);
 }

@@ -8,6 +8,7 @@ import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
@@ -57,4 +58,6 @@ public interface VideoService {
 	 * @return 추천 비디오 목록의 페이지
 	 */
 	Page<Video> getRecommendedVideos(Long channelId, Integer page, Integer size, Member loginMember);
+
+    Video checkVideoUrlWithMember(Member member, @NotNull(message = "null이서는 안됩니다.") String url);
 }

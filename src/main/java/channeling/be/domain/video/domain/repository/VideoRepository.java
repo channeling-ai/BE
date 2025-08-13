@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -39,4 +40,16 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 			"AND r.id is null " +
 			"ORDER BY v.view DESC ")
 	Page<Video> findAllRecommendationByChannel(Long channelId, Pageable pageable);
+
+
+	@Query("""
+        SELECT v
+        FROM Video v
+        JOIN v.channel c
+        JOIN c.member m
+        WHERE m.id = :memberId
+	    AND v.youtubeVideoId = :youtubeVideoId
+""")
+	Optional<Video> findByMemberAndYoutubeVideoId(@Param("memberId") Long memberId, @Param("youtubeVideoId") String youtubeVideoId);
+
 }

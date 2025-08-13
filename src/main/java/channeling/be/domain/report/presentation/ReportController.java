@@ -5,7 +5,10 @@ import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.application.ReportService;
 import channeling.be.domain.report.domain.Report;
+import channeling.be.domain.video.application.VideoService;
+import channeling.be.domain.video.domain.Video;
 import channeling.be.response.exception.handler.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class ReportController implements ReportSwagger {
 
     private final ReportService reportService;
-
+    private final VideoService videoService;
     @Override
     @GetMapping("/{report-id}/status")
     public ApiResponse<ReportResDto.getReportAnalysisStatus> getReportAnalysisStatus(
@@ -56,5 +59,14 @@ public class ReportController implements ReportSwagger {
             @PathVariable("report-id") Long reportId,
             @LoginMember Member member) {
         return ApiResponse.onSuccess(reportService.deleteReport(member, reportId));
+    }
+
+    @PostMapping("")
+    public ApiResponse<ReportResDto.createReport> createReportByUrl(
+            @Valid @RequestBody ReportReqDto.createReportByUrl request,
+            @LoginMember Member member) {
+        Video video = videoService.checkVideoUrlWithMember(member, request.url());
+
+        return ApiResponse.onSuccess(reportService.createReport(member, video.getId()));
     }
 }
