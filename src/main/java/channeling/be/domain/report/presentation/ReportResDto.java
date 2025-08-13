@@ -11,7 +11,6 @@ import java.util.List;
 
 public class ReportResDto {
     public record getReportAnalysisStatus(
-            Long taskId,
             Long reportId,
             TaskStatus overviewStatus,
             TaskStatus analysisStatus,
@@ -21,7 +20,7 @@ public class ReportResDto {
 
     public record getCommentsByType(
             CommentType commentType,
-            List<SingleCommentRes> commnetList
+            List<SingleCommentRes> commentList
     ) {
     }
     public record SingleCommentRes(
@@ -32,7 +31,11 @@ public class ReportResDto {
     }
 
     public record createReport(
-            Long taskId,
+            Long reportId
+    ) {
+    }
+    public record deleteReport(
+            @Schema(description = "삭제된 리포트 아이디")
             Long reportId
     ) {
     }

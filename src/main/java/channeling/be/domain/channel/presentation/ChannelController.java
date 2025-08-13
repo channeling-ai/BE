@@ -11,22 +11,17 @@ import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.data.domain.Slice;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import static channeling.be.domain.channel.presentation.converter.ChannelConverter.*;
-import static channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto.*;
-import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.*;
+import static channeling.be.domain.channel.presentation.converter.ChannelConverter.toEditChannelConceptResDto;
+import static channeling.be.domain.channel.presentation.converter.ChannelConverter.toEditChannelTargetResDto;
+import static channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto.EditChannelConceptReqDto;
+import static channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto.EditChannelTargetReqDto;
+import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.EditChannelConceptResDto;
+import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.EditChannelTargetResDto;
 
 
 @RequiredArgsConstructor
@@ -79,17 +74,17 @@ public class ChannelController implements ChannelSwagger{
 
 	}
 	@Override
-	@PatchMapping("/{channel-id}/concept")
+	@PatchMapping("/{channel-id}/concepts")
 	public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId,
-																	@RequestBody EditChannelConceptReqDto request,
+																	@Valid @RequestBody EditChannelConceptReqDto request,
 																	@LoginMember Member member) {
 		return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request, member)));
 	}
 
 	@Override
-	@PatchMapping("/{channel-id}/target")
+	@PatchMapping("/{channel-id}/targets")
 	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId,
-                                                                  @RequestBody EditChannelTargetReqDto request,
+                                                                  @Valid @RequestBody EditChannelTargetReqDto request,
                                                                   @LoginMember Member member) {
 		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request, member))));
 	}
@@ -98,6 +93,16 @@ public class ChannelController implements ChannelSwagger{
 	@GetMapping("{channel-id}")
 	public ApiResponse<ChannelResDTO.ChannelInfo> getChannel(@PathVariable("channel-id") Long channelId,
                                                              @LoginMember Member loginMember) {
-		 return ApiResponse.onSuccess(ChannelConverter.toChannelResDto(channelService.getChannel(channelId, loginMember)));
-	}
+        return ApiResponse.onSuccess(ChannelConverter.toChannelResDto(channelService.getChannel(channelId, loginMember)));
+    }
+
+    @Override
+    @GetMapping("/{channel-id}/recommended-videos")
+    public ApiResponse<ChannelResDTO.PageDto> getRecommendedChannelVideos(@PathVariable("channel-id") Long channelId,
+                                                                      @RequestParam(value = "page", defaultValue = "1") Integer page,
+                                                                      @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                                                      @LoginMember Member loginMember) {
+        return ApiResponse.onSuccess(ChannelConverter.toVideoList(
+                videoService.getRecommendedVideos(channelId, page - 1, size, loginMember)));
+    }
 }

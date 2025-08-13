@@ -1,17 +1,17 @@
 package channeling.be.domain.video.domain.repository;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import javax.swing.text.html.Option;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 public interface VideoRepository extends JpaRepository<Video, Long> {
@@ -32,4 +32,24 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
     WHERE v.id = :videoId AND m.id = :memberId
 """)
 	Optional<Video> findByIdWithMemberId(@Param("videoId")Long videoId, @Param("memberId")Long memberId);
+
+	// 내 채널 추천 영상 : 조회 수 높은 영상, 리포트 안 받아본 영상
+	@Query("SELECT v FROM Video v " +
+			"LEFT JOIN FETCH Report r ON v.id = r.video.id " +
+			"WHERE v.channel.id = :channelId " +
+			"AND r.id is null " +
+			"ORDER BY v.view DESC ")
+	Page<Video> findAllRecommendationByChannel(Long channelId, Pageable pageable);
+
+
+	@Query("""
+        SELECT v
+        FROM Video v
+        JOIN v.channel c
+        JOIN c.member m
+        WHERE m.id = :memberId
+	    AND v.youtubeVideoId = :youtubeVideoId
+""")
+	Optional<Video> findByMemberAndYoutubeVideoId(@Param("memberId") Long memberId, @Param("youtubeVideoId") String youtubeVideoId);
+
 }
