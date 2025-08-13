@@ -119,7 +119,7 @@ public class ChannelServiceImpl implements ChannelService {
 		);
 
 		Stats stats=updateVideosAndAccumulateStats(data.briefs, data.details, channelEntity);
-		ChannelConverter.updateChannel(channelEntity, data.item, topCategoryId,stats);
+		ChannelConverter.updateChannel(channelEntity, data.item, topCategoryId,stats,shares);
 		return channelRepository.save(channelEntity);
 
 	}

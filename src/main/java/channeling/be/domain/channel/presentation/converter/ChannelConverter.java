@@ -26,7 +26,7 @@ public class ChannelConverter {
                 .build();
     }
 
-    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item,String topCategoryId ,Stats stats) {
+    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item,String topCategoryId ,Stats stats,long shares) {
         channel.updateChannelInfo(
             item.getSnippet().getTitle(),
             item.getId(),
@@ -39,7 +39,8 @@ public class ChannelConverter {
             item.getStatistics().getVideoCount(),
             stats.likeCount(),
             stats.commentCount(),
-            topCategoryId
+            topCategoryId,
+            shares
         );
         channel.updateChannelStats(stats.likeCount(), stats.commentCount());
     }
