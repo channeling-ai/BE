@@ -6,6 +6,7 @@ import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.VideoConverter;
+import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
@@ -43,12 +44,19 @@ public class VideoServiceImpl implements VideoService {
 	private final ChannelRepository channelRepository;
 
 	@Override
-	public Page<VideoResDTO.VideoBrief> getChannelVideoListByType(Long channelId, VideoCategory type ,int page, int size) {
+	public Page<VideoResDTO.VideoBrief> getChannelVideoListByType(Long channelId, VideoType type ,int page, int size) {
 		Pageable pageable = PageRequest.of(page-1, size);
-		return videoRepository.findByChannelIdAndVideoCategoryOrderByUploadDateDesc(channelId,type ,pageable)
-			.map(VideoResDTO.VideoBrief::from);
+		Page<Video> videos;
+		if(VideoType.SHORTS.equals(type)) {
+			videos=videoRepository.findByChannelIdAndVideoCategoryOrderByUploadDateDesc(channelId, VideoCategory.SHORTS, pageable);
+		} else{
+			videos=videoRepository.findByChannelIdAndVideoCategoryNotOrderByUploadDateDesc(channelId,VideoCategory.SHORTS,pageable);
+		}
+
+		return videos.map(VideoResDTO.VideoBrief::from);
 	}
 
+	@Deprecated
 	@Override
 	public Slice<VideoResDTO.VideoBrief> getChannelVideoListByTypeAfterCursor(Long channelId, VideoCategory type,
 		LocalDateTime cursor, int size) {

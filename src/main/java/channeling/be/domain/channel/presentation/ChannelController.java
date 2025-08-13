@@ -7,6 +7,7 @@ import channeling.be.domain.report.application.ReportService;
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.application.VideoService;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,7 +40,7 @@ public class ChannelController implements ChannelSwagger{
 	public ApiResponse<ChannelResDTO.ChannelVideoList> getChannelVideos(
 		@LoginMember Member member,
 		@PathVariable("channel-id") Long channelId,
-		@RequestParam(value = "type") VideoCategory type,
+		@RequestParam(value = "type") VideoType type,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "8") int size) {
 		channelService.validateChannelByIdAndMember(channelId,member);
@@ -64,7 +65,7 @@ public class ChannelController implements ChannelSwagger{
 	@Operation(summary = "채널의 레포트 조회 API (page)", description = "특정 채널의 레포트 리스트를 페이지를 통해 조회합니다.")
 	public ApiResponse<ChannelResDTO.ChannelReportList> getReports(@LoginMember Member member,
 		@PathVariable("channel-id") Long channelId,
-		@RequestParam(value = "type") VideoCategory type,
+		@RequestParam(value = "type") VideoType type,
 		@RequestParam(value = "page", defaultValue = "1") int page,
 		@RequestParam(value = "size", defaultValue = "8") int size){
 		channelService.validateChannelByIdAndMember(channelId,member);

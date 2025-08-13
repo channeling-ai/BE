@@ -15,6 +15,7 @@ import channeling.be.domain.task.domain.TaskStatus;
 import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
@@ -110,7 +111,6 @@ public class ReportServiceImpl implements ReportService {
 
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
-
 	@Override
 	@Transactional
 	public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
@@ -137,10 +137,14 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
     @Transactional(readOnly = true)
-    public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
+	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoType type, int page,
 		int size) {
 		Pageable pageable= PageRequest.of(page-1,size);
-		Page<Report> reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,type,pageable);
+		Page<Report> reports;
+		if(VideoType.SHORTS.equals(type))
+			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
+		else
+			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryNotOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
 
 		return reports.map(ReportResDTO.ReportBrief::from);
 
