@@ -18,7 +18,7 @@ public interface ReportService {
 		int page,
 		int size
 	);
-    ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId);
+    ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long reportId);
 
 	Report getReportByIdAndMember(Long reportId, Member member);
 

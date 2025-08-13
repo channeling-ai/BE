@@ -60,31 +60,34 @@ public class ReportServiceImpl implements ReportService {
 	private String baseFastApiUrl;
 
     @Override
-    public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId) {
-        //task 조회 -> 없으면 애러 반환 -> 연관된 리포트 연관 조인
-        Task task =taskRepository.findByIdFetchWithReportAndMember(taskId)
+    @Transactional(readOnly = true)
+    public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long reportId) {
+        // 리포트 존재 확인
+        if (!reportRepository.existsById(reportId)) {
+            throw new ReportHandler(ErrorStatus._REPORT_NOT_FOUND);
+        }
+
+        //리포트 주인 확인
+        Report report = reportRepository.findByReportAndMember(reportId, member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
+
+        //리포트로 연관된 task 조회 -> 없으면 애러 반환
+        Task task =taskRepository.findByReportId(reportId)
                 .orElseThrow(()-> new TaskHandler(ErrorStatus._TASK_NOT_FOUND));
-        // 만약 연관된 리포트가 없다면..? 오류 처리
-        Report report = task.getReport();
-        if (report == null) {
-            throw new TaskHandler(ErrorStatus._TASK_NOT_REPORT);
-        }
-        // 만약 해당 리포트의 주인이 멤버가 아닌 경우 오류 처리
-        if (!report.getVideo().getChannel().getMember().getId().equals(member.getId())) {
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_MEMBER);
-        }
+
         return ReportConverter.toReportAnalysisStatus(task,report);
     }
 
 	@Override
-	public Report getReportByIdAndMember(Long reportId, Member member) {
+    @Transactional(readOnly = true)
+    public Report getReportByIdAndMember(Long reportId, Member member) {
 		Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
 		return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
 
 	}
 
 	@Override
-	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
+    @Transactional(readOnly = true)
+    public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
 		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
 	}
 
@@ -133,7 +136,8 @@ public class ReportServiceImpl implements ReportService {
 	}
 
 	@Override
-	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
+    @Transactional(readOnly = true)
+    public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
 		int size) {
 		Pageable pageable= PageRequest.of(page-1,size);
 		Page<Report> reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,type,pageable);
@@ -155,7 +159,7 @@ public class ReportServiceImpl implements ReportService {
         // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
-        //존재한다면
+        //존재한다면 삭제
         optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member));
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
@@ -169,19 +173,11 @@ public class ReportServiceImpl implements ReportService {
         // fastapi 쪽에 요청 보내기
         // 요청 바디에 보낼 객체 구성
         Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
+        // taskId로 리포트 조회
+        Report report = reportRepository.findByTaskId(taskId)
+                .orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
 
-        log.info("fastapi로부터 받은 task_id: {}", taskId);
-
-
-        // fastapi 응답 값으로 생성된 리포트 조회
-        Report report = reportRepository.findByTaskId(taskId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
-
-        if (report == null) {
-            log.error("Task의 Report가 null - taskId: {}", taskId);
-            throw new ReportHandler(ErrorStatus._REPORT_NOT_CREATE);
-        }
-
-        return new ReportResDto.createReport(taskId, report.getId());
+        return new ReportResDto.createReport(report.getId());
     }
 
     private Long sendPostToFastAPI(Long videoId, String googleAccessToken) {

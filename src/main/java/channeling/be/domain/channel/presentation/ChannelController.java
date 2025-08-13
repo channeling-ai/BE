@@ -11,6 +11,7 @@ import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -73,17 +74,17 @@ public class ChannelController implements ChannelSwagger{
 
 	}
 	@Override
-	@PatchMapping("/{channel-id}/concept")
+	@PatchMapping("/{channel-id}/concepts")
 	public ApiResponse<EditChannelConceptResDto> editChannelConcept(@PathVariable("channel-id") Long channelId,
-																	@RequestBody EditChannelConceptReqDto request,
+																	@Valid @RequestBody EditChannelConceptReqDto request,
 																	@LoginMember Member member) {
 		return ApiResponse.onSuccess(toEditChannelConceptResDto(channelService.editChannelConcept(channelId, request, member)));
 	}
 
 	@Override
-	@PatchMapping("/{channel-id}/target")
+	@PatchMapping("/{channel-id}/targets")
 	public ApiResponse<EditChannelTargetResDto> editChannelTarget(@PathVariable("channel-id") Long channelId,
-                                                                  @RequestBody EditChannelTargetReqDto request,
+                                                                  @Valid @RequestBody EditChannelTargetReqDto request,
                                                                   @LoginMember Member member) {
 		return ApiResponse.onSuccess(toEditChannelTargetResDto((channelService.editChannelTarget(channelId, request, member))));
 	}

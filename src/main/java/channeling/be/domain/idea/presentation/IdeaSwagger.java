@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface IdeaSwagger{
 
     @Operation(summary = "아이디어 북마크 추가 혹은 제거", description = "아이디어를 북마크 혹은 북마크 제거를 합니다.")
-    @PatchMapping("/bookmarks/{idea-id}")
+    @PatchMapping("/{idea-id}/bookmarks")
     ApiResponse<IdeaResDto.ChangeIdeaBookmarkRes> changeIdeaBookmark(
             @Parameter(description = "북마크 변경 요청할 아이디어 아이디 (북마크한 아이디어 리스트 조회 시, 응답에 포함 되어 있습니다.)", example = "1")
             @PathVariable("idea-id") Long ideaId,

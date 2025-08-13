@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.*;
 public interface ReportSwagger {
 
     @Operation(summary = "리포트 분석 상태를 조회합니다.", description = "순서대로 개요, 분석, 아이디어.")
-    @GetMapping("/status/{task-id}")
+    @GetMapping("{report-id}/status")
     ApiResponse<ReportResDto.getReportAnalysisStatus> getReportAnalysisStatus(
-            @Parameter(description = "상태를 조회할 태스크 아이디 (리포트 분석 요청 시, 응답에 포함 되어 있습니다.)", example = "1")
-            @PathVariable("task-id") Long taskId,
+            @Parameter(description = "상태를 조회할 리포트 아이디 (리포트 분석 요청 시, 응답에 포함 되어 있습니다.)", example = "1")
+            @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true)
             @LoginMember Member member);
 

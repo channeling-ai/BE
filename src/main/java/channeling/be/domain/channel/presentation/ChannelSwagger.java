@@ -21,6 +21,7 @@ public interface ChannelSwagger {
 	@Operation(summary = "채널의 비디오 목록 조회", description = "채널의 영상 목록을 페이지네이션으로 조회합니다.")
 	@GetMapping("/{channel-id}/videos")
 	ApiResponse<ChannelResDTO.ChannelVideoList> getChannelVideos(
+			@Parameter(hidden = true)
 			@LoginMember Member member,
 			@Parameter(description = "요청 채널 아이디 (로그인 성공 시 바디에 포함 되어 있습니다.)", example = "1")
 			@PathVariable("channel-id") Long channelId,
@@ -46,7 +47,7 @@ public interface ChannelSwagger {
 
 
 	@Operation(summary = "채널의 컨셉 수정", description = "채널의 컨셉을 수정합니다.")
-        @PatchMapping("/{channel-id}/concept")
+        @PatchMapping("/{channel-id}/concepts")
         ApiResponse<ChannelResponseDto.EditChannelConceptResDto> editChannelConcept(
                 @Parameter(description = "요청 채널 아이디 (로그인 성공 시 바디에 포함 되어 있습니다.)", example = "1")
                 @PathVariable("channel-id") Long channelId,
@@ -56,7 +57,7 @@ public interface ChannelSwagger {
 
 
         @Operation(summary = "채널의 타겟 수정", description = "채널의 타겟을 수정합니다.")
-        @PatchMapping("/{channel-id}/target")
+        @PatchMapping("/{channel-id}/targets")
         ApiResponse<ChannelResponseDto.EditChannelTargetResDto> editChannelTarget(
                 @Parameter(description = "요청 채널 아이디 (로그인 성공 시 바디에 포함 되어 있습니다.)", example = "1")
                 @PathVariable("channel-id") Long channelId,
