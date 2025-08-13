@@ -18,9 +18,15 @@ public interface ReportService {
 		int page,
 		int size
 	);
-    ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long taskId);
+    ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long reportId);
 
 	Report getReportByIdAndMember(Long reportId, Member member);
 
 	ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType);
+
+    ReportResDto.createReport createReport(Member member, Long videoId);
+
+	Report checkReport(Long reportId, Member member);
+
+	ReportResDto.deleteReport deleteReport(Member member, Long reportId);
 }

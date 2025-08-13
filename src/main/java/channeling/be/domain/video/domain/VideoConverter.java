@@ -21,7 +21,7 @@ public class VideoConverter {
 			.link("https://www.youtube.com/watch?v="+briefDTO.getVideoId())
 			.uploadDate(OffsetDateTime.parse(briefDTO.getPublishedAt(), DateTimeFormatter.ISO_OFFSET_DATE_TIME
 			).toLocalDateTime())
-			.videoCategory("42".equals(detailDTO.getCategoryId()) ? VideoCategory.SHORT : VideoCategory.LONG)
+			.videoCategory(VideoCategory.ofId(detailDTO.getCategoryId()))
 			.build();
 	}
 	public static void toVideo(Video video,YoutubeVideoBriefDTO briefDTO, YoutubeVideoDetailDTO detailDTO) {
@@ -35,7 +35,7 @@ public class VideoConverter {
 		video.setLikeCount(detailDTO.getLikeCount());
 		video.setCommentCount(detailDTO.getCommentCount());
 		video.setVideoCategory(
-			"42".equals(detailDTO.getCategoryId()) ? VideoCategory.SHORT : VideoCategory.LONG
+				VideoCategory.ofId(detailDTO.getCategoryId())
 		);
 	}
 }

@@ -1,9 +1,8 @@
 package channeling.be.domain.video.application;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.channel.domain.repository.ChannelRepository;
+import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.VideoConverter;
@@ -11,15 +10,28 @@ import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
+import channeling.be.response.code.status.ErrorStatus;
+import channeling.be.response.exception.handler.ChannelHandler;
+import channeling.be.response.exception.handler.VideoHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
+import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,13 +40,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class VideoServiceImpl implements VideoService {
 
 	private final VideoRepository videoRepository;
+	private final ChannelRepository channelRepository;
 
 	@Override
-	public Slice<VideoResDTO.VideoBrief> getChannelVideoListByType(Long channelId, VideoCategory type ,int page, int size) {
-		// 업로드 날짜 기준으로 내림차순 정렬하여 비디오 목록을 조회합니다.
-		// TODO: 추후 커서기반 페이징 적용
-		Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.DESC, "uploadDate"));
-		return videoRepository.findByChannelIdAndVideoCategory(channelId,type ,pageable)
+	public Page<VideoResDTO.VideoBrief> getChannelVideoListByType(Long channelId, VideoCategory type ,int page, int size) {
+		Pageable pageable = PageRequest.of(page-1, size);
+		return videoRepository.findByChannelIdAndVideoCategoryOrderByUploadDateDesc(channelId,type ,pageable)
 			.map(VideoResDTO.VideoBrief::from);
 	}
 
@@ -64,4 +75,65 @@ public class VideoServiceImpl implements VideoService {
 			return videoRepository.save(VideoConverter.toVideo(briefDTO,detailDTO,channel));
 		}
 	}
-}
+
+	@Override
+	public Page<Video> getRecommendedVideos(Long channelId, Integer page, Integer size, Member loginMember) {
+		Channel channel = channelRepository.findById(channelId)
+				.orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+		if (!channel.getMember().getId().equals(loginMember.getId())) {
+			throw new ChannelHandler(_CHANNEL_NOT_MEMBER);
+		}
+
+		return videoRepository.findAllRecommendationByChannel(channel.getId(), PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "view")));
+	}
+
+
+	// http:// 또는 https://
+	// www 있을 수도, 없을 수도.
+	// youtube.com/watch?v=” 이거나 “youtu.be/” 라는 문자열
+	// 유튜브 아이디는 [...] 문자 집합 {11} 11글자
+	private static final Pattern YOUTUBE_URL_PATTERN = Pattern.compile(
+			"^(?:https?://)?(?:www\\.)?(?:youtube\\.com|youtu\\.be)/.*?([\\w-]{11})(?:[^\\w-]|$)",
+			Pattern.CASE_INSENSITIVE
+	);
+
+	// 유튜브 URL에서 videoId 추출
+	public static String extractYoutubeVideoId(String url) {
+		if (url == null || url.isBlank()) return null;
+		Matcher matcher = YOUTUBE_URL_PATTERN.matcher(url);
+		if (matcher.find()) {
+			return matcher.group(1);
+		}
+		return null;
+	}
+
+	// 유효한 유튜브 URL인지 확인 (videoId 추출 성공 여부로 판단)
+	public static boolean isValidYoutubeUrl(String url) {
+		return extractYoutubeVideoId(url) != null;
+	}
+
+
+	// 멤버와 URL이 일치하는 영상인지 체크하는 메서드
+	public Video checkVideoUrlWithMember(Member member, String url) {
+		// 1. URL 유효성 검사
+		if (!isValidYoutubeUrl(url)) {
+			throw new VideoHandler(ErrorStatus._LINK_NOT_VALID);
+		}
+
+		// 2. youtubeVideoId 추출 (정규화)
+		String youtubeVideoId = extractYoutubeVideoId(url);
+
+		// 3. DB에서 멤버 소유 영상 존재 여부 확인
+
+        return videoRepository.findByMemberAndYoutubeVideoId(member.getId(), youtubeVideoId)
+                .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
+
+		}
+	}
+
+
+
+
+
+

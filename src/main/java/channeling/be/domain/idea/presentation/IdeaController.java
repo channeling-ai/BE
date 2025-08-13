@@ -14,7 +14,7 @@ public class IdeaController implements IdeaSwagger{
     private final IdeaService ideaService;
 
     @Override
-    @PatchMapping("/bookmarks/{idea-id}")
+    @PatchMapping("/{idea-id}/bookmarks")
     public ApiResponse<IdeaResDto.ChangeIdeaBookmarkRes> changeIdeaBookmark(@PathVariable("idea-id") Long ideaId,
                                                                         @LoginMember Member loginMember) {
         return ApiResponse.onSuccess(ideaService.changeIdeaBookmark(ideaId, loginMember));

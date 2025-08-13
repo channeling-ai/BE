@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -30,6 +31,14 @@ import java.util.Collections;
 public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
+    private static final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+    private static final String[] JWT_WHITELIST = {
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/members/login/**"
+
+    };
 
     /**
      * 매 요청마다 실행되는 진입점.
@@ -37,13 +46,23 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        log.info("jwt 토큰 인증 시작");
+        if (isWhitelisted(request)) {
+            log.info("jwt 토큰 인증 제외 URL입니다.");
+            // 화이트리스트라면 JWT 인증 로직 수행하지 않고 다음 필터로 진행
+            filterChain.doFilter(request, response);
+            return;
+        }
         checkAccessTokenAndAuthentication(request, response, filterChain);
-
-
-
     }
-
+    private boolean isWhitelisted(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        for (String pattern : JWT_WHITELIST) {
+            if (pathMatcher.match(pattern, path)) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * ① 요청 헤더에서 토큰 추출
      * ② 토큰 유효성·블랙리스트 여부 검사

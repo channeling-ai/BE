@@ -26,7 +26,9 @@ import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -39,7 +41,7 @@ public class ChannelServiceImpl implements ChannelService {
 
 	@AllArgsConstructor
 	@Getter
-	private static class YoutubeChannelData {
+	private static class YoutubeChannelVideoData {
 		YoutubeChannelResDTO.Item item;
 		List<YoutubeVideoBriefDTO> briefs;
 		List<YoutubeVideoDetailDTO> details;
@@ -105,15 +107,34 @@ public class ChannelServiceImpl implements ChannelService {
         long shares=YoutubeUtil.getAllVideoShares(googleAccessToken, item.getSnippet().getPublishedAt(),LocalDateTime.now());
 		String playlistId = item.getContentDetails().getRelatedPlaylists().getUploads();
 
-		YoutubeChannelData data = fetchYoutubeVideoData(item, googleAccessToken, playlistId);
+		//유튜브 비디오 데이터 가져오기
+		YoutubeChannelVideoData data = fetchYoutubeVideoData(item, googleAccessToken, playlistId);
 
+		//유튜브 비디오 데이터(data.details)의 각 요소의 category id 의 count를 세서 가장 높은 카테고리 추출
+		String topCategoryId = getTopCategoryId(data);
+
+		//채널이 없으면 기본 1차 저장
 		Channel channelEntity = channel.orElseGet(() ->
-			channelRepository.save(ChannelConverter.toNewChannel(data.item, member,shares))
+			channelRepository.save(ChannelConverter.toNewChannel(data.item, member,shares,topCategoryId))
 		);
+
 		Stats stats=updateVideosAndAccumulateStats(data.briefs, data.details, channelEntity);
-		ChannelConverter.updateChannel(channelEntity, data.item, stats);
+		ChannelConverter.updateChannel(channelEntity, data.item, topCategoryId,stats);
 		return channelRepository.save(channelEntity);
 
+	}
+
+	private String getTopCategoryId(YoutubeChannelVideoData data) {
+		return data.details.stream()
+			.collect(Collectors.groupingBy(
+				YoutubeVideoDetailDTO::getCategoryId,
+				Collectors.counting()
+			))
+			.entrySet()
+			.stream()
+			.max(Map.Entry.comparingByValue())
+			.map(Map.Entry::getKey)
+			.orElse("0");
 	}
 
 	@Override
@@ -142,7 +163,7 @@ public class ChannelServiceImpl implements ChannelService {
 	}
 
 
-	private YoutubeChannelData fetchYoutubeVideoData(
+	private YoutubeChannelVideoData fetchYoutubeVideoData(
 		YoutubeChannelResDTO.Item item,
 		String accessToken,
 		String uploadPlaylistId
@@ -151,7 +172,7 @@ public class ChannelServiceImpl implements ChannelService {
 		List<YoutubeVideoDetailDTO> videoDetails = YoutubeUtil.getVideoDetailsByIds(
 			accessToken, videoBriefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList());
 
-		return new YoutubeChannelData(item, videoBriefs, videoDetails);
+		return new YoutubeChannelVideoData(item, videoBriefs, videoDetails);
 	}
 }
 

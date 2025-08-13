@@ -2,6 +2,7 @@ package channeling.be.global.infrastructure.jwt;
 
 import channeling.be.domain.member.domain.Member;
 import channeling.be.global.infrastructure.redis.RedisUtil;
+import channeling.be.response.exception.handler.JwtHandler;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.TokenExpiredException;
@@ -70,7 +71,10 @@ public class JwtUtilImpl implements JwtUtil {
     public Optional<String> extractAccessToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader(accessHeader)).filter(
                 accessToken -> accessToken.startsWith(BEARER)
-        ).map(accessToken -> accessToken.replace(BEARER, ""));
+        ).map(accessToken -> accessToken.replace(BEARER, ""))
+                .or(() -> {
+                    throw new JwtHandler("Access Token이 없거나 형식이 올바르지 않습니다.");
+                });
     }
 
 
@@ -101,11 +105,11 @@ public class JwtUtilImpl implements JwtUtil {
             JWT.require(Algorithm.HMAC512(secret)).build().verify(token);
             return true;
         } catch (TokenExpiredException ex) {
-            log.error("만료된 JWT 토큰입니다.");
-            return false;
+            throw new JwtHandler("만료된 JWT 토큰입니다.");
+
         } catch (Exception e) {
-            log.error("유효하지 않은 Token입니다 {}", e.getMessage());
-            return false;
+            throw new JwtHandler("유효하지 않은 Token입니다.");
+
         }
     }
 
@@ -113,5 +117,11 @@ public class JwtUtilImpl implements JwtUtil {
     public boolean isTokenInBlackList(String accessToken) {
         // Redis에서 블랙리스트로 저장된 토큰 확인
         String blacklistToken = redisUtil.getData( BLACKLIST_ACCESS_TOKEN_PREFIX + accessToken);
-        return blacklistToken != null;    }
+
+        if (blacklistToken != null) {
+            throw new JwtHandler("블랙리스트 처리 되었거나 로그아웃된 Token입니다.");
+        }
+
+        return false;
+    }
 }

@@ -2,8 +2,8 @@ package channeling.be.domain.channel.presentation.converter;
 
 import channeling.be.domain.channel.application.model.Stats;
 import channeling.be.domain.channel.domain.Channel;
-import channeling.be.domain.channel.domain.ChannelHashTag;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +26,7 @@ public class ChannelConverter {
                 .build();
     }
 
-    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item, Stats stats) {
+    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item,String topCategoryId ,Stats stats) {
         channel.updateChannelInfo(
             item.getSnippet().getTitle(),
             item.getId(),
@@ -38,12 +38,13 @@ public class ChannelConverter {
             item.getStatistics().getSubscriberCount(),
             item.getStatistics().getVideoCount(),
             stats.likeCount(),
-            stats.commentCount()
+            stats.commentCount(),
+            topCategoryId
         );
         channel.updateChannelStats(stats.likeCount(), stats.commentCount());
     }
 
-    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member,long shares) {
+    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member,long shares,String topCategoryId) {
         return Channel.builder()
             .name(item.getSnippet().getTitle())
             .youtubeChannelId(item.getId())
@@ -57,7 +58,7 @@ public class ChannelConverter {
             .member(member)
             .target("default")
             .likeCount(0L)
-            .channelHashTag(ChannelHashTag.CHANNEL_HASH_TAG)
+            .channelHashTag(VideoCategory.ofId(topCategoryId))
             .channelUpdateAt(LocalDateTime.now())
             .concept("default")
             .comment(0L)
