@@ -2,6 +2,7 @@ package channeling.be.domain.report.application;
 
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.presentation.ReportResDto;
 
@@ -27,7 +28,7 @@ public interface ReportService {
 
     ReportResDto.createReport createReport(Member member, Long videoId);
 
-	Report checkReport(Long reportId, Member member);
+	Report checkReport(Long reportId, PageType type, Member member);
 
 	ReportResDto.deleteReport deleteReport(Member member, Long reportId);
 }

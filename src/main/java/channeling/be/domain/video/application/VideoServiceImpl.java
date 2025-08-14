@@ -138,7 +138,19 @@ public class VideoServiceImpl implements VideoService {
                 .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
 
 		}
+
+	@Override
+	public Video checkVideoWithMember(Long videoId, Member member) {
+		Video video = videoRepository.findById(videoId)
+				.orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND));
+
+		if (!video.getChannel().getMember().getId().equals(member.getId())) {
+			throw new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER);
+		}
+
+		return video;
 	}
+}
 
 
 
