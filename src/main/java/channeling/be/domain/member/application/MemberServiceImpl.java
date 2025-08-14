@@ -4,12 +4,16 @@ import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.repository.MemberRepository;
 import channeling.be.domain.member.presentation.MemberConverter;
 import channeling.be.domain.member.presentation.MemberResDTO;
+import channeling.be.domain.memberAgree.domain.MemberAgree;
+import channeling.be.domain.memberAgree.domain.repository.MemberAgreeRepository;
 import channeling.be.global.infrastructure.aws.S3Service;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.MemberHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static channeling.be.domain.auth.application.MemberOauth2UserService.*;
 import static channeling.be.domain.member.presentation.MemberReqDTO.*;
@@ -20,7 +24,7 @@ import static channeling.be.domain.member.presentation.MemberReqDTO.*;
 public class MemberServiceImpl implements MemberService {
 	private final MemberRepository memberRepository;
 	private final S3Service s3Service;
-
+	private final MemberAgreeRepository memberAgreeRepository;
 	@Transactional
 	@Override
 	public MemberResDTO.updateSnsRes updateSns(Member loginMember,updateSnsReq updateSnsReq) {
@@ -77,7 +81,13 @@ public class MemberServiceImpl implements MemberService {
 	public MemberResDTO.getMemberInfo getMemberInfo(Member loginMember) {
 		Member member = memberRepository.findById(loginMember.getId())
 				.orElseThrow(() -> new MemberHandler(ErrorStatus._MEMBER_NOT_FOUND));
-		return MemberConverter.toGetMemberInfo(member);
+		Optional<MemberAgree> byMemberId = memberAgreeRepository.findByMemberId(loginMember.getId());
+		if (byMemberId.isPresent()) {
+			MemberAgree memberAgree = byMemberId.get();
+			return MemberConverter.toGetMemberInfo(member, memberAgree.getMarketingEmailAgree(), memberAgree.getDayContentEmailAgree());
+		} else {
+			return MemberConverter.toGetMemberInfo(member, false,false);
+		}
 	}
 
 }
