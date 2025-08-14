@@ -43,7 +43,10 @@ public class MemberResDTO {
 			String instagramLink,
 			String tiktokLink,
 			String facebookLink,
-			String twitterLink
+			String twitterLink,
+			Boolean marketingEmailAgree,
+			Boolean dayContentEmailAgree
+
 	) {
 	}
 }

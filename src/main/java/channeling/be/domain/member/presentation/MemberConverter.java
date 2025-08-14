@@ -27,7 +27,7 @@ public class MemberConverter {
 				.build();
 	}
 
-	public static MemberResDTO.getMemberInfo toGetMemberInfo(Member member) {
+	public static MemberResDTO.getMemberInfo toGetMemberInfo(Member member, Boolean marketingEmailAgree, Boolean dayContentEmailAgree) {
 		return MemberResDTO.getMemberInfo.builder()
 				.memberId(member.getId())
 				.nickname(member.getNickname())
@@ -37,6 +37,8 @@ public class MemberConverter {
 				.tiktokLink(member.getTiktokLink())
 				.facebookLink(member.getFacebookLink())
 				.twitterLink(member.getTwitterLink())
+				.marketingEmailAgree(marketingEmailAgree)
+				.dayContentEmailAgree(dayContentEmailAgree)
 				.build();
 
 	}
