@@ -190,7 +190,7 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findByTaskId(taskId)
                 .orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
 
-        return new ReportResDto.createReport(report.getId());
+        return new ReportResDto.createReport(report.getId(), video.getId());
     }
 
     private Long sendPostToFastAPI(Long videoId, String googleAccessToken) {
