@@ -69,7 +69,7 @@
 3. 본문은 어떻게 보다는 무엇과 왜를 설명한다.
 4. 마침표와 특수기호는 사용하지 않는다
 
-### `commit type: 현재 형으로 무엇을 했는지 적되, 개조식 구문으로 적기`
+### commit type: 현재 형으로 무엇을 했는지 적되, 개조식 구문으로 적기
 
 **Examples**
 
@@ -89,7 +89,7 @@
 1. 브랜치 이름은 영어로 짓는다.
 2. 슬래시(`/`)로 카테고리화 시키고, 뒤에 붙는 기능 및 내용을 대표하는 문구는 대시(`-`)로 연결한다.
 
-### `branch type: 대표 내용을 간단한 단어의 조합으로 표기`
+### branch type: 대표 내용을 간단한 단어의 조합으로 표기
 
 **Examples**
 
@@ -118,3 +118,11 @@
 * main에 배포된 것을 복구하고 싶을 때 → revert를 통해 재배포
 - **develop ← feature** :  Squash Commit을 남기는 방법으로 작업하기. develop에는 구체적인 모든 사항을 깔끔하게 정리해서 올리는 것이 맞다고 생각되기 때문!
 - conflict가 발생했다면, **git rebase**를 사용하기
+
+
+
+### 서버 아키텍처 구조
+
+
+---
+<img width="1251" height="612" alt="image" src="https://github.com/user-attachments/assets/0ce377e2-8190-43fc-b480-271e28c0f4f9" />
