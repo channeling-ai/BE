@@ -46,8 +46,8 @@ public class ChannelConverter {
 	}
     public static ChannelResDTO.PageDto toVideoList(Page<Video> videoPage){
 
-        List<VideoResDTO.VideoBrief> videoBriefs = videoPage.stream()
-                .map(VideoResDTO.VideoBrief::from).collect(Collectors.toList());
+        List<VideoResDTO.VideoRecommend> videoBriefs = videoPage.stream()
+                .map(VideoResDTO.VideoRecommend::from).collect(Collectors.toList());
 
         return ChannelResDTO.PageDto.builder()
                 .isLast(videoPage.isLast())
