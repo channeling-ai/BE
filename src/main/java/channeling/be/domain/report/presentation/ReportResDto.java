@@ -30,7 +30,8 @@ public class ReportResDto {
     }
 
     public record createReport(
-            Long reportId
+            Long reportId,
+            Long videoId
     ) {
     }
     public record deleteReport(
