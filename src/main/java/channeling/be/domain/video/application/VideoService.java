@@ -5,6 +5,7 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.presentaion.VideoResDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
@@ -26,7 +27,7 @@ public interface VideoService {
 	 */
 	Page<VideoResDTO.VideoBrief> getChannelVideoListByType(
 		Long channelId,
-		VideoCategory type,
+		VideoType type,
 		int page,
 		int size
 	);
@@ -60,4 +61,6 @@ public interface VideoService {
 	Page<Video> getRecommendedVideos(Long channelId, Integer page, Integer size, Member loginMember);
 
     Video checkVideoUrlWithMember(Member member, @NotNull(message = "null이서는 안됩니다.") String url);
+
+	Video checkVideoWithMember(@NotNull(message = "null이서는 안됩니다.") Long videoId, Member member);
 }

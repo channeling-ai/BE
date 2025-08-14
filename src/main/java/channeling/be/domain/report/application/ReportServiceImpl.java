@@ -5,6 +5,7 @@ import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
 import channeling.be.domain.report.presentation.ReportConverter;
@@ -15,6 +16,7 @@ import channeling.be.domain.task.domain.TaskStatus;
 import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
@@ -92,25 +94,32 @@ public class ReportServiceImpl implements ReportService {
 	}
 
     @Override
-    public Report checkReport(Long reportId, Member member) {
+    public Report checkReport(Long reportId, PageType type, Member member) {
         // TODO 태스크 삭제하지 않는다고 가정
         Task task = taskRepository.findByReportId(reportId)
-                .orElseThrow(() -> new TaskHandler(ErrorStatus._REPORT_NOT_TASK));
+                .orElseThrow(() -> new TaskHandler(ErrorStatus._REPORT_NOT_FOUND));
 
-        if (task.getAnalysisStatus() != TaskStatus.COMPLETED)
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_ANALYTICS);
-
-        if (task.getOverviewStatus() != TaskStatus.COMPLETED)
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_OVERVIEW);
-
-        if (task.getIdeaStatus() != TaskStatus.COMPLETED)
-            throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
+        switch (type) {
+            case OVERVIEW:
+                if (task.getOverviewStatus() != TaskStatus.COMPLETED)
+                    throw new TaskHandler(ErrorStatus._REPORT_NOT_OVERVIEW);
+                break;
+            case ANALYSIS:
+                if (task.getAnalysisStatus() != TaskStatus.COMPLETED)
+                    throw new TaskHandler(ErrorStatus._REPORT_NOT_ANALYTICS);
+                break;
+            case IDEA:
+                if (task.getIdeaStatus() != TaskStatus.COMPLETED)
+                    throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid PageType: " + type);
+        }
 
         Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
 
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
-
 	@Override
 	@Transactional
 	public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
@@ -137,10 +146,14 @@ public class ReportServiceImpl implements ReportService {
 
 	@Override
     @Transactional(readOnly = true)
-    public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoCategory type, int page,
+	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoType type, int page,
 		int size) {
 		Pageable pageable= PageRequest.of(page-1,size);
-		Page<Report> reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,type,pageable);
+		Page<Report> reports;
+		if(VideoType.SHORTS.equals(type))
+			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
+		else
+			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryNotOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
 
 		return reports.map(ReportResDTO.ReportBrief::from);
 

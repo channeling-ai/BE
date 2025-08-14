@@ -2,6 +2,7 @@ package channeling.be.domain.report.application;
 
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.presentation.ReportResDto;
 
@@ -9,12 +10,13 @@ import org.springframework.data.domain.Page;;
 
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.domain.VideoCategory;
+import channeling.be.domain.video.domain.VideoType;
 
 public interface ReportService {
 
 	Page<ReportResDTO.ReportBrief> getChannelReportListByType(
 		Long channelId,
-		VideoCategory type,
+		VideoType type,
 		int page,
 		int size
 	);
@@ -26,7 +28,7 @@ public interface ReportService {
 
     ReportResDto.createReport createReport(Member member, Long videoId);
 
-	Report checkReport(Long reportId, Member member);
+	Report checkReport(Long reportId, PageType type, Member member);
 
 	ReportResDto.deleteReport deleteReport(Member member, Long reportId);
 }

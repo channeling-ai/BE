@@ -5,11 +5,13 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import static channeling.be.domain.channel.presentation.dto.response.ChannelResponseDto.*;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 public class ChannelConverter {
     public static EditChannelConceptResDto toEditChannelConceptResDto(Channel channel) {
         return EditChannelConceptResDto.builder()
@@ -24,7 +26,7 @@ public class ChannelConverter {
                 .build();
     }
 
-    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item,String topCategoryId ,Stats stats) {
+    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item,String topCategoryId ,Stats stats,long shares) {
         channel.updateChannelInfo(
             item.getSnippet().getTitle(),
             item.getId(),
@@ -37,11 +39,13 @@ public class ChannelConverter {
             item.getStatistics().getVideoCount(),
             stats.likeCount(),
             stats.commentCount(),
-            topCategoryId
+            topCategoryId,
+            shares
         );
+        channel.updateChannelStats(stats.likeCount(), stats.commentCount());
     }
 
-    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member,String topCategoryId) {
+    public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member,long shares,String topCategoryId) {
         return Channel.builder()
             .name(item.getSnippet().getTitle())
             .youtubeChannelId(item.getId())
@@ -59,7 +63,7 @@ public class ChannelConverter {
             .channelUpdateAt(LocalDateTime.now())
             .concept("default")
             .comment(0L)
-            .share(0L)
+            .share(shares)
             .build();
     }
 

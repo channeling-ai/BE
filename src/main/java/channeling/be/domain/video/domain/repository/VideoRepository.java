@@ -20,6 +20,8 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
 	Page<Video> findByChannelIdAndVideoCategoryOrderByUploadDateDesc(Long channelId, VideoCategory type, Pageable pageable);
 
+	Page<Video> findByChannelIdAndVideoCategoryNotOrderByUploadDateDesc(Long channelId, VideoCategory type, Pageable pageable);
+
 	Slice<Video> findByChannelIdAndVideoCategoryAndUploadDateLessThanOrderByUploadDateDesc(Long channelId, VideoCategory type, LocalDateTime cursor, Pageable pageable);
 
 	Optional<Video> findByYoutubeVideoId(String youtubeVideoId);
