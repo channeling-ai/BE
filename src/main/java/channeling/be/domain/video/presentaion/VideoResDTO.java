@@ -31,6 +31,30 @@ public class VideoResDTO {
 		}
 	}
 
+	public record VideoRecommend (
+			Long videoId,
+			String videoTitle,
+			String  videoThumbnailUrl,
+			VideoCategory videoCategory,
+			Long viewCount,
+			LocalDateTime uploadDate,
+			String channelName,
+			String channelImage
+	) {
+		public static VideoRecommend from(Video video) {
+			return new VideoRecommend(
+					video.getId(),
+					video.getTitle(),
+					video.getThumbnail(),
+					video.getVideoCategory(),
+					video.getView(),
+					video.getUploadDate(),
+					video.getChannel().getName(),
+					video.getChannel().getImage()
+			);
+		}
+	}
+
 	public record ReportVideoInfo (
 		@Schema(description = "비디오 ID")
 		Long videoId,
