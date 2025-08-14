@@ -41,7 +41,7 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 			"WHERE v.channel.id = :channelId " +
 			"AND r.id is null " +
 			"ORDER BY v.view DESC ")
-	Page<Video> findAllRecommendationByChannel(Long channelId, Pageable pageable);
+	Page<Video> findAllRecommendationByChannel(@Param("channelId") Long channelId, Pageable pageable);
 
 
 	@Query("""
