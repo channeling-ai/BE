@@ -1,20 +1,15 @@
 package channeling.be.domain.auth.handler;
 
 import channeling.be.domain.auth.application.MemberOauth2UserService;
-import channeling.be.domain.auth.application.MemberOauth2UserService.*;
-import channeling.be.domain.channel.application.ChannelService;
-import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.auth.application.MemberOauth2UserService.LoginResult;
 import channeling.be.domain.member.application.MemberService;
-import channeling.be.domain.member.domain.Member;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
-import channeling.be.global.infrastructure.redis.RedisUtil;
-import channeling.be.response.exception.handler.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -24,7 +19,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 
@@ -38,6 +32,10 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;    // JWT 토큰 생성기
     private final MemberService memberService;
     private final MemberOauth2UserService memberOauth2UserService;
+
+    // 프론트 콜백
+    @Value("${FRONT_URL:http://localhost:5173}")
+    private String frontUrl;
 
     // 로그인 성공 시 처리하는 메서드
     @Override
@@ -77,7 +75,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String accessToken = jwtUtil.createAccessToken(result.member());
 
         // 프론트 응답 생성
-        String targetUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/auth/callback")// TODO  https://channeling.vercel.app/
+        String targetUrl = UriComponentsBuilder.fromUriString(frontUrl + "/auth/callback") // TODO
                 .queryParam("token", accessToken)
                 .queryParam("message", "Success")
                 .queryParam("channelId", result.channel().getId())
