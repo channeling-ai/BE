@@ -89,6 +89,9 @@ jobs:
           # Others
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
+
+          # Frontend URL
+          FRONT_URL: ${{ secrets.FRONT_URL }}
         run: |
           docker-compose up -d --no-deps spring-app
           
