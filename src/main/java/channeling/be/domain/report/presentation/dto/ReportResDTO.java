@@ -10,6 +10,7 @@ public class ReportResDTO {
 	public record ReportBrief(
 		Long reportId,
 		String channelName,
+		Long videoId,
 		String videoTitle,
 		String videoThumbnailUrl,
 		VideoCategory videoCategory,
@@ -21,6 +22,7 @@ public class ReportResDTO {
 			return new ReportBrief(
 				report.getId(),
 				channel.getName(),
+				report.getVideo().getId(),
 				report.getVideo().getTitle(),
 				report.getVideo().getThumbnail(),
 				report.getVideo().getVideoCategory(),
