@@ -7,6 +7,7 @@ import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.task.domain.Task;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -73,6 +74,7 @@ public class ReportConverter {
                         .collect(Collectors.toList()),
                 report.getTrends().stream()
                         .map(ReportConverter::toResTrendKeywordInfo)
+                        .sorted(Comparator.comparing(ReportResDto.TrendKeywordInfo::score).reversed())
                         .collect(Collectors.toList())
         );
     }
