@@ -19,6 +19,11 @@ import org.springframework.security.web.access.ExceptionTranslationFilter;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @RequiredArgsConstructor
 @EnableWebSecurity
@@ -38,7 +43,7 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // OAuth2 로그인 설정
                 .oauth2Login(oauth -> oauth
@@ -53,7 +58,7 @@ public class SecurityConfig {
                 //미인증 상태로, whiteList 에 접근했을 경우
                 .addFilterAfter(jwtAuthenticationProcessingFilter(), ExceptionTranslationFilter.class)
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
-                // TODO 엔드포인트 추가 (개발 후)
+//                // TODO 엔드포인트 추가 (개발 후)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/test").authenticated()
                         .anyRequest().permitAll()
@@ -74,5 +79,19 @@ public class SecurityConfig {
     @Bean
     public JwtAuthenticationProcessingFilter jwtAuthenticationProcessingFilter() {
         return new JwtAuthenticationProcessingFilter(jwtUtil, customUserDetailsService);
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("https://channeling.it.com", "http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
