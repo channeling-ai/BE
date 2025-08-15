@@ -1,6 +1,8 @@
 package channeling.be.domain.report.application;
 
 import channeling.be.domain.TrendKeyword.domain.repository.TrendKeywordRepository;
+import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
@@ -20,6 +22,7 @@ import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.domain.repository.VideoRepository;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
+import channeling.be.response.exception.handler.ChannelHandler;
 import channeling.be.response.exception.handler.ReportHandler;
 import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.response.exception.handler.VideoHandler;
@@ -58,8 +61,9 @@ public class ReportServiceImpl implements ReportService {
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
     private final ReportDeleteService reportDeleteService;
+    private final ChannelRepository channelRepository;
 
-	//환경변수에서 FASTAPI_URL 환경변수 불러오기
+    //환경변수에서 FASTAPI_URL 환경변수 불러오기
 	@Value("${FASTAPI_URL:http://localhost:8000}")
 	private String baseFastApiUrl;
 
@@ -157,7 +161,9 @@ public class ReportServiceImpl implements ReportService {
 		else
 			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryNotOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
 
-		return reports.map(ReportResDTO.ReportBrief::from);
+        Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelHandler(ErrorStatus._CHANNEL_NOT_FOUND));
+
+        return reports.map(report -> ReportResDTO.ReportBrief.from(report, channel));
 
 	}
 
