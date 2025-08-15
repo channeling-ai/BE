@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
-@Tag(name = "더미레포트 관련 API", description = "더미레포트 관련 API입니다.")
+@Tag(name = "더미레포트 관련 API", description = "더미레포트 관련 API입니다. id에 1 혹은 2 를 넣어주세요")
 public interface DummySwagger {
 
 
