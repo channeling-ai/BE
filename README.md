@@ -45,6 +45,9 @@
 -->
 <img width="845" height="627" alt="image" src="https://github.com/user-attachments/assets/e3c4701f-eec1-4caa-9aa9-5ba6e59a2a49" />
 
+## 서버 아키텍처 구조
+<img width="1251" height="612" alt="image" src="https://github.com/user-attachments/assets/0ce377e2-8190-43fc-b480-271e28c0f4f9" />
+
 
 ## 브렌치 전략
 ### Commit 타입
@@ -122,8 +125,4 @@
 
 
 
-### 서버 아키텍처 구조
 
-
----
-<img width="1251" height="612" alt="image" src="https://github.com/user-attachments/assets/0ce377e2-8190-43fc-b480-271e28c0f4f9" />
