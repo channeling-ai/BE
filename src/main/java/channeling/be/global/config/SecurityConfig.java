@@ -57,7 +57,7 @@ public class SecurityConfig {
                 // TODO 커스텀 필터 등록 (자체 JWT 인가 필터, 예외처리 필터 등)
                 //미인증 상태로, whiteList 에 접근했을 경우
                 .addFilterAfter(jwtAuthenticationProcessingFilter(), ExceptionTranslationFilter.class)
-//                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint()))
 //                // TODO 엔드포인트 추가 (개발 후)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/test").authenticated()
