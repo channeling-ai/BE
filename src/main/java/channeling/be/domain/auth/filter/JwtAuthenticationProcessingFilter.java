@@ -36,8 +36,9 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
     private static final String[] JWT_WHITELIST = {
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/members/login/**"
-
+            "/members/login/**",
+            "/dummys/**",
+            "/actuator/health"
     };
 
     /**
