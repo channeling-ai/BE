@@ -18,8 +18,12 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
@@ -38,6 +42,7 @@ public class ChannelServiceImpl implements ChannelService {
 	private final ChannelRepository channelRepository;
 	private final VideoService videoService;
 	private final RedisUtil redisUtil;
+	private final RestTemplate restTemplate;
 
 	@AllArgsConstructor
 	@Getter
@@ -172,7 +177,48 @@ public class ChannelServiceImpl implements ChannelService {
 		List<YoutubeVideoDetailDTO> videoDetails = YoutubeUtil.getVideoDetailsByIds(
 			accessToken, videoBriefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList());
 
+		// Shorts 판별 후 categoryId 수정
+		for (int i = 0; i < videoDetails.size(); i++) {
+			String videoId = videoBriefs.get(i).getVideoId();
+
+			if (isYoutubeShorts(videoId)) {
+				videoDetails.get(i).updateCategoryId("42");
+			}
+		}
+
+
+
 		return new YoutubeChannelVideoData(item, videoBriefs, videoDetails);
+	}
+
+	public boolean isYoutubeShorts(String videoId) {
+		String shortsUrl = "https://www.youtube.com/shorts/" + videoId;
+
+		try {
+			ResponseEntity<String> response = restTemplate.exchange(
+				shortsUrl,
+				HttpMethod.HEAD,
+				null,
+				String.class
+			);
+
+			// 2xx 응답이고 리다이렉트가 없으면 Shorts
+			if (response.getStatusCode().is2xxSuccessful()) {
+				return true;
+			}
+
+			// 3xx 리다이렉트면 Location 확인
+			if (response.getStatusCode().is3xxRedirection()) {
+				String location = response.getHeaders().getFirst("Location");
+				return location == null || !location.contains("/watch?v=");
+			}
+
+			return false; // 4xx, 5xx 에러
+
+		} catch (HttpClientErrorException e) {
+			//만약 404 에러일 경우 shorts 가 아니라고 판단
+			return false;
+		}
 	}
 }
 
