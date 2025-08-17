@@ -9,8 +9,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public class YoutubeVideoDetailDTO {
 	private final String description;
-	private final String categoryId;
+	private String categoryId;
 	private final Long viewCount;
 	private final Long likeCount;
 	private final Long commentCount;
+
+	public void updateCategoryId(String categoryId){
+		this.categoryId=categoryId;
+	}
 }
