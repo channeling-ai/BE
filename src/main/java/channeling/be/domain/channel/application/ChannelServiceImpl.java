@@ -29,9 +29,11 @@ import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -177,16 +179,25 @@ public class ChannelServiceImpl implements ChannelService {
 		List<YoutubeVideoDetailDTO> videoDetails = YoutubeUtil.getVideoDetailsByIds(
 			accessToken, videoBriefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList());
 
+		// 비동기 작업을 담을 List 생성
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
+
 		// Shorts 판별 후 categoryId 수정
 		for (int i = 0; i < videoDetails.size(); i++) {
+			final int index = i;
 			String videoId = videoBriefs.get(i).getVideoId();
 
-			if (isYoutubeShorts(videoId)) {
-				videoDetails.get(i).updateCategoryId("42");
-			}
+			// 각 비디오 확인 작업을 CompletableFuture로 감싸 비동기 실행
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+				if (isYoutubeShorts(videoId)) {
+					// TODO: 스레드 안정성 확보 필요
+					videoDetails.get(index).updateCategoryId("42");
+				}
+			});
+			futures.add(future);
 		}
-
-
+		// 모든 비동기 작업이 완료될 때까지 대기
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 
 		return new YoutubeChannelVideoData(item, videoBriefs, videoDetails);
 	}
