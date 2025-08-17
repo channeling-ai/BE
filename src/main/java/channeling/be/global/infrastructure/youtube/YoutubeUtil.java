@@ -189,7 +189,7 @@ public class YoutubeUtil {
                 for (YoutubePlayListResDTO.Item item : youtubeResponse.getItems()) {
                     String videoId = item.getSnippet().getResourceId().getVideoId();
                     String title = item.getSnippet().getTitle();
-                    String thumbnailUrl = item.getSnippet().getThumbnails().getDefaultThumbnail().getUrl();
+                    String thumbnailUrl = item.getSnippet().getThumbnails().getHigh().getUrl();
                     String publishedAt = item.getSnippet().getPublishedAt();
                     videoList.add(new YoutubeVideoBriefDTO(videoId, thumbnailUrl, title, publishedAt));
                 }

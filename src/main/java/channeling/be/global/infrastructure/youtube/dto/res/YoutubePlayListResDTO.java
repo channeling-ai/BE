@@ -42,6 +42,8 @@ public class YoutubePlayListResDTO {
 	public static class Thumbnails {
 		@JsonProperty("default")
 		private Thumbnail defaultThumbnail;
+		private Thumbnail medium;
+		private Thumbnail high;
 	}
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
