@@ -159,7 +159,19 @@ public class ChannelServiceImpl implements ChannelService {
 	private Stats updateVideosAndAccumulateStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
 		long likeCount = 0, commentCount = 0;
 
-		for (int i = 0; i < briefs.size(); i++) {
+//		for (int i = 0; i < briefs.size(); i++) {
+//			YoutubeVideoBriefDTO brief = briefs.get(i);
+//			YoutubeVideoDetailDTO detail = details.get(i);
+//			likeCount += detail.getLikeCount();
+//			commentCount += detail.getCommentCount();
+//			videoService.updateVideo(brief, detail, channel);
+//		}
+//		return new Stats(likeCount, commentCount);
+
+		//두 리스트 길이 중 작은 값까지만 반복하기.
+		int size = Math.min(briefs.size(), details.size());
+
+		for (int i = 0; i < size; i++) {
 			YoutubeVideoBriefDTO brief = briefs.get(i);
 			YoutubeVideoDetailDTO detail = details.get(i);
 			likeCount += detail.getLikeCount();
