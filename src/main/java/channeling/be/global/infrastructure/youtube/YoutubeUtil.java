@@ -189,7 +189,22 @@ public class YoutubeUtil {
                 for (YoutubePlayListResDTO.Item item : youtubeResponse.getItems()) {
                     String videoId = item.getSnippet().getResourceId().getVideoId();
                     String title = item.getSnippet().getTitle();
-                    String thumbnailUrl = item.getSnippet().getThumbnails().getHigh().getUrl();
+
+//                    String thumbnailUrl = item.getSnippet().getThumbnails().getHigh().getUrl();
+                    YoutubePlayListResDTO.Thumbnails thumbnails = item.getSnippet().getThumbnails();
+                    String thumbnailUrl = null;
+
+                    if (thumbnails != null) {
+                        if (thumbnails.getHigh() != null) {
+                            thumbnailUrl = thumbnails.getHigh().getUrl();
+                        } else if (thumbnails.getMedium() != null) {
+                            thumbnailUrl = thumbnails.getMedium().getUrl();
+                        } else if (thumbnails.getDefaultThumbnail() != null) {
+                            thumbnailUrl = thumbnails.getDefaultThumbnail().getUrl();
+                        }
+                    }
+
+
                     String publishedAt = item.getSnippet().getPublishedAt();
                     videoList.add(new YoutubeVideoBriefDTO(videoId, thumbnailUrl, title, publishedAt));
                 }
@@ -197,6 +212,8 @@ public class YoutubeUtil {
 
             } while (pageToken != null);
         } catch (Exception e) {
+            log.error("유튜브 플레이리스트 조회 중 에러 발생", e);
+
             throw new YoutubeHandler(ErrorStatus._YOUTUBE_PLAYLIST_PULLING_ERROR);
         }
         return videoList;
