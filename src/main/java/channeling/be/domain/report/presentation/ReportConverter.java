@@ -95,7 +95,7 @@ public class ReportConverter {
                 trendKeyword.getKeywordType(),
                 trendKeyword.getKeyword(),
                 trendKeyword.getScore(),
-                trendKeyword.getCreatedAt().plusHours(9L) // 한국 시간으로 변환
+                trendKeyword.getCreatedAt()
         );
     }
 }
