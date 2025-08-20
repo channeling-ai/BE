@@ -46,21 +46,21 @@ public class ReportResDto {
         @Schema(description = "개요-영상평가-조회수")
         Long view,
         @Schema(description = "개요-영상평가-조회수-동일주제평균")
-        Long viewTopicAvg,
+        Double viewTopicAvg,
         @Schema(description = "개요-영상평가-조회수-채널평균")
-        Long viewChannelAvg,
+        Double viewChannelAvg,
         @Schema(description = "개요-영상평가-좋아요수")
         Long likeCount,
         @Schema(description = "개요-영상평가-좋아요수-동일주제평균")
-        Long likeTopicAvg,
+        Double likeTopicAvg,
         @Schema(description = "개요-영상평가-좋아요수-채널평균")
-        Long likeChannelAvg,
+        Double likeChannelAvg,
         @Schema(description = "개요-영상평가-댓글수")
         Long comment,
         @Schema(description = "개요-영상평가-댓글수-동일주제평균")
-        Long commentTopicAvg,
+        Double commentTopicAvg,
         @Schema(description = "개요-영상평가-댓글수-채널평균")
-        Long commentChannelAvg,
+        Double commentChannelAvg,
         @Schema(description = "개요-영상평가-컨셉일관성")
         Integer concept,
         @Schema(description = "개요-영상평가-seo구성")
