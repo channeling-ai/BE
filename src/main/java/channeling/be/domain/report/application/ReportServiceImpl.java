@@ -207,7 +207,7 @@ public class ReportServiceImpl implements ReportService {
         RestTemplate restTemplate = new RestTemplate();
         // url 설정
 		String url = UriComponentsBuilder
-                .fromHttpUrl(baseFastApiUrl+"/reports")
+                .fromHttpUrl(baseFastApiUrl+"/reports/v2")
                 .queryParam("video_id", videoId)
                 .toUriString();
 
