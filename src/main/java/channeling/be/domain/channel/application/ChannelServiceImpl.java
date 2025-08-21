@@ -7,6 +7,7 @@ import channeling.be.domain.channel.presentation.converter.ChannelConverter;
 import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.application.VideoService;
+import channeling.be.domain.video.domain.Video;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
 import channeling.be.global.infrastructure.youtube.YoutubeUtil;
@@ -33,8 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -168,16 +171,27 @@ public class ChannelServiceImpl implements ChannelService {
 //		}
 //		return new Stats(likeCount, commentCount);
 
-		//두 리스트 길이 중 작은 값까지만 반복하기.
-		int size = Math.min(briefs.size(), details.size());
+		List<Video> dbVideos = videoService.findVideosByChannel(channel);
+		Set<String> briefsVideoIds = briefs.stream()
+			.map(YoutubeVideoBriefDTO::getVideoId)
+			.collect(Collectors.toSet());
 
-		for (int i = 0; i < size; i++) {
-			YoutubeVideoBriefDTO brief = briefs.get(i);
-			YoutubeVideoDetailDTO detail = details.get(i);
-			likeCount += detail.getLikeCount();
-			commentCount += detail.getCommentCount();
-			videoService.updateVideo(brief, detail, channel);
+		for (Video dbVideo : dbVideos) {
+			if (briefsVideoIds.contains(dbVideo.getYoutubeVideoId())) {
+				// briefs에서 해당 videoId의 brief와 detail을 찾아 update
+				int idx = IntStream.range(0, briefs.size())
+					.filter(i -> briefs.get(i).getVideoId().equals(dbVideo.getYoutubeVideoId()))
+					.findFirst().orElse(-1);
+				if (idx != -1) {
+					videoService.updateVideo(briefs.get(idx), details.get(idx), channel);
+					likeCount += details.get(idx).getLikeCount();
+					commentCount += details.get(idx).getCommentCount();
+				}
+			} else {
+				videoService.deleteVideo(dbVideo);
+			}
 		}
+
 		return new Stats(likeCount, commentCount);
 	}
 
