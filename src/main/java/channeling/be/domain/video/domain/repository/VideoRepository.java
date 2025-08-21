@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -55,4 +56,5 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 """)
 	Optional<Video> findByMemberAndYoutubeVideoId(@Param("memberId") Long memberId, @Param("youtubeVideoId") String youtubeVideoId);
 
+	List<Video> findByChannelId(Long channelId);
 }
