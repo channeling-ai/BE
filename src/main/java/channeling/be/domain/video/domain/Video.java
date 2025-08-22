@@ -3,11 +3,13 @@ package channeling.be.domain.video.domain;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
 import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.report.domain.Report;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -56,7 +58,11 @@ public class Video extends BaseEntity {
     @Column
     private String description; // 영상 설명
 
-    @OneToMany(mappedBy = "video", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "video",cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @BatchSize(size = 5)
     private List<Idea> ideas;
+
+	@OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@BatchSize(size = 10)
+	private List<Report> reports = new ArrayList<>();
 }
