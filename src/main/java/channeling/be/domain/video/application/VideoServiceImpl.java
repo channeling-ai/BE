@@ -2,7 +2,12 @@ package channeling.be.domain.video.application;
 
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
+import channeling.be.domain.member.application.MemberService;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.repository.MemberRepository;
+import channeling.be.domain.report.application.ReportService;
+import channeling.be.domain.report.domain.Report;
+import channeling.be.domain.report.domain.repository.ReportRepository;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.VideoConverter;
@@ -43,6 +48,10 @@ public class VideoServiceImpl implements VideoService {
 
 	private final VideoRepository videoRepository;
 	private final ChannelRepository channelRepository;
+	private final ReportService reportService;
+	private final MemberService memberService;
+	private final MemberRepository memberRepository;
+	private final ReportRepository reportRepository;
 
 	@Override
 	public Page<VideoResDTO.VideoBrief> getChannelVideoListByType(Long channelId, VideoType type ,int page, int size) {
@@ -160,7 +169,25 @@ public class VideoServiceImpl implements VideoService {
 	@Override
 	@Transactional
 	public void deleteVideo(Video dbVideo) {
+		System.out.println("[Video Delete] 시작: videoId=" + dbVideo.getId() + ", title=" + dbVideo.getTitle());
+
+		// Video에 연결된 Channel을 통해 Member 조회
+		Channel channel = dbVideo.getChannel();
+		if (channel != null && channel.getMember() != null) {
+			Member member = channel.getMember();
+
+			// 해당 Member의 모든 보고서 조회
+			Report report = reportRepository.findByVideoAndMember(dbVideo.getId(),member.getId()).orElse(null);
+			if (report != null) {
+				reportService.deleteReport(member, report.getId());
+			}
+		} else {
+			System.out.println("[Member] 연결된 멤버 없음");
+		}
+
+		// Video 삭제
 		videoRepository.delete(dbVideo);
+		System.out.println("[Video Delete] 완료: videoId=" + dbVideo.getId());
 	}
 }
 

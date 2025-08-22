@@ -204,7 +204,8 @@ public class YoutubeUtil {
 							thumbnailUrl = thumbnails.getDefaultThumbnail().getUrl();
 						}else{
 							//섬네일 없으면 이상영상 처리, 다음 비디오로 넘어감
-							continue;
+                            System.out.println("[Thumbnail] 없음, 건너뜀: videoId=" + videoId + ", title=" + title);
+                            continue;
 						}
                     }
 
