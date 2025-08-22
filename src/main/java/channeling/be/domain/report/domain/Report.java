@@ -31,28 +31,28 @@ public class Report extends BaseEntity {
     private Long view; // 조회수
 
     @Column
-    private Long viewTopicAvg; // 동일 주제 평균 조회수
+    private Double viewTopicAvg; // 동일 주제 평균 조회수
 
     @Column
-    private Long viewChannelAvg; // 체널 평균 조회수
+    private Double viewChannelAvg; // 체널 평균 조회수
 
     @Column
     private Long likeCount; // 좋아요 수
 
     @Column
-    private Long likeTopicAvg; // 동일 주제 평균 좋아요 수
+    private Double likeTopicAvg; // 동일 주제 평균 좋아요 수
 
     @Column
-    private Long likeChannelAvg; // 채널 평균 좋아요 수
+    private Double likeChannelAvg; // 채널 평균 좋아요 수
 
     @Column
     private Long comment; // 댓글 수
 
     @Column
-    private Long commentTopicAvg; // 동일 주제 평균 댓글 수
+    private Double commentTopicAvg; // 동일 주제 평균 댓글 수
 
     @Column
-    private Long commentChannelAvg; // 채널 평균 좋아요 수
+    private Double commentChannelAvg; // 채널 평균 좋아요 수
 
     @Column
     private Integer concept; //컨셉 일관성

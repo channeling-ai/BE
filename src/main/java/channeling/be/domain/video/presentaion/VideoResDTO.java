@@ -83,7 +83,7 @@ public class VideoResDTO {
 				video.getThumbnail(),
 				video.getVideoCategory(),
 				video.getView(),
-				video.getUploadDate().plusHours(9L), // 한국 시간으로 변환
+				video.getUploadDate(),
 				video.getChannel().getName(),
 				video.getChannel().getChannelUpdateAt()
 			);
