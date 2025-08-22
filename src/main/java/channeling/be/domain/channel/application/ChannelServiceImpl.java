@@ -162,20 +162,13 @@ public class ChannelServiceImpl implements ChannelService {
 	private Stats updateVideosAndAccumulateStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
 		long likeCount = 0, commentCount = 0;
 
-//		for (int i = 0; i < briefs.size(); i++) {
-//			YoutubeVideoBriefDTO brief = briefs.get(i);
-//			YoutubeVideoDetailDTO detail = details.get(i);
-//			likeCount += detail.getLikeCount();
-//			commentCount += detail.getCommentCount();
-//			videoService.updateVideo(brief, detail, channel);
-//		}
-//		return new Stats(likeCount, commentCount);
-
+		// DB에 있는 영상의 아이디 set으로 가져오기
 		List<Video> dbVideos = videoService.findVideosByChannel(channel);
 		Set<String> briefsVideoIds = briefs.stream()
 			.map(YoutubeVideoBriefDTO::getVideoId)
 			.collect(Collectors.toSet());
 
+		// DB 영상 처리 (update or delete)
 		for (Video dbVideo : dbVideos) {
 			if (briefsVideoIds.contains(dbVideo.getYoutubeVideoId())) {
 				// briefs에서 해당 videoId의 brief와 detail을 찾아 update
@@ -188,9 +181,27 @@ public class ChannelServiceImpl implements ChannelService {
 					commentCount += details.get(idx).getCommentCount();
 				}
 			} else {
+				// 새로 불렀는데 db에는 있는데, 안 가져와짐 -> 삭제 된 영상
 				videoService.deleteVideo(dbVideo);
 			}
 		}
+
+		// db에는 없는데 새로 불러온 거에는 존재 -> 새로 추가된 영상 -> insert
+// briefs에만 있는 새 영상 insert
+		for (int i = 0; i < briefs.size(); i++) {
+			String videoId = briefs.get(i).getVideoId();
+			boolean existsInDb = dbVideos.stream()
+					.anyMatch(dbVideo -> dbVideo.getYoutubeVideoId().equals(videoId));
+
+			if (!existsInDb) {
+				videoService.updateVideo(briefs.get(i), details.get(i), channel);
+				likeCount += details.get(i).getLikeCount();
+				commentCount += details.get(i).getCommentCount();
+			}
+		}
+
+
+
 
 		return new Stats(likeCount, commentCount);
 	}
