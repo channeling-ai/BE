@@ -62,7 +62,4 @@ public class Video extends BaseEntity {
     @BatchSize(size = 5)
     private List<Idea> ideas;
 
-	@OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	@BatchSize(size = 10)
-	private List<Report> reports = new ArrayList<>();
 }
