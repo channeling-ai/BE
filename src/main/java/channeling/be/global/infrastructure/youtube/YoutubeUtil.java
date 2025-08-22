@@ -184,6 +184,7 @@ public class YoutubeUtil {
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+				log.info("response: {}", response.body());
                 YoutubePlayListResDTO youtubeResponse = mapper.readValue(response.body(), YoutubePlayListResDTO.class);
 
                 for (YoutubePlayListResDTO.Item item : youtubeResponse.getItems()) {
@@ -200,8 +201,11 @@ public class YoutubeUtil {
                         } else if (thumbnails.getMedium() != null) {
                             thumbnailUrl = thumbnails.getMedium().getUrl();
                         } else if (thumbnails.getDefaultThumbnail() != null) {
-                            thumbnailUrl = thumbnails.getDefaultThumbnail().getUrl();
-                        }
+							thumbnailUrl = thumbnails.getDefaultThumbnail().getUrl();
+						}else{
+							//섬네일 없으면 이상영상 처리, 다음 비디오로 넘어감
+							continue;
+						}
                     }
 
 
