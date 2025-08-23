@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,6 +150,17 @@ public class VideoServiceImpl implements VideoService {
 		}
 
 		return video;
+	}
+
+	@Override
+	public List<Video> findVideosByChannel(Channel channel) {
+		return videoRepository.findByChannelId((channel.getId()));
+	}
+
+	@Override
+	@Transactional
+	public void deleteVideo(Video dbVideo) {
+		videoRepository.delete(dbVideo);
 	}
 }
 
