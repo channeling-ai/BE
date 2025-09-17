@@ -16,6 +16,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Table(name = "video", indexes = @Index(name = "upload_date", columnList = "upload_date"))
 public class Video extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +54,7 @@ public class Video extends BaseEntity {
     @Column
     private String thumbnail; // 썸네일 사진
 
-    @Column
+    @Column(length = 5000)
     private String description; // 영상 설명
 
     @OneToMany(mappedBy = "video", fetch = FetchType.LAZY)
