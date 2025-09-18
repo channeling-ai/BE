@@ -162,37 +162,37 @@ public class ChannelServiceImpl implements ChannelService {
 	private Stats updateVideosAndAccumulateStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
 		long likeCount = 0, commentCount = 0;
 
-//		for (int i = 0; i < briefs.size(); i++) {
-//			YoutubeVideoBriefDTO brief = briefs.get(i);
-//			YoutubeVideoDetailDTO detail = details.get(i);
-//			likeCount += detail.getLikeCount();
-//			commentCount += detail.getCommentCount();
-//			videoService.updateVideo(brief, detail, channel);
-//		}
-//		return new Stats(likeCount, commentCount);
-
-		List<Video> dbVideos = videoService.findVideosByChannel(channel);
-		Set<String> briefsVideoIds = briefs.stream()
-			.map(YoutubeVideoBriefDTO::getVideoId)
-			.collect(Collectors.toSet());
-
-		for (Video dbVideo : dbVideos) {
-			if (briefsVideoIds.contains(dbVideo.getYoutubeVideoId())) {
-				// briefs에서 해당 videoId의 brief와 detail을 찾아 update
-				int idx = IntStream.range(0, briefs.size())
-					.filter(i -> briefs.get(i).getVideoId().equals(dbVideo.getYoutubeVideoId()))
-					.findFirst().orElse(-1);
-				if (idx != -1) {
-					videoService.updateVideo(briefs.get(idx), details.get(idx), channel);
-					likeCount += details.get(idx).getLikeCount();
-					commentCount += details.get(idx).getCommentCount();
-				}
-			} else {
-				videoService.deleteVideo(dbVideo);
-			}
+		for (int i = 0; i < briefs.size(); i++) {
+			YoutubeVideoBriefDTO brief = briefs.get(i);
+			YoutubeVideoDetailDTO detail = details.get(i);
+			likeCount += detail.getLikeCount();
+			commentCount += detail.getCommentCount();
+			videoService.updateVideo(brief, detail, channel);
 		}
-
 		return new Stats(likeCount, commentCount);
+
+//		List<Video> dbVideos = videoService.findVideosByChannel(channel);
+//		Set<String> briefsVideoIds = briefs.stream()
+//			.map(YoutubeVideoBriefDTO::getVideoId)
+//			.collect(Collectors.toSet());
+//
+//		for (Video dbVideo : dbVideos) {
+//			if (briefsVideoIds.contains(dbVideo.getYoutubeVideoId())) {
+//				// briefs에서 해당 videoId의 brief와 detail을 찾아 update
+//				int idx = IntStream.range(0, briefs.size())
+//					.filter(i -> briefs.get(i).getVideoId().equals(dbVideo.getYoutubeVideoId()))
+//					.findFirst().orElse(-1);
+//				if (idx != -1) {
+//					videoService.updateVideo(briefs.get(idx), details.get(idx), channel);
+//					likeCount += details.get(idx).getLikeCount();
+//					commentCount += details.get(idx).getCommentCount();
+//				}
+//			} else {
+//				videoService.deleteVideo(dbVideo);
+//			}
+//		}
+
+//		return new Stats(likeCount, commentCount);
 	}
 
 
