@@ -19,13 +19,13 @@ public class Idea extends BaseEntity {
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String title; // 제목
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String content; // 내용
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     private String hashTag; // 해시태그 Json 리스트
 
     @Column(nullable = false)
