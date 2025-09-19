@@ -53,10 +53,15 @@ public class Video extends BaseEntity {
     @Column(length = 100)
     private String thumbnail; // 썸네일 사진
 
-    @Column(columnDefinition = "TEXT")
+    @Column(length = 5000)
     private String description; // 영상 설명
 
-    @OneToMany(mappedBy = "video", fetch = FetchType.LAZY)
+    @OneToMany(
+            mappedBy = "video",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,       // Video 삭제 시 Idea도 같이 삭제
+            orphanRemoval = true             // Video에서 Idea 제거하면 DB에서도 삭제
+    )
     @BatchSize(size = 5)
     private List<Idea> ideas;
 }

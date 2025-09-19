@@ -28,7 +28,7 @@ public class Channel extends BaseEntity {
     @Column(nullable = false, unique = true, length = 30)
     private String youtubePlaylistId; // 플레이리스트 ID (유튜브 플레이리스트 ID)
 
-    @Column(nullable = false, length = 100)
+    @Column(length = 50, nullable = false)
     private String name; // 채널 이름
 
     @Column(nullable = false)
@@ -55,10 +55,10 @@ public class Channel extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime joinDate; // 채널 가입일
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 100, nullable = false)
     private String target; // 시청자 타겟
 
-    @Column(nullable = false, length = 255)
+    @Column(length = 500, nullable = false)
     private String concept; // 채널 컨셉
 
     @Column(nullable = false, length = 100)
