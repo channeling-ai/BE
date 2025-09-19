@@ -41,8 +41,8 @@ jobs:
       - name: Stop spring-app
         run: |
           cd deploy-configs
-          docker-compose stop spring-app || true 
-          docker-compose rm -f spring-app || true 
+          docker compose stop spring-app || true 
+          docker compose rm -f spring-app || true 
 
       # 이전 Docker 이미지 제거
       - name: Clean up old Docker images
@@ -93,7 +93,7 @@ jobs:
           # Frontend URL
           FRONT_URL: ${{ secrets.FRONT_URL }}
         run: |
-          docker-compose up -d --no-deps spring-app
+          docker compose up -d --no-deps spring-app
           
 
 
