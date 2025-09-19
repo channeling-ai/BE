@@ -16,7 +16,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "video", indexes = @Index(name = "upload_date", columnList = "upload_date"))
 public class Video extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,14 +25,14 @@ public class Video extends BaseEntity {
     @JoinColumn(name = "channel_id", nullable = false)
     private Channel channel;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 50)
     private String youtubeVideoId; // 영상 ID (유튜브 영상 ID)
 
     @Enumerated(EnumType.STRING)
     @Column
     private VideoCategory videoCategory; // long, short 여부
 
-    @Column
+    @Column(length = 100)
     private String title; // 영상 제목
 
     @Column
@@ -45,13 +44,13 @@ public class Video extends BaseEntity {
     @Column
     private Long commentCount; // 영상 댓글 수
 
-    @Column
+    @Column(length = 100)
     private String link; // 영상 링크
 
     @Column
     private LocalDateTime uploadDate; // 업로드 날짜
 
-    @Column
+    @Column(length = 100)
     private String thumbnail; // 썸네일 사진
 
     @Column(length = 5000)

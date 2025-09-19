@@ -3,7 +3,7 @@ package channeling.be.domain.report.domain;
 import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
 import channeling.be.domain.comment.domain.Comment;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,15 +16,36 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Table(name = "report", indexes = @Index(name = "updated_at", columnList = "updated_at"))
 public class Report extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
+
+
+    @OneToMany(
+            mappedBy = "report",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,       // Report 삭제 시 TrendKeyword도 같이 삭제
+            orphanRemoval = true             // Report에서 TrendKeyword 제거하면 DB에서도 삭제
+    )
+    @BatchSize(size = 20)                 // LAZY 로딩 시 20개 단위로 한 번에 가져오기
+    private List<TrendKeyword> trends;
+
+    @OneToMany(
+            mappedBy = "report",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,       // Report 삭제 시 Comment도 같이 삭제
+            orphanRemoval = true             // Report에서 Comment 제거하면 DB에서도 삭제
+    )
+    private List<Comment> comments;
+
+
+    @OneToOne(mappedBy = "report", fetch = FetchType.LAZY)
+    private Task task;
 
     @Column
     private String title; // 영상 제목
@@ -60,10 +81,10 @@ public class Report extends BaseEntity {
     private Integer concept; //컨셉 일관성
 
     @Column
-    private Long seo; // seo 구성
+    private Integer seo; // seo 구성
 
     @Column
-    private Long revisit; // 재방문률
+    private Integer revisit; // 재방문률
 
     @Column(columnDefinition = "TEXT")
     private String summary; // 요약본
@@ -86,23 +107,6 @@ public class Report extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
 
-
-    @OneToMany(
-            mappedBy = "report",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Report 삭제 시 TrendKeyword도 같이 삭제
-            orphanRemoval = true             // Report에서 TrendKeyword 제거하면 DB에서도 삭제
-    )
-    @BatchSize(size = 20)                 // LAZY 로딩 시 20개 단위로 한 번에 가져오기
-    private List<TrendKeyword> trends;
-
-    @OneToMany(
-            mappedBy = "report",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Report 삭제 시 Comment도 같이 삭제
-            orphanRemoval = true             // Report에서 Comment 제거하면 DB에서도 삭제
-    )
-    private List<Comment> comments;
 
 
 }
