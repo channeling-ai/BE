@@ -1,5 +1,5 @@
 # channeling-backend
-![img.png](img.png)
+
 ## 💡 Project Overview
 
 유튜브 채널 및 개별 영상 데이터를 AI로 분석해, 개선점과 트렌드 기반 콘텐츠 아이디어를 제공하는 솔루션입니다.  
