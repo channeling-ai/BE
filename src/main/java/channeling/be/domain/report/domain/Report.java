@@ -1,13 +1,15 @@
 package channeling.be.domain.report.domain;
 
 import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
+import channeling.be.domain.comment.domain.Comment;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.BatchSize;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -23,6 +25,16 @@ public class Report extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
+
+    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private List<TrendKeyword> trends = new ArrayList<>();
+
+    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
+
+    @OneToOne(mappedBy = "report", fetch = FetchType.LAZY)
+    private Task task;
 
     @Column
     private Long view; // 조회수
@@ -80,10 +92,5 @@ public class Report extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
-
-
-    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
-    @BatchSize(size = 20)
-    private List<TrendKeyword> trends;
 
 }

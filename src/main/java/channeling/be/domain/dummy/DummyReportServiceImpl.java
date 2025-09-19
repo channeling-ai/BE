@@ -1,11 +1,11 @@
 package channeling.be.domain.dummy;
 
+import channeling.be.domain.comment.domain.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import channeling.be.domain.comment.domain.CommentType;
-import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.application.ReportService;
 import channeling.be.domain.report.domain.PageType;
@@ -20,13 +20,13 @@ import channeling.be.response.exception.handler.ReportHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @Slf4j
 public class DummyReportServiceImpl implements ReportService {
 	private final ReportRepository reportRepository;
-	private final CommentRepository commentRepository;
-
 
     @Override
     @Transactional(readOnly = true)
@@ -43,7 +43,11 @@ public class DummyReportServiceImpl implements ReportService {
 	@Override
     @Transactional(readOnly = true)
     public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
-		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+		List<Comment> comments = report.getComments().stream()
+				.filter(comment -> comment.getCommentType() == commentType)
+				.limit(5)
+				.toList();
+		return ReportConverter.toCommentsByType(commentType, comments);
 	}
 
     @Override

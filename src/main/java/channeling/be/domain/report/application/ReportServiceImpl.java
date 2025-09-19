@@ -3,8 +3,8 @@ package channeling.be.domain.report.application;
 import channeling.be.domain.TrendKeyword.domain.repository.TrendKeywordRepository;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
+import channeling.be.domain.comment.domain.Comment;
 import channeling.be.domain.comment.domain.CommentType;
-import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.domain.PageType;
@@ -15,7 +15,6 @@ import channeling.be.domain.report.presentation.ReportResDto;
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.task.domain.TaskStatus;
-import channeling.be.domain.task.domain.repository.TaskRepository;
 import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.VideoType;
@@ -45,6 +44,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -53,9 +53,7 @@ import java.util.Optional;
 @Slf4j
 @Primary
 public class ReportServiceImpl implements ReportService {
-    private final TaskRepository taskRepository;
 	private final ReportRepository reportRepository;
-	private final CommentRepository commentRepository;
     private final IdeaRepository ideaRepository;
     private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
@@ -79,10 +77,11 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findByReportAndMember(reportId, member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
 
         //리포트로 연관된 task 조회 -> 없으면 애러 반환
-        Task task =taskRepository.findByReportId(reportId)
-                .orElseThrow(()-> new TaskHandler(ErrorStatus._TASK_NOT_FOUND));
+        if (report.getTask() == null) {
+            throw new TaskHandler(ErrorStatus._TASK_NOT_FOUND);
+        }
 
-        return ReportConverter.toReportAnalysisStatus(task,report);
+        return ReportConverter.toReportAnalysisStatus(report.getTask(), report);
     }
 
 	@Override
@@ -96,14 +95,23 @@ public class ReportServiceImpl implements ReportService {
 	@Override
     @Transactional(readOnly = true)
     public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
-		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+        List<Comment> comments = report.getComments().stream()
+                .filter(comment -> comment.getCommentType() == commentType)
+                .limit(5)
+                .toList();
+		return ReportConverter.toCommentsByType(commentType, comments);
 	}
 
     @Override
     public Report checkReport(Long reportId, PageType type, Member member) {
         // TODO 태스크 삭제하지 않는다고 가정
-        Task task = taskRepository.findByReportId(reportId)
-                .orElseThrow(() -> new TaskHandler(ErrorStatus._REPORT_NOT_FOUND));
+
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+        Task task = report.getTask();
+
+        if (task == null) {
+            throw new TaskHandler(ErrorStatus._TASK_NOT_FOUND);
+        }
 
         switch (type) {
             case OVERVIEW:
@@ -122,8 +130,6 @@ public class ReportServiceImpl implements ReportService {
                 throw new IllegalArgumentException("Invalid PageType: " + type);
         }
 
-        Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
-
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
 	@Override
@@ -139,11 +145,11 @@ public class ReportServiceImpl implements ReportService {
 			// 연관된 북마크 하지 않은 아이디어 리스트 삭제
 			ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
 			// 연관된 댓글 리스트 삭제
-			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+            report.getComments().clear();
 			// 연관되 키워드 리스트 가져오기
 			trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
 			// 연관된 task 삭제
-			taskRepository.deleteTaskByReportId(report.getId());
+            report.getTask().setReport(null);
 			// 리포트 삭제
 			reportRepository.deleteById(report.getId());
 		}
