@@ -1,5 +1,6 @@
 package channeling.be.domain.video.application;
 
+import channeling.be.domain.channel.application.ChannelService;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.member.domain.Member;
@@ -17,16 +18,11 @@ import channeling.be.response.exception.handler.VideoHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -149,6 +145,17 @@ public class VideoServiceImpl implements VideoService {
 		}
 
 		return video;
+	}
+
+	@Override
+	public List<Video> findVideosByChannel(Channel channel) {
+		return videoRepository.findByChannelId((channel.getId()));
+	}
+
+	@Override
+	@Transactional
+	public void deleteVideo(Video dbVideo) {
+		videoRepository.delete(dbVideo);
 	}
 }
 

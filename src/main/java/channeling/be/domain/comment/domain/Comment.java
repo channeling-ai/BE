@@ -23,7 +23,7 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     CommentType commentType; // 댓글 종류
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     String content; // 댓글 내용
 
 }

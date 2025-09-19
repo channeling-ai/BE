@@ -15,7 +15,7 @@ public class Task extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "report_id", nullable = false)
     private Report report;
 
@@ -30,4 +30,8 @@ public class Task extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TaskStatus ideaStatus;
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
 }

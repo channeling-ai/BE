@@ -22,13 +22,13 @@ public class Channel extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 30)
     private String youtubeChannelId; // 채널 ID (유튜브 채널 ID)
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 30)
     private String youtubePlaylistId; // 플레이리스트 ID (유튜브 플레이리스트 ID)
 
-    @Column(nullable = false)
+    @Column(length = 50, nullable = false)
     private String name; // 채널 이름
 
     @Column(nullable = false)
@@ -49,19 +49,19 @@ public class Channel extends BaseEntity {
     @Column(nullable = false)
     private Long comment; // 체널 총 댓글 수
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 150)
     private String link; // 채널 링크
 
     @Column(nullable = false)
     private LocalDateTime joinDate; // 채널 가입일
 
-    @Column(nullable = false)
+    @Column(length = 100, nullable = false)
     private String target; // 시청자 타겟
 
-    @Column(nullable = false)
+    @Column(length = 500, nullable = false)
     private String concept; // 채널 컨셉
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 100)
     private String image; // 채널 프로필 이미지
 
     @Enumerated(EnumType.STRING)

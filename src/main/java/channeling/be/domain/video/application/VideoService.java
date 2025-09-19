@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface VideoService {
 	/**
@@ -63,4 +64,8 @@ public interface VideoService {
     Video checkVideoUrlWithMember(Member member, @NotNull(message = "null이서는 안됩니다.") String url);
 
 	Video checkVideoWithMember(@NotNull(message = "null이서는 안됩니다.") Long videoId, Member member);
+
+	List<Video> findVideosByChannel(Channel channel);
+
+	void deleteVideo(Video dbVideo);
 }
