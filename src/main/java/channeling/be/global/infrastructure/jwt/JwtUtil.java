@@ -17,7 +17,6 @@ public interface JwtUtil {
      */
     String createAccessToken(Member member);
 
-
     /**
      * HTTP 요청 헤더에서 액세스 토큰을 추출합니다.
      * @param request HTTP 요청 객체
