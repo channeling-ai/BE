@@ -1,6 +1,10 @@
 package channeling.be.domain.dummy.presentation;
 
+import channeling.be.response.code.BaseErrorCode;
+import channeling.be.response.exception.GeneralException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,60 +25,47 @@ import channeling.be.response.exception.handler.ApiResponse;
 import channeling.be.response.exception.handler.ReportHandler;
 import lombok.RequiredArgsConstructor;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+
 @RestController
-@RequestMapping("/dummys")
+@RequestMapping("/dummies")
 public class DummyController implements DummySwagger {
-    private final ReportService reportService;
-    private final VideoService videoService;
 
-	public DummyController(@Qualifier("dummyReportServiceImpl") ReportService reportService, VideoService videoService) {
-		this.reportService = reportService;
-		this.videoService = videoService;
-	}
+    /**
+     * GET /api/reports/{reportId}/{section}
+     * reportId: 1,2
+     * section: overview, comments 등
+     */
+    @GetMapping("/{reportId}/{section}")
+    public String getDummyReportSection(
+            @PathVariable String reportId,
+            @PathVariable String section) throws IOException {
 
-	@Override
-    @GetMapping("/{report-id}/comments")
-    public ApiResponse<ReportResDto.getCommentsByType> getCommentsByType(
-        @PathVariable("report-id") Long reportId,
-        @RequestParam(value = "type") CommentType commentType) {
-        reportId = getDummyReportId(reportId);
-        Report report = reportService.getReportByIdAndMember(reportId, null);
-        return ApiResponse.onSuccess(reportService.getCommentsByType(report, commentType));
-
+        // resources/dummies/reports/{reportId}/{section}.json
+        String path = String.format("dummies/reports/%s/%s.json", reportId, section);
+        ClassPathResource resource = new ClassPathResource(path);
+        // 존재하지 않으면 예외 던짐 → 전역 핸들러에서 처리
+        if (!resource.exists()) {
+            throw new GeneralException(ErrorStatus._DUMMY_NOT_FOUND);
+        }
+        return FileCopyUtils.copyToString(
+                new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)
+        );
     }
 
 
-    @Override
-    @GetMapping("/{report-id}/overviews")
-    public ApiResponse<ReportResDto.OverviewReport> getReportOverview(
-        @PathVariable("report-id") Long reportId) {
-        reportId = getDummyReportId(reportId);
-        Report report = reportService.checkReport(reportId, PageType.OVERVIEW, null);
-        return ApiResponse.onSuccess(ReportConverter.toOverview(report));
-    }
-
-    @Override
-    @GetMapping("/{report-id}/analyses")
-    public ApiResponse<ReportResDto.AnalysisReport> getReportAnalysis(
-        @PathVariable("report-id") Long reportId) {
-        reportId = getDummyReportId(reportId);
-        Report report = reportService.checkReport(reportId, PageType.ANALYSIS,null);
-        return ApiResponse.onSuccess(ReportConverter.toAnalysis(report));
-    }
-
-    @Override
-    @GetMapping("/{report-id}/ideas")
-    public ApiResponse<ReportResDto.IdeaReport> getReportIdea(
-        @PathVariable("report-id") Long reportId) {
-        reportId = getDummyReportId(reportId);
-        Report report = reportService.checkReport(reportId, PageType.IDEA, null);
-        return ApiResponse.onSuccess(ReportConverter.toIdea(report));
-    }
-
-
-    private Long getDummyReportId(Long reportId) {
-        if(reportId ==1L) return 28L;
-        else if(reportId ==2L) return 29L;
-        throw new ReportHandler(ErrorStatus._REPORT_NOT_FOUND);
+    @GetMapping("/videos")
+    public String getDummyVideos() throws IOException {
+        String path = "dummies/videos/list.json";
+        ClassPathResource resource = new ClassPathResource(path);
+        // 존재하지 않으면 예외 던짐 → 전역 핸들러에서 처리
+        if (!resource.exists()) {
+            throw new GeneralException(ErrorStatus._DUMMY_NOT_FOUND);
+        }
+        return FileCopyUtils.copyToString(
+                new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)
+        );
     }
 }
