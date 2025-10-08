@@ -1,6 +1,7 @@
 package channeling.be.domain.TrendKeyword.domain;
 
 
+import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.video.domain.Video;
@@ -18,8 +19,8 @@ public class TrendKeyword extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "report_id", nullable = false)
-    private Report report;
+    @JoinColumn(name = "channel_id")
+    private Channel channel;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,6 +1,5 @@
 package channeling.be.domain.report.application;
 
-import channeling.be.domain.TrendKeyword.domain.repository.TrendKeywordRepository;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.comment.domain.CommentType;
@@ -57,7 +56,6 @@ public class ReportServiceImpl implements ReportService {
 	private final ReportRepository reportRepository;
 	private final CommentRepository commentRepository;
     private final IdeaRepository ideaRepository;
-    private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
     private final ReportDeleteService reportDeleteService;
@@ -140,8 +138,6 @@ public class ReportServiceImpl implements ReportService {
 			ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
 			// 연관된 댓글 리스트 삭제
 			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-			// 연관되 키워드 리스트 가져오기
-			trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
 			// 연관된 task 삭제
 			taskRepository.deleteTaskByReportId(report.getId());
 			// 리포트 삭제

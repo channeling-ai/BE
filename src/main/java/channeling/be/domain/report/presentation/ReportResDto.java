@@ -95,9 +95,7 @@ public class ReportResDto {
         @Schema(description = "리포트 ID (기본키)")
         Long reportId,
         @Schema(description = "리포트 - 아이디어")
-        List<IdeaInfo> idea,
-        @Schema(description = "리포트 - 트랜드 키워드")
-        List<TrendKeywordInfo> trend
+        List<IdeaInfo> idea
     ) {}
 
     // 리포트 페이지 조회 응답 DTO - 아이디어 정보

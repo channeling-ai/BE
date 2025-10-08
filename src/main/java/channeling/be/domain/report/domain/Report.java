@@ -85,8 +85,5 @@ public class Report extends BaseEntity {
     private String optimization; // 알고리즘 최적화
 
 
-    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
-    @BatchSize(size = 20)
-    private List<TrendKeyword> trends;
 
 }
