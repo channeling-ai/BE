@@ -7,6 +7,8 @@ import channeling.be.response.exception.handler.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ideas")
@@ -27,6 +29,12 @@ public class IdeaController implements IdeaSwagger{
                     @LoginMember Member loginMember) {
 
         return ApiResponse.onSuccess(ideaService.getBookmarkedIdeaList(loginMember,page,size));
+    }
+
+    @Override
+    public ApiResponse<List<IdeaResDto.SingleIdeaRes>> createIdeas(IdeaReqDto.CreateIdeaReqDto dto) {
+//        return ApiResponse.onSuccess(ideaService.getBookmarkedIdeaList(loginMember,page,size));
+        return null;
     }
 
 }

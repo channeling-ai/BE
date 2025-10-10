@@ -3,6 +3,7 @@ package channeling.be.domain.idea.application;
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.idea.presentation.IdeaConverter;
+import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.response.exception.handler.IdeaHandler;
@@ -14,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.util.List;
 
 import static channeling.be.response.code.status.ErrorStatus.*;
 
@@ -44,5 +47,10 @@ public class IdeaServiceImpl implements IdeaService {
         Page<Idea> ideaPage = ideaRepository.findIdeasByMemberId(loginMember.getId(), pageable);
         return IdeaConverter.toBookmarkedIdeaListRes(ideaPage, page, size);
 
+    }
+
+    @Override
+    public List<Idea> createIdeas(IdeaReqDto.CreateIdeaReqDto dto) {
+        return null;
     }
 }
