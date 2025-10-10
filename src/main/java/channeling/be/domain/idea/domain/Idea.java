@@ -1,7 +1,7 @@
 package channeling.be.domain.idea.domain;
 
+import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,8 +16,8 @@ public class Idea extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "video_id", nullable = false)
-    private Video video;
+    @JoinColumn(name = "channel_id", nullable = false)
+    private Channel channel;
 
     @Column(nullable = false)
     private String title; // 제목

@@ -33,7 +33,7 @@ public class IdeaServiceImpl implements IdeaService {
         Idea idea = ideaRepository.findWithVideoChannelMemberById(ideaId).orElseThrow(() -> new IdeaHandler(_IDEA_NOT_FOUND));
         //해당 아이디어가 로그인한 멤버의 아이디어인지 확인
 
-        if (!idea.getVideo().getChannel().getMember().getId().equals(loginMember.getId())) {
+        if (!idea.getChannel().getMember().getId().equals(loginMember.getId())) {
             throw new IdeaHandler(_IDEA_NOT_MEMBER);
         }
         //아이디어 북마크 수정 -> 더티체크

@@ -69,7 +69,7 @@ public class ReportConverter {
     public static ReportResDto.IdeaReport toIdea(Report report) {
         return new ReportResDto.IdeaReport(
                 report.getId(),
-                report.getVideo().getIdeas().stream()
+                report.getVideo().getChannel().getIdeas().stream()
                         .map(ReportConverter::toResIdeaInfo)
                         .sorted(Comparator.comparing(ReportResDto.IdeaInfo::isBookMarked))
                         .collect(Collectors.toList()),

@@ -15,8 +15,7 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
     @Query("""
     SELECT i
     FROM Idea i
-    JOIN FETCH i.video v
-    JOIN FETCH v.channel c
+    JOIN FETCH i.channel c
     JOIN FETCH c.member m
     WHERE i.id = :ideaId
     """)
@@ -25,18 +24,10 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
     @Query("""
     SELECT i
     FROM Idea i
-    JOIN i.video v
-    JOIN v.channel c
+    JOIN i.channel c
     JOIN c.member m
     WHERE m.id = :memberId AND i.isBookMarked = true
 """)
     Page<Idea> findIdeasByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
-    @Modifying
-    @Query("""
-    DELETE
-    FROM Idea i
-    WHERE i.video.id = :videoId And i.video.channel.member.id = :memberId AND i.isBookMarked = false
- """)
-    void deleteAllByVideoWithoutBookmarked(@Param("videoId") Long videoId, @Param("memberId")  Long memberId);
 }

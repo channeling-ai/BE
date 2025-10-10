@@ -136,8 +136,9 @@ public class ReportServiceImpl implements ReportService {
 		if (optionalReport.isPresent()) {
 			Report report = optionalReport.get();
 			Video video = report.getVideo();
-			// 연관된 북마크 하지 않은 아이디어 리스트 삭제
-			ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
+			// TODO 리포트 삭제 시 아이디어 삭제 관련
+            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
+			//ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
 			// 연관된 댓글 리스트 삭제
 			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
 			// 연관되 키워드 리스트 가져오기
