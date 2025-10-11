@@ -2,6 +2,7 @@ package channeling.be.domain.idea.presentation;
 
 import channeling.be.domain.auth.annotation.LoginMember;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +34,8 @@ public interface IdeaSwagger {
             @LoginMember Member loginMember);
 
     @Operation(summary = "아이디어 생성", description = "채널 기반 아이디어 생성")
-    @PostMapping("/")
-    ApiResponse<List<IdeaResDto.SingleIdeaRes>> createIdeas(@RequestBody IdeaReqDto.CreateIdeaReqDto dto);
+    @PostMapping("")
+    ApiResponse<List<LlmResDto.CreateIdeasResDto>> createIdeas(@RequestBody IdeaReqDto.CreateIdeaReqDto dto,
+                                                               @Parameter(hidden = true)
+                                                               @LoginMember Member loginMember);
 }

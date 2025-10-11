@@ -5,6 +5,7 @@ import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.global.infrastructure.llm.LlmResDto;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface IdeaService {
 
     IdeaResDto.GetBookmarkedIdeaListRes getBookmarkedIdeaList(Member loginMember, int page, int size);
 
-    List<Idea> createIdeas(IdeaReqDto.CreateIdeaReqDto dto);
+    List<LlmResDto.CreateIdeasResDto> createIdeas(IdeaReqDto.CreateIdeaReqDto dto, Member member);
 
 }
 

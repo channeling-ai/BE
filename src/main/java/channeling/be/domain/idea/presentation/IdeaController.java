@@ -3,6 +3,7 @@ package channeling.be.domain.idea.presentation;
 import channeling.be.domain.auth.annotation.LoginMember;
 import channeling.be.domain.idea.application.IdeaService;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.response.exception.handler.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -32,9 +33,11 @@ public class IdeaController implements IdeaSwagger{
     }
 
     @Override
-    public ApiResponse<List<IdeaResDto.SingleIdeaRes>> createIdeas(IdeaReqDto.CreateIdeaReqDto dto) {
-//        return ApiResponse.onSuccess(ideaService.getBookmarkedIdeaList(loginMember,page,size));
-        return null;
+    @PostMapping("")
+    public ApiResponse<List<LlmResDto.CreateIdeasResDto>> createIdeas(
+            IdeaReqDto.CreateIdeaReqDto dto,
+            @LoginMember Member loginMember) {
+        return ApiResponse.onSuccess(ideaService.createIdeas(dto, loginMember));
     }
 
 }

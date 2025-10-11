@@ -1,11 +1,15 @@
 package channeling.be.domain.idea.application;
 
+import channeling.be.domain.channel.domain.Channel;
+import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.idea.presentation.IdeaConverter;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.global.infrastructure.llm.LlmResDto;
+import channeling.be.global.infrastructure.llm.LlmServerUtil;
 import channeling.be.response.exception.handler.IdeaHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,6 +29,8 @@ import static channeling.be.response.code.status.ErrorStatus.*;
 @RequiredArgsConstructor
 public class IdeaServiceImpl implements IdeaService {
     private final IdeaRepository ideaRepository;
+    private final ChannelRepository channelRepository;
+    private final LlmServerUtil llmServerUtil;
 
     @Override
     @Transactional
@@ -50,7 +56,9 @@ public class IdeaServiceImpl implements IdeaService {
     }
 
     @Override
-    public List<Idea> createIdeas(IdeaReqDto.CreateIdeaReqDto dto) {
-        return null;
+    public List<LlmResDto.CreateIdeasResDto> createIdeas(IdeaReqDto.CreateIdeaReqDto dto, Member member) {
+        Channel channel = channelRepository.findByMember(member)
+                .orElseThrow(() -> new IdeaHandler(_CHANNEL_NOT_FOUND));
+        return llmServerUtil.createIdeas(dto, channel);
     }
 }
