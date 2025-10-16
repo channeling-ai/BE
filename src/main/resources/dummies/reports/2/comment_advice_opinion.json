@@ -1,0 +1,31 @@
+{
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "commentType": "ADVICE_OPINION",
+    "commentList": [
+      {
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "많은 댓글 작성자들이 추가 영상 요청을 하며 다시 만나기를 희망합니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "이진이와의 재회에 대한 기대감이 두드러지며 이야기를 나누고 싶어하는 의견이 많습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "해외 팬들이 자막 요청을 하고 있으며, 더 많은 콘텐츠를 제공해주길 바라는 목소리가 있습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "특정 음악에 대한 질문과 함께 다양한 개인적인 이야기들이 댓글로 등장하고 있습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "댓글에는 여러 번 본 사용자들이 많고, 영상이 일상적인 루틴으로 자리잡았다는 반응이 있습니다."
+      }
+    ]
+  }
+}

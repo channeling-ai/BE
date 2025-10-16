@@ -1,0 +1,31 @@
+{
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "commentType": "POSITIVE",
+    "commentList": [
+      {
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "대부분의 댓글에서 여상에 대한 극찬과 함께 그의 아름다움에 감탄하는 반응이 많았습니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "많은 사용자들이 여상의 메이크업과 타투에 깊은 인상을 받았다고 표현했습니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "여상이의 편안한 모습과 화기애애한 분위기에 대한 긍정적인 언급이 많았습니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "이 영상 덕분에 여상에 대한 관심이 더욱 높아졌다는 피드백이 있었습니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "여상의 매력을 더욱 강조한 메이크업과 스타일에 대한 칭찬이 이어졌습니다."
+      }
+    ]
+  }
+}

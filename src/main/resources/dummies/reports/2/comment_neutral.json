@@ -1,0 +1,31 @@
+{
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "commentType": "NEUTRAL",
+    "commentList": [
+      {
+        "commentType": "NEUTRAL",
+        "commentId": 0,
+        "content": "많은 사용자가 영상에 반복적으로 방문하며 재미있어하고 있습니다.",
+
+        "commentType": "NEUTRAL",
+        "commentId": 0,
+        "content": "댓글에는 이진아라는 이름이 자주 등장하며 친근한 반응이 많습니다.",
+
+        "commentType": "NEUTRAL",
+        "commentId": 0,
+        "content": "가장 많이 언급된 곡은 'Dust in the Wind'입니다.",
+
+        "commentType": "NEUTRAL",
+        "commentId": 0,
+        "content": "조회수가 1300만을 넘었으며, 여전히 인기를 끌고 있다는 반응이 있습니다.",
+
+        "commentType": "NEUTRAL",
+        "commentId": 0,
+        "content": "사용자들은 영상에 대한 강한 애정과 함께 늘 재방문하겠다는 메시지를 전달하고 있습니다."
+      }
+    ]
+  }
+}

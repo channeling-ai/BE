@@ -1,0 +1,31 @@
+{
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "commentType": "ADVICE_OPINION",
+    "commentList": [
+      {
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "댓글에서 Yeosang의 노력과 경쟁적인 상황에 대한 언급이 많았습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "다양한 아이디어를 바탕으로 Yeosang의 출생 징후에 대한 애칭 제안이 있었습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "Yeosang의 출생 마크에 문신을 고려하자는 의견도 있었으며, 긍정적인 반응이 많았습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "한 사용자는 Yeosang의 스타일을 다른 캐릭터와 비교하며 흥미를 나타냈습니다.",
+
+        "commentType": "ADVICE_OPINION",
+        "commentId": 0,
+        "content": "비슷한 디자인의 렌즈와 문신 아이디어에 대한 요청이 댓글로 남겨졌습니다."
+      }
+    ]
+  }
+}

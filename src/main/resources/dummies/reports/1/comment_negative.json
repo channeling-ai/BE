@@ -1,0 +1,31 @@
+{
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "commentType": "NEGATIVE",
+    "commentList": [
+      {
+        "commentType": "NEGATIVE",
+        "commentId": 0,
+        "content": "여상에 대한 열광적인 반응이 댓글에 가득합니다.",
+
+        "commentType": "NEGATIVE",
+        "commentId": 0,
+        "content": "많은 사용자들이 여상의 외모에 놀라움을 표했습니다.",
+
+        "commentType": "NEGATIVE",
+        "commentId": 0,
+        "content": "여상이 인터뷰에서 제외되는 것에 대한 아쉬움을 표현한 댓글이 많습니다.",
+
+        "commentType": "NEGATIVE",
+        "commentId": 0,
+        "content": "여상의 등장으로 깜짝 놀랐다는 반응이 주를 이루고 있습니다.",
+
+        "commentType": "NEGATIVE",
+        "commentId": 0,
+        "content": "댓글에서는 여상이 AI처럼 보인다는 의견도 있었습니다."
+      }
+    ]
+  }
+}

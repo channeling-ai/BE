@@ -1,0 +1,31 @@
+{
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "commentType": "POSITIVE",
+    "commentList": [
+      {
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "많은 사용자들이 영상 속 이진이의 귀여움에 감동하며 자주 본다고 합니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "이진이의 세심한 행동과 배려에 대한 찬사가 이어지고 있습니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "댓글에서는 '최고의 힐링 영상'이라는 반응이 자주 보입니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "영상 시청이 반복적인 만큼, 사용자들은 이진이의 매력에 빠져있습니다.",
+
+        "commentType": "POSITIVE",
+        "commentId": 0,
+        "content": "영상에 대한 극찬과 함께, 다양한 유머와 애정 어린 댓글들이 눈에 띕니다."
+      }
+    ]
+  }
+}

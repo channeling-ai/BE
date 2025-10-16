@@ -1,3 +1,33 @@
 {
-  "list" : "List"
+  "isSuccess": true,
+  "code": "COMMON200",
+  "message": "성공입니다.",
+  "result": {
+    "channelId": 0,
+    "page": 0,
+    "size": 8,
+    "hasNextPage": false,
+    "totalElements": 2,
+    "totalPages": 1,
+    "videoList": [
+      {
+        "videoId": 1,
+        "videoTitle": "와..내 구독자였던 에이티즈 \"여상\"님이 빌보드를 휩쓰는 아이돌이 됐다고...?",
+        "channelName" : "LeoJ Makeup",
+        "videoThumbnailUrl": "https://i.ytimg.com/vi/iqHCy6qCB-Q/hqdefault.jpg?s…BACGAY4AUAB&rs=AOn4CLCHUqKejOhZByxSmhhgO-X2VprO6Q",
+        "channelThumbnailUrl": "https://yt3.googleusercontent.com/ytc/AIdro_n_prkAS2s-jB2JHHI7g0tstz6iohY_6qBqQ6lxKra2vYg=s160-c-k-c0x00ffffff-no-rj",
+        "viewCount": 180000,
+        "uploadDate": "2025-08-07T18:15:08"
+      },
+      {
+        "videoId": 2,
+        "videoTitle": "아들아 인생 별 거 없다",
+        "channelName" : "카더정원",
+        "videoThumbnailUrl": "https://i.ytimg.com/vi/RHZb_u3VOco/hqdefault.jpg?s…BACGAY4AUAB&rs=AOn4CLByDRczcmtKoYBQxCUD3Wx20UnmPg",
+        "channelThumbnailUrl": "https://yt3.googleusercontent.com/7wgZsN7aqP--_a2sVU9OZYmXZVpAhcsCr8OO8KAeI5Tcv9xUYLGy5H0ObpUgW0hS21cF_sGEjA=s160-c-k-c0x00ffffff-no-rj",
+        "viewCount": 13453203,
+        "uploadDate": "2025-02-20T13:30:01"
+      }
+    ]
+  }
 }
