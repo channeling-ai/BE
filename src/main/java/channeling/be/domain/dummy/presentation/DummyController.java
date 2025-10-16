@@ -40,8 +40,8 @@ public class DummyController implements DummySwagger {
      */
     @GetMapping("/{reportId}/{section}")
     public String getDummyReportSection(
-            @PathVariable String reportId,
-            @PathVariable String section) throws IOException {
+            @PathVariable("reportId") String reportId,
+            @PathVariable("section") String section) throws IOException {
 
         // resources/dummies/reports/{reportId}/{section}.json
         String path = String.format("dummies/reports/%s/%s.json", reportId, section);
@@ -55,6 +55,23 @@ public class DummyController implements DummySwagger {
         );
     }
 
+
+    @GetMapping("/{reportId}/comments")
+    public String getDummyReportComments(
+            @PathVariable("reportId") String reportId,
+            @RequestParam("commentType") CommentType commentType )throws IOException {
+
+        // resources/dummies/reports/{reportId}/{section}.json
+        String path = String.format("dummies/reports/%s/comment_%s.json", reportId, commentType.toString().toLowerCase());
+        ClassPathResource resource = new ClassPathResource(path);
+        // 존재하지 않으면 예외 던짐 → 전역 핸들러에서 처리
+        if (!resource.exists()) {
+            throw new GeneralException(ErrorStatus._DUMMY_NOT_FOUND);
+        }
+        return FileCopyUtils.copyToString(
+                new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8)
+        );
+    }
 
     @GetMapping("/videos")
     public String getDummyVideos() throws IOException {
