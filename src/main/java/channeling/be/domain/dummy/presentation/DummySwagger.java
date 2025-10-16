@@ -1,10 +1,12 @@
 package channeling.be.domain.dummy.presentation;
 
+import channeling.be.domain.comment.domain.CommentType;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 
@@ -19,10 +21,21 @@ public interface DummySwagger {
     String getDummyReportSection(
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable String reportId,
-            @Parameter(description = "요청 섹션 이름 (overview, comment, analysis)", example = "overview")
+            @Parameter(description = "요청 섹션 이름 (overview, analysis)", example = "overview")
             @PathVariable String section
     ) throws IOException;
 
+
+    @Operation(
+            summary = "리포트 댓글 타입별 조회",
+            description = "reportId와 commentType 에 따라 더미 JSON 파일을 그대로 반환합니다."
+    )
+    @GetMapping("/{reportId}/comments")
+    String getDummyReportComments(
+            @Parameter(description = "요청 리포트 아이디", example = "1")
+            @PathVariable("reportId") String reportId,
+            @Parameter(description = "댓글 타입 (NEUTRAL, POSITIVE, NEGATIVE, ADVICE_OPINION,)", example = "NEUTRAL")
+            @RequestParam("commentType") CommentType commentType )throws IOException;
 
 
     @Operation(summary = "더미 비디오 리스트 조회", description = "더미 JSON 파일에서 비디오 리스트를 반환합니다.")
