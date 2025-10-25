@@ -21,8 +21,8 @@ public interface DummySwagger {
     String getDummyReportSection(
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable String reportId,
-            @Parameter(description = "요청 섹션 이름 (overview, analysis)", example = "overview")
-            @PathVariable String section
+            @Parameter(description = "요청 섹션 이름")
+            @PathVariable ReportSection section
     ) throws IOException;
 
 
