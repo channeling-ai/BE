@@ -1,17 +1,17 @@
-<!-- <?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 로그 파일이 저장될 경로 설정 -->
     <property name="LOG_PATH" value="logs"/>
     <property name="LOG_FILE_NAME" value="channeling"/>
-    
+
     <!-- 콘솔 출력 설정 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %cyan([%thread]) %highlight(%-5level) %yellow(%logger{36}) - %msg%n</pattern>
         </encoder>
     </appender>
-    
-    <!-- 전체 로그 파일 설정 - 임시 비활성화 -->
+
+    <!-- 전체 로그 파일 설정 - 임시 비활성화
     <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${LOG_FILE_NAME}-all.log</file>
         <encoder>
@@ -24,9 +24,9 @@
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
     </appender>
+    -->
 
-
-    <!-- Warning 이상 로그 파일 설정 - 임시 비활성화 -->
+    <!-- Warning 이상 로그 파일 설정 - 임시 비활성화
     <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${LOG_FILE_NAME}-warn.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -43,15 +43,11 @@
         </rollingPolicy>
     </appender>
     -->
-    
-    
+
     <!-- 개발 환경 설정 -->
     <springProfile name="!prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <!-- 파일 로그 임시 비활성화 -->
-            <!-- <appender-ref ref="ALL_FILE"/> -->
-            <!-- <appender-ref ref="WARN_FILE"/> -->
         </root>
         <!-- 개발 환경에서는 SQL 로그도 파일에 출력 -->
         <logger name="org.springframework.jdbc" level="DEBUG"/>
@@ -63,24 +59,21 @@
     <springProfile name="prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <!-- 파일 로그 임시 비활성화 -->
-            <!-- <appender-ref ref="ALL_FILE"/> -->
-            <!-- <appender-ref ref="WARN_FILE"/> -->
         </root>
         <!-- 운영 환경에서는 보안상 민감한 로그 레벨 조정 -->
         <logger name="org.springframework.security" level="WARN"/>
         <logger name="org.springframework.web" level="WARN"/>
     </springProfile>
-    
+
     <!-- 애플리케이션 로거 설정 -->
     <logger name="channeling.be" level="INFO"/>
-    
+
     <!-- 예외 처리 관련 로거 -->
     <logger name="channeling.be.response.exception" level="DEBUG"/>
     <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" level="DEBUG"/>
-    
+
     <!-- 외부 라이브러리 로그 레벨 조정 -->
     <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="org.springframework.boot.autoconfigure" level="INFO"/>
     <logger name="org.springframework.boot.web.embedded" level="INFO"/>
-</configuration> -->
+</configuration>
