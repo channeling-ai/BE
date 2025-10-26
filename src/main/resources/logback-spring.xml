@@ -11,7 +11,7 @@
         </encoder>
     </appender>
 
-    <!-- 전체 로그 파일 설정 - 임시 비활성화
+    <!-- File appender disabled temporarily
     <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${LOG_FILE_NAME}-all.log</file>
         <encoder>
@@ -25,8 +25,6 @@
         </rollingPolicy>
     </appender>
 
-
-    <!-- Warning 이상 로그 파일 설정 - 임시 비활성화
     <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${LOG_FILE_NAME}-warn.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
