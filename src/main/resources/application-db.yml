@@ -2,8 +2,8 @@ spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:5432}/${PG_DATABASE:channeling}
-    username: ${PG_USER:channeling}
-    password: ${PG_PASSWORD:channeling1234}
+    username: ${PG_USER}
+    password: ${PG_PASSWORD}
 
   jpa:
     hibernate:
