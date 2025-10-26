@@ -11,7 +11,8 @@
         </encoder>
     </appender>
     
-    <!-- 전체 로그 파일 설정 -->
+    <!-- 전체 로그 파일 설정 - 임시 비활성화 -->
+    <!--
     <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${LOG_FILE_NAME}-all.log</file>
         <encoder>
@@ -24,8 +25,10 @@
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
     </appender>
-    
-    <!-- Warning 이상 로그 파일 설정 -->
+    -->
+
+    <!-- Warning 이상 로그 파일 설정 - 임시 비활성화 -->
+    <!--
     <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/${LOG_FILE_NAME}-warn.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
@@ -41,6 +44,7 @@
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
     </appender>
+    -->
     
     <!-- 개발 환경 설정 -->
     <springProfile name="!prod">
