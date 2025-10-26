@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<!-- <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 로그 파일이 저장될 경로 설정 -->
     <property name="LOG_PATH" value="logs"/>
@@ -24,7 +24,7 @@
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
     </appender>
-    -->
+
 
     <!-- Warning 이상 로그 파일 설정 - 임시 비활성화
     <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
