@@ -46,21 +46,23 @@
     <springProfile name="!prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ALL_FILE"/>
-            <appender-ref ref="WARN_FILE"/>
+            <!-- 파일 로그 임시 비활성화 -->
+            <!-- <appender-ref ref="ALL_FILE"/> -->
+            <!-- <appender-ref ref="WARN_FILE"/> -->
         </root>
         <!-- 개발 환경에서는 SQL 로그도 파일에 출력 -->
         <logger name="org.springframework.jdbc" level="DEBUG"/>
         <logger name="org.hibernate.SQL" level="DEBUG"/>
         <logger name="org.hibernate.type" level="TRACE"/>
     </springProfile>
-    
+
     <!-- 운영 환경 설정 -->
     <springProfile name="prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
-            <appender-ref ref="ALL_FILE"/>
-            <appender-ref ref="WARN_FILE"/>
+            <!-- 파일 로그 임시 비활성화 -->
+            <!-- <appender-ref ref="ALL_FILE"/> -->
+            <!-- <appender-ref ref="WARN_FILE"/> -->
         </root>
         <!-- 운영 환경에서는 보안상 민감한 로그 레벨 조정 -->
         <logger name="org.springframework.security" level="WARN"/>
