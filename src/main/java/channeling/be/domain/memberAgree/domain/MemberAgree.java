@@ -5,6 +5,7 @@ import channeling.be.domain.member.domain.Member;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Entity
 @Getter
 @Builder
