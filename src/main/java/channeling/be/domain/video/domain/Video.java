@@ -50,6 +50,6 @@ public class Video extends BaseEntity {
     @Column
     private String thumbnail; // 썸네일 사진
 
-    @Column(length = 500)
+    @Column(length = 5000)
     private String description; // 영상 설명
 }

@@ -160,41 +160,39 @@ public class ChannelServiceImpl implements ChannelService {
 	}
 
 	private Stats updateVideosAndAccumulateStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
-		// 두 리스트가 항상 같은 크기와 순서를 가짐을 보장하는 방어 코드
-		if (briefs.size() != details.size()) {
-			throw new IllegalArgumentException("Briefs and details lists must be parallel and have the same size.");
-		}
+		long likeCount = 0, commentCount = 0;
 
-		long likeCount = 0;
-		long commentCount = 0;
-
-		// 1. DB 동영상을 Map으로 변환
-		Map<String, Video> dbVideoMap = videoService.findVideosByChannel(channel).stream()
-				.collect(Collectors.toMap(Video::getYoutubeVideoId, v -> v));
-
-		// 2. 새로 가져온 동영상 목록(briefs)을 기준으로 순회(신규 동영상 처리 보장)
 		for (int i = 0; i < briefs.size(); i++) {
 			YoutubeVideoBriefDTO brief = briefs.get(i);
 			YoutubeVideoDetailDTO detail = details.get(i);
-			String videoId = brief.getVideoId();
-
-			// 3. 신규/기존 동영상 모두 저장 또는 업데이트 (Upsert)
-			videoService.updateVideo(brief, detail, channel);
-
-			// 4. 모든 최신 동영상의 통계를 정확하게 합산
 			likeCount += detail.getLikeCount();
 			commentCount += detail.getCommentCount();
-
-			// 5. 처리된 동영상은 Map에서 제거 (루프가 끝나면 dbVideoMap에는 삭제되어야 할 동영상만 남음)
-			dbVideoMap.remove(videoId);
+			videoService.updateVideo(brief, detail, channel);
 		}
-
-		// 6. Map에 남아있는 동영상(최신 목록에 없던 동영상)을 DB에서 삭제
-		for (Video videoToDelete : dbVideoMap.values()) {
-			videoService.deleteVideo(videoToDelete);
-		}
-
 		return new Stats(likeCount, commentCount);
+
+//		List<Video> dbVideos = videoService.findVideosByChannel(channel);
+//		Set<String> briefsVideoIds = briefs.stream()
+//			.map(YoutubeVideoBriefDTO::getVideoId)
+//			.collect(Collectors.toSet());
+//
+//		for (Video dbVideo : dbVideos) {
+//			if (briefsVideoIds.contains(dbVideo.getYoutubeVideoId())) {
+//				// briefs에서 해당 videoId의 brief와 detail을 찾아 update
+//				int idx = IntStream.range(0, briefs.size())
+//					.filter(i -> briefs.get(i).getVideoId().equals(dbVideo.getYoutubeVideoId()))
+//					.findFirst().orElse(-1);
+//				if (idx != -1) {
+//					videoService.updateVideo(briefs.get(idx), details.get(idx), channel);
+//					likeCount += details.get(idx).getLikeCount();
+//					commentCount += details.get(idx).getCommentCount();
+//				}
+//			} else {
+//				videoService.deleteVideo(dbVideo);
+//			}
+//		}
+
+//		return new Stats(likeCount, commentCount);
 	}
 
 
