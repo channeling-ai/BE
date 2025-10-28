@@ -39,4 +39,12 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
     WHERE i.video.id = :videoId And i.video.channel.member.id = :memberId AND i.isBookMarked = false
  """)
     void deleteAllByVideoWithoutBookmarked(@Param("videoId") Long videoId, @Param("memberId")  Long memberId);
+
+    @Modifying
+    @Query("""
+    DELETE
+    FROM Idea i
+    WHERE i.video.channel.member.id = :memberId AND i.isBookMarked = false
+ """)
+    int deleteAllByMemberWithoutBookmarked(@Param("memberId")  Long memberId);
 }

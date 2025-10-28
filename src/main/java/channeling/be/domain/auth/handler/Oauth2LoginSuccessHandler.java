@@ -2,6 +2,7 @@ package channeling.be.domain.auth.handler;
 
 import channeling.be.domain.auth.application.MemberOauth2UserService;
 import channeling.be.domain.auth.application.MemberOauth2UserService.LoginResult;
+import channeling.be.domain.idea.application.IdeaService;
 import channeling.be.domain.member.application.MemberService;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,10 +28,9 @@ import java.util.Map;
 @Component
 public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
-    private final ObjectMapper om;
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final JwtUtil jwtUtil;    // JWT 토큰 생성기
-    private final MemberService memberService;
+    private final IdeaService ideaService;
     private final MemberOauth2UserService memberOauth2UserService;
 
     // 프론트 콜백
@@ -71,6 +71,8 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
          * ------------------------------------------------- */
 
         LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
+
+        ideaService.deleteNotBookMarkedIdeas(result.member());
 
         String accessToken = jwtUtil.createAccessToken(result.member());
 

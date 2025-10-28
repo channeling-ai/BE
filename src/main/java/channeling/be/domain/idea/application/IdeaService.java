@@ -9,5 +9,7 @@ public interface IdeaService {
 
     IdeaResDto.GetBookmarkedIdeaListRes getBookmarkedIdeaList(Member loginMember, int page, int size);
 
+    void deleteNotBookMarkedIdeas(Member loginMember);
+
 }
 
