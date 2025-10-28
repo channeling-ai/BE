@@ -45,11 +45,11 @@ public class LlmServerUtil {
         // requestbody 생성
         Map<String, String> requestBody = new HashMap<>();
         requestBody.put("channel_id", channel.getId().toString());
-        requestBody.put("keyword", dto.keyword());
-        requestBody.put("video_type", dto.videoType().toString());
         requestBody.put("detail", dto.detail());
+        requestBody.put("keyword", dto.keyword());
+        if (dto.videoType()!=null) requestBody.put("video_type", dto.videoType().toString());
 
-        log.info("요청형태!!!{}", requestBody);
+        log.info("아이디어 생성 요청형태!!!{}", requestBody);
 
         // 헤더 생성
         HttpHeaders headers = new HttpHeaders();
