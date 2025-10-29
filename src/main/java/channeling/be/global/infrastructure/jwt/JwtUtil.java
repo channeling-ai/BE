@@ -4,6 +4,7 @@ import channeling.be.domain.member.domain.Member;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.Date;
 import java.util.Optional;
 
 /**
@@ -54,4 +55,6 @@ public interface JwtUtil {
      * @return 블랙리스트에 있으면 true, 아니면 false
      */
     boolean isTokenInBlackList(String accessToken);
+
+    Date getIssuedAt(String accessToken);
 }

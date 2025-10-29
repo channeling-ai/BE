@@ -6,13 +6,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 
 public class CustomUserDetails implements UserDetails {
 
     private final Member member;
+    private Date loginTime;
 
     public CustomUserDetails(Member member) {
         this.member = member;
+        this.loginTime = null;
+    }
+
+    public void setLoginTime(Date date) {
+        loginTime = date;
+    }
+
+    public Date getLoginTime() {
+        return loginTime;
     }
 
     @Override
