@@ -122,10 +122,6 @@ public class ReportServiceImpl implements ReportService {
                 if (task.getAnalysisStatus() != TaskStatus.COMPLETED)
                     throw new TaskHandler(ErrorStatus._REPORT_NOT_ANALYTICS);
                 break;
-            case IDEA:
-                if (task.getIdeaStatus() != TaskStatus.COMPLETED)
-                    throw new TaskHandler(ErrorStatus._REPORT_NOT_IDEA);
-                break;
             default:
                 throw new IllegalArgumentException("Invalid PageType: " + type);
         }
