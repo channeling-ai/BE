@@ -25,28 +25,6 @@ public class Report extends BaseEntity {
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
 
-
-    @OneToMany(
-            mappedBy = "report",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Report 삭제 시 TrendKeyword도 같이 삭제
-            orphanRemoval = true             // Report에서 TrendKeyword 제거하면 DB에서도 삭제
-    )
-    @BatchSize(size = 20)                 // LAZY 로딩 시 20개 단위로 한 번에 가져오기
-    private List<TrendKeyword> trends;
-
-    @OneToMany(
-            mappedBy = "report",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Report 삭제 시 Comment도 같이 삭제
-            orphanRemoval = true             // Report에서 Comment 제거하면 DB에서도 삭제
-    )
-    private List<Comment> comments;
-
-
-    @OneToOne(mappedBy = "report", fetch = FetchType.LAZY)
-    private Task task;
-
     @Column
     private String title; // 영상 제목
 
@@ -107,6 +85,8 @@ public class Report extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
 
-
+    @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private List<TrendKeyword> trends;
 
 }
