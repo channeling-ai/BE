@@ -1,7 +1,9 @@
 package channeling.be.domain.idea.presentation;
 
 import channeling.be.domain.auth.annotation.LoginMember;
+import channeling.be.domain.auth.domain.CustomUserDetails;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.report.presentation.ReportResDto;
 import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Tag(name = "아이디어 API", description = "아이디어 관련 API입니다.")
@@ -38,4 +41,11 @@ public interface IdeaSwagger {
     ApiResponse<List<LlmResDto.CreateIdeasResDto>> createIdeas(@RequestBody IdeaReqDto.CreateIdeaReqDto dto,
                                                                @Parameter(hidden = true)
                                                                @LoginMember Member loginMember);
+
+    @Operation(summary = "아이디어 조회", description = "아이디어 페이지 - 채널 기반 아이디어 목록 조회")
+    @GetMapping("")
+    ApiResponse<IdeaResDto.IdeaCursorRes> getIdeas(
+            Long cursorId,
+            LocalDateTime cursorTime,
+            @Parameter(hidden = true) CustomUserDetails customUserDetails);
 }

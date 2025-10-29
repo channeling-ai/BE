@@ -1,5 +1,6 @@
 package channeling.be.domain.idea.application;
 
+import channeling.be.domain.auth.domain.CustomUserDetails;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.idea.domain.Idea;
@@ -8,6 +9,7 @@ import channeling.be.domain.idea.presentation.IdeaConverter;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.repository.MemberRepository;
 import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.global.infrastructure.llm.LlmServerUtil;
 import channeling.be.response.exception.handler.IdeaHandler;
@@ -20,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 
 import static channeling.be.response.code.status.ErrorStatus.*;
@@ -28,9 +33,12 @@ import static channeling.be.response.code.status.ErrorStatus.*;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class IdeaServiceImpl implements IdeaService {
+
     private final IdeaRepository ideaRepository;
     private final ChannelRepository channelRepository;
     private final LlmServerUtil llmServerUtil;
+
+    private final int IDEA_CURSOR_SIZE = 12;
 
     @Override
     @Transactional
@@ -49,7 +57,7 @@ public class IdeaServiceImpl implements IdeaService {
     @Override
     public IdeaResDto.GetBookmarkedIdeaListRes getBookmarkedIdeaList(Member loginMember, int page, int size) {
 
-        Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Idea> ideaPage = ideaRepository.findIdeasByMemberId(loginMember.getId(), pageable);
         return IdeaConverter.toBookmarkedIdeaListRes(ideaPage, page, size);
 
@@ -60,5 +68,44 @@ public class IdeaServiceImpl implements IdeaService {
         Channel channel = channelRepository.findByMember(member)
                 .orElseThrow(() -> new IdeaHandler(_CHANNEL_NOT_FOUND));
         return llmServerUtil.createIdeas(dto, channel);
+    }
+
+    // 아이디어 페이지 - 채널 기반 아이디어 목록 조회
+    // 로그인 시점 이후 생성된 아이디어 목록 확인 가능 (북마크 아이디어는 북마크 페이지에서 확인)
+    @Override
+    public IdeaResDto.IdeaCursorRes getIdeas(Long cursorId,
+                                             LocalDateTime cursorTime,
+                                             CustomUserDetails loginMember) {
+
+        LocalDateTime loginAt = convertToLocalDateTime(loginMember.getLoginTime());
+
+        Pageable page = PageRequest.of(0, IDEA_CURSOR_SIZE);
+        boolean hasNext = false;
+
+        List<Idea> ideas = (cursorId == null || cursorTime == null)
+                ? ideaRepository.findByIdeaFirstCursor(loginAt, page)
+                : ideaRepository.findByIdeaAfterCursor(loginAt, cursorId, cursorTime, page);
+
+
+        if (!ideas.isEmpty()) {
+            Idea last = ideas.get(ideas.size() - 1);
+            List<Idea> one = ideaRepository.findByIdeaAfterCursor(
+                    loginAt,
+                    last.getId(),
+                    last.getCreatedAt(),
+                    PageRequest.of(0, 1)
+            );
+            if (!one.isEmpty()) hasNext = true;
+        }
+
+        return IdeaConverter.toIdeaCursor(ideas, hasNext);
+    }
+
+    // 로그인 시각 Date -> LocalDateTime 변환
+    // TODO 타임존 확인 필요
+    private LocalDateTime convertToLocalDateTime(Date date) {
+        return date.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
     }
 }

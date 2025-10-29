@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,5 +30,23 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
     WHERE m.id = :memberId AND i.isBookMarked = true
 """)
     Page<Idea> findIdeasByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("""
+    SELECT i
+    FROM Idea i
+    WHERE i.createdAt > :loginTime
+    ORDER BY i.createdAt DESC, i.id DESC
+    """)
+    List<Idea> findByIdeaFirstCursor(LocalDateTime loginTime, Pageable pageable);
+
+    @Query("""
+    SELECT i
+    FROM Idea i
+    WHERE i.createdAt > :loginTime
+    AND (i.createdAt < :cursorTime 
+        OR (i.createdAt = :cursorTime AND i.id < :cursorId))
+    ORDER BY i.createdAt DESC, i.id DESC
+    """)
+    List<Idea> findByIdeaAfterCursor(LocalDateTime loginTime, Long cursorId, LocalDateTime cursorTime, Pageable pageable);
 
 }
