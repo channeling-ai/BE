@@ -9,7 +9,6 @@ import channeling.be.domain.idea.presentation.IdeaConverter;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
 import channeling.be.domain.member.domain.Member;
-import channeling.be.domain.member.domain.repository.MemberRepository;
 import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.global.infrastructure.llm.LlmServerUtil;
 import channeling.be.response.exception.handler.IdeaHandler;
@@ -20,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -39,6 +37,7 @@ public class IdeaServiceImpl implements IdeaService {
     private final LlmServerUtil llmServerUtil;
 
     private final int IDEA_CURSOR_SIZE = 12;
+    private final ZoneId timeZone = ZoneId.systemDefault(); // TODO 타임존 확인 필요
 
     @Override
     @Transactional
@@ -78,34 +77,24 @@ public class IdeaServiceImpl implements IdeaService {
                                              CustomUserDetails loginMember) {
 
         LocalDateTime loginAt = convertToLocalDateTime(loginMember.getLoginTime());
-
         Pageable page = PageRequest.of(0, IDEA_CURSOR_SIZE);
-        boolean hasNext = false;
 
         List<Idea> ideas = (cursorId == null || cursorTime == null)
                 ? ideaRepository.findByIdeaFirstCursor(loginAt, page)
                 : ideaRepository.findByIdeaAfterCursor(loginAt, cursorId, cursorTime, page);
 
-
-        if (!ideas.isEmpty()) {
-            Idea last = ideas.get(ideas.size() - 1);
-            List<Idea> one = ideaRepository.findByIdeaAfterCursor(
-                    loginAt,
-                    last.getId(),
-                    last.getCreatedAt(),
-                    PageRequest.of(0, 1)
-            );
-            if (!one.isEmpty()) hasNext = true;
+        boolean hasNext = ideas.size() > IDEA_CURSOR_SIZE;
+        if (hasNext) {
+            ideas = ideas.subList(0, IDEA_CURSOR_SIZE);
         }
 
         return IdeaConverter.toIdeaCursor(ideas, hasNext);
     }
 
     // 로그인 시각 Date -> LocalDateTime 변환
-    // TODO 타임존 확인 필요
     private LocalDateTime convertToLocalDateTime(Date date) {
         return date.toInstant()
-                .atZone(ZoneId.systemDefault())
+                .atZone(timeZone)
                 .toLocalDateTime();
     }
 }
