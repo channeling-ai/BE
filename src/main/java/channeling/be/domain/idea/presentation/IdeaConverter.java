@@ -5,6 +5,7 @@ import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.idea.presentation.IdeaResDto.ChangeIdeaBookmarkRes;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class IdeaConverter {
@@ -13,7 +14,6 @@ public class IdeaConverter {
     }
 
     public static IdeaResDto.GetBookmarkedIdeaListRes toBookmarkedIdeaListRes(Page<Idea> ideaPage, int page, int size) {
-
         return new IdeaResDto.GetBookmarkedIdeaListRes(
                 ideaPage.getTotalElements(),
                 page,
@@ -25,6 +25,21 @@ public class IdeaConverter {
 
         );
     }
+
+    public static IdeaResDto.IdeaCursorRes toIdeaCursor(List<Idea> ideas, boolean hasNext) {
+        List<IdeaResDto.SingleIdeaRes> ideaRes = ideas.stream()
+                .map(IdeaConverter::toSingleIdeaRes)
+                .toList();
+
+        return new IdeaResDto.IdeaCursorRes(
+                ideaRes,
+                ideas.isEmpty() ? null : ideas.get(ideas.size() - 1).getId(),
+                ideas.isEmpty() ? null : ideas.get(ideas.size() - 1).getCreatedAt(),
+                hasNext
+        );
+
+    }
+
     private static IdeaResDto.SingleIdeaRes toSingleIdeaRes(Idea idea) {
         return new IdeaResDto.SingleIdeaRes(idea.getId(), idea.getTitle(), idea.getContent(), idea.getHashTag(), idea.getIsBookMarked());
     }

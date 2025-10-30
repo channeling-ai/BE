@@ -1,6 +1,7 @@
 package channeling.be.domain.auth.filter;
 
 import channeling.be.domain.auth.application.CustomUserDetailsService;
+import channeling.be.domain.auth.domain.CustomUserDetails;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,13 +19,15 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 
 /**
  * JWT 인증용 커스텀 필터.
  * - 요청당 한 번(OncePerRequestFilter) 실행된다.
  * - Access Token 검증 → Google ID 추출 → DB 조회 → 인증 객체 생성 과정을 거쳐
- *   SecurityContext에 인증 정보를 저장한다.
+ * SecurityContext에 인증 정보를 저장한다.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -55,6 +58,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         }
         checkAccessTokenAndAuthentication(request, response, filterChain);
     }
+
     private boolean isWhitelisted(HttpServletRequest request) {
         String path = request.getRequestURI();
         for (String pattern : JWT_WHITELIST) {
@@ -64,6 +68,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         }
         return false;
     }
+
     /**
      * ① 요청 헤더에서 토큰 추출
      * ② 토큰 유효성·블랙리스트 여부 검사
@@ -75,17 +80,35 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
         jwtUtil.extractAccessToken(request)
                 .filter(jwtUtil::isTokenValid) // 토큰을 검증
                 .filter(accessToken -> !jwtUtil.isTokenInBlackList(accessToken)) // 블랙리스틑 여부 판단
-                .flatMap(jwtUtil::extractGoogleId) // 토큰에서 구글 아이디 추출
-                .map(customUserDetailsService::loadUserByUsername) // db 에서 존재하는 지 확인
-                .ifPresent(this::saveAuthentication); // -> 통과하면 로그인 성공! -> 세션에 로그인 멤버 저장
+                .ifPresent(this::authenticateUser);
+
         filterChain.doFilter(request, response);
     }
 
     /**
+     * 유저 인증 관련 처리
+     * - 토큰에서 Google ID를 추출 / 로그인 시점 추출
+     * - DB에서 UserDetails를 조회
+     * - 인증 객체를 생성하여 SecurityContextHolder에 저장
+     */
+    private void authenticateUser(String token) {
+        Date loginAt = jwtUtil.getIssuedAt(token);
+        jwtUtil.extractGoogleId(token)
+                .map(customUserDetailsService::loadUserByUsername)
+                .filter(CustomUserDetails.class::isInstance)
+                .map(CustomUserDetails.class::cast)
+                .ifPresent(userDetails -> {
+                    userDetails.setLoginTime(loginAt);
+                    saveAuthentication(userDetails);
+                });
+    }
+
+    /**
      * 인증 객체를 SecurityContextHolder에 저장한다.
+     *
      * @param userDetails 인증에 성공한 사용자 정보
      */
-    private void saveAuthentication(UserDetails userDetails) {
+    private void saveAuthentication(CustomUserDetails userDetails) {
         Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, Collections.emptyList());
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
