@@ -72,12 +72,8 @@ public class ReportConverter {
                 report.getVideo().getIdeas().stream()
                         .map(ReportConverter::toResIdeaInfo)
                         .sorted(Comparator.comparing(ReportResDto.IdeaInfo::isBookMarked))
-                        .collect(Collectors.toList()),
-                report.getTrends().stream()
-                        .map(ReportConverter::toResTrendKeywordInfo)
-                        .sorted(Comparator.comparing(ReportResDto.TrendKeywordInfo::score).reversed())
-                        .collect(Collectors.toList())
-        );
+                        .collect(Collectors.toList()
+        ));
     }
     private static ReportResDto.IdeaInfo toResIdeaInfo(Idea idea) {
         return new ReportResDto.IdeaInfo(
