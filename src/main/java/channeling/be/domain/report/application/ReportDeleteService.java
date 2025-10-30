@@ -26,7 +26,7 @@ public class ReportDeleteService {
     @Transactional
     public void deleteExistingReport(Report report, Video video, Member member) {
         log.info("기존 리포트 삭제 시작 - reportId: {}", report.getId());
-        
+
         // 연관된 북마크 하지 않은 아이디어 리스트 삭제
         ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
         // 연관된 댓글 리스트 삭제
@@ -37,7 +37,7 @@ public class ReportDeleteService {
         taskRepository.deleteTaskByReportId(report.getId());
         // 리포트 삭제
         reportRepository.deleteById(report.getId());
-        
+
         // 명시적 flush로 삭제 즉시 실행
         reportRepository.flush();
         log.info("기존 리포트 삭제 완료 - reportId: {}", report.getId());

@@ -170,7 +170,7 @@ public class ChannelServiceImpl implements ChannelService {
 			videoService.updateVideo(brief, detail, channel);
 		}
 		return new Stats(likeCount, commentCount);
-//
+
 //		List<Video> dbVideos = videoService.findVideosByChannel(channel);
 //		Set<String> briefsVideoIds = briefs.stream()
 //			.map(YoutubeVideoBriefDTO::getVideoId)

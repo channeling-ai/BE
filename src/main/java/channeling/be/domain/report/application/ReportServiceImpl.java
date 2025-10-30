@@ -54,8 +54,8 @@ import java.util.Optional;
 @Primary
 public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
-	private final ReportRepository reportRepository;
-	private final CommentRepository commentRepository;
+    private final ReportRepository reportRepository;
+    private final CommentRepository commentRepository;
     private final IdeaRepository ideaRepository;
     private final TrendKeywordRepository trendKeywordRepository;
     private final VideoRepository videoRepository;
@@ -64,8 +64,8 @@ public class ReportServiceImpl implements ReportService {
     private final ChannelRepository channelRepository;
 
     //환경변수에서 FASTAPI_URL 환경변수 불러오기
-	@Value("${FASTAPI_URL:http://localhost:8000}")
-	private String baseFastApiUrl;
+    @Value("${FASTAPI_URL:http://localhost:8000}")
+    private String baseFastApiUrl;
 
     @Override
     @Transactional(readOnly = true)
@@ -85,19 +85,19 @@ public class ReportServiceImpl implements ReportService {
         return ReportConverter.toReportAnalysisStatus(task,report);
     }
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
     public Report getReportByIdAndMember(Long reportId, Member member) {
-		Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
-		return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+        return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
 
-	}
+    }
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
     public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
-		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
-	}
+        return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+    }
 
     @Override
     public Report checkReport(Long reportId, PageType type, Member member) {
@@ -126,46 +126,46 @@ public class ReportServiceImpl implements ReportService {
 
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
-	@Override
-	@Transactional
-	public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
-		// 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
-		Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
+    @Override
+    @Transactional
+    public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
+        // 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
+        Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
 
-		//존재한다면
-		if (optionalReport.isPresent()) {
-			Report report = optionalReport.get();
-			Video video = report.getVideo();
-			// 연관된 북마크 하지 않은 아이디어 리스트 삭제
-			ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
-			// 연관된 댓글 리스트 삭제
-			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-			// 연관되 키워드 리스트 가져오기
-			trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-			// 연관된 task 삭제
-			taskRepository.deleteTaskByReportId(report.getId());
-			// 리포트 삭제
-			reportRepository.deleteById(report.getId());
-		}
-		return new ReportResDto.deleteReport(reportId);
-	}
+        //존재한다면
+        if (optionalReport.isPresent()) {
+            Report report = optionalReport.get();
+            Video video = report.getVideo();
+            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
+            ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
+            // 연관된 댓글 리스트 삭제
+            commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+            // 연관되 키워드 리스트 가져오기
+            trendKeywordRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+            // 연관된 task 삭제
+            taskRepository.deleteTaskByReportId(report.getId());
+            // 리포트 삭제
+            reportRepository.deleteById(report.getId());
+        }
+        return new ReportResDto.deleteReport(reportId);
+    }
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
-	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoType type, int page,
-		int size) {
-		Pageable pageable= PageRequest.of(page-1,size);
-		Page<Report> reports;
-		if(VideoType.SHORTS.equals(type))
-			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
-		else
-			reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryNotOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
+    public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoType type, int page,
+                                                                     int size) {
+        Pageable pageable= PageRequest.of(page-1,size);
+        Page<Report> reports;
+        if(VideoType.SHORTS.equals(type))
+            reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
+        else
+            reports=reportRepository.findByVideoChannelIdAndVideoVideoCategoryNotOrderByUpdatedAtDesc(channelId,VideoCategory.SHORTS,pageable);
 
         Channel channel = channelRepository.findById(channelId).orElseThrow(() -> new ChannelHandler(ErrorStatus._CHANNEL_NOT_FOUND));
 
         return reports.map(report -> ReportResDTO.ReportBrief.from(report, channel));
 
-	}
+    }
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
@@ -206,7 +206,7 @@ public class ReportServiceImpl implements ReportService {
         // HTTP 요청 보내기
         RestTemplate restTemplate = new RestTemplate();
         // url 설정
-		String url = UriComponentsBuilder
+        String url = UriComponentsBuilder
                 .fromHttpUrl(baseFastApiUrl+"/reports/v2")
                 .queryParam("video_id", videoId)
                 .toUriString();

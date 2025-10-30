@@ -30,4 +30,8 @@ public class Task extends BaseEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TaskStatus ideaStatus;
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
 }

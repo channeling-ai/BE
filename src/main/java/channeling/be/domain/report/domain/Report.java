@@ -1,8 +1,9 @@
 package channeling.be.domain.report.domain;
 
 import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
+import channeling.be.domain.comment.domain.Comment;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
@@ -58,10 +59,10 @@ public class Report extends BaseEntity {
     private Integer concept; //컨셉 일관성
 
     @Column
-    private Long seo; // seo 구성
+    private Integer seo; // seo 구성
 
     @Column
-    private Long revisit; // 재방문률
+    private Integer revisit; // 재방문률
 
     @Column(columnDefinition = "TEXT")
     private String summary; // 요약본
@@ -83,7 +84,6 @@ public class Report extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
-
 
     @OneToMany(mappedBy = "report", fetch = FetchType.LAZY)
     @BatchSize(size = 20)
