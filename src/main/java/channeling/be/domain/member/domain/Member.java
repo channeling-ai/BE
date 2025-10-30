@@ -22,7 +22,7 @@ public class Member extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String googleEmail; // 구글 이메일
 
-    @Column(length = 100)
+    @Column
     private String profileImage; // 프로필 이미지
 
     @Column(length = 100)
