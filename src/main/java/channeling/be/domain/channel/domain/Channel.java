@@ -1,5 +1,6 @@
 package channeling.be.domain.channel.domain;
 
+import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
 import channeling.be.domain.common.BaseEntity;
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.member.domain.Member;
@@ -78,6 +79,9 @@ public class Channel extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime channelUpdateAt; // 채널 정보 업데이트 시기
 
+    @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private List<TrendKeyword> trends;
 
     public void editConcept(String concept) {
         this.concept = concept;
