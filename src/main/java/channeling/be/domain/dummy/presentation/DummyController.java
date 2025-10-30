@@ -1,22 +1,12 @@
 package channeling.be.domain.dummy.presentation;
 
-import channeling.be.global.infrastructure.aws.S3Service;
-import channeling.be.response.exception.GeneralException;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import channeling.be.domain.comment.domain.CommentType;
-import channeling.be.response.code.status.ErrorStatus;
+import channeling.be.global.infrastructure.aws.S3Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 

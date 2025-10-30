@@ -2,6 +2,7 @@ package channeling.be.domain.channel.domain;
 
 import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
 import channeling.be.domain.common.BaseEntity;
+import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.VideoCategory;
 import jakarta.persistence.*;
@@ -25,13 +26,18 @@ public class Channel extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false, unique = true)
     private Member member;
 
-    @Column(nullable = false, unique = true, length = 30)
+    // TODO : 허유진, 사용 확인 필요
+    @OneToMany(mappedBy = "channel", fetch = FetchType.LAZY)
+    @BatchSize(size = 10)
+    private List<Idea> ideas;
+
+    @Column(nullable = false, unique = true)
     private String youtubeChannelId; // 채널 ID (유튜브 채널 ID)
 
-    @Column(nullable = false, unique = true, length = 30)
+    @Column(nullable = false, unique = true)
     private String youtubePlaylistId; // 플레이리스트 ID (유튜브 플레이리스트 ID)
 
-    @Column(length = 50, nullable = false)
+    @Column(nullable = false)
     private String name; // 채널 이름
 
     @Column(nullable = false)
@@ -58,10 +64,10 @@ public class Channel extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime joinDate; // 채널 가입일
 
-    @Column(length = 100, nullable = false)
+    @Column(nullable = false)
     private String target; // 시청자 타겟
 
-    @Column(length = 500, nullable = false)
+    @Column(nullable = false)
     private String concept; // 채널 컨셉
 
     @Column(nullable = false)

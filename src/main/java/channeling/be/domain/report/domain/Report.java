@@ -53,10 +53,10 @@ public class Report extends BaseEntity {
     private Integer concept; //컨셉 일관성
 
     @Column
-    private Long seo; // seo 구성
+    private Integer seo; // seo 구성
 
     @Column
-    private Long revisit; // 재방문률
+    private Integer revisit; // 재방문률
 
     @Column(columnDefinition = "TEXT")
     private String summary; // 요약본
