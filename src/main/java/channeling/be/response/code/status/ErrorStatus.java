@@ -62,9 +62,10 @@ public enum ErrorStatus implements BaseErrorCode {
     _VIDEO_NOT_MEMBER(HttpStatus.BAD_REQUEST, "VIDEO403", "해당 영상을 소유한 멤버가 아닙니다."),
 
     //토큰 관련 에러
-    _TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN400", "토큰이 만료되었습니다. 재로그인 해주세요.")
+    _TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN400", "토큰이 만료되었습니다. 재로그인 해주세요."),
 
-
+    //더미 관련 에러
+    _DUMMY_NOT_FOUND(HttpStatus.BAD_REQUEST, "DUMMY404", "더미데이터가 존재하지 않습니다.")
     ;
 
 
