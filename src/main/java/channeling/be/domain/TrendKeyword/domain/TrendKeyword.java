@@ -26,7 +26,7 @@ public class TrendKeyword extends BaseEntity {
     @Column(nullable = false)
     TrendKeywordType keywordType; // 트렌드 타입
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     String keyword; // 키워드
 
     @Column(nullable = false)

@@ -1,14 +1,9 @@
 package channeling.be.domain.report.domain;
 
-import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
-
-import java.util.List;
 
 @Entity
 @Getter

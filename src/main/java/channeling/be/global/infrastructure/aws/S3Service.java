@@ -22,7 +22,6 @@ import static channeling.be.response.code.status.ErrorStatus.*;
  * S3와 연동하여 파일 업로드 및 삭제 기능을 제공하는 서비스 클래스입니다.
  */
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class S3Service {
 

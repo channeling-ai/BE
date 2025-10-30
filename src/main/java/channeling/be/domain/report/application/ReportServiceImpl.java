@@ -53,8 +53,8 @@ import java.util.Optional;
 @Primary
 public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
-	private final ReportRepository reportRepository;
-	private final CommentRepository commentRepository;
+    private final ReportRepository reportRepository;
+    private final CommentRepository commentRepository;
     private final IdeaRepository ideaRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
@@ -62,8 +62,8 @@ public class ReportServiceImpl implements ReportService {
     private final ChannelRepository channelRepository;
 
     //환경변수에서 FASTAPI_URL 환경변수 불러오기
-	@Value("${FASTAPI_URL:http://localhost:8000}")
-	private String baseFastApiUrl;
+    @Value("${FASTAPI_URL:http://localhost:8000}")
+    private String baseFastApiUrl;
 
     @Override
     @Transactional(readOnly = true)
@@ -83,19 +83,19 @@ public class ReportServiceImpl implements ReportService {
         return ReportConverter.toReportAnalysisStatus(task,report);
     }
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
     public Report getReportByIdAndMember(Long reportId, Member member) {
-		Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
-		return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
+        Report report = reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
+        return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
 
-	}
+    }
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
     public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
-		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
-	}
+        return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
+    }
 
     @Override
     public Report checkReport(Long reportId, PageType type, Member member) {
@@ -124,11 +124,11 @@ public class ReportServiceImpl implements ReportService {
 
         return reportRepository.findByReportAndMember(report.getId(), member.getId()).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_MEMBER));
     }
-	@Override
-	@Transactional
-	public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
-		// 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
-		Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
+    @Override
+    @Transactional
+    public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
+        // 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
+        Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
 
 		//존재한다면
 		if (optionalReport.isPresent()) {
@@ -146,7 +146,7 @@ public class ReportServiceImpl implements ReportService {
 		return new ReportResDto.deleteReport(reportId);
 	}
 
-	@Override
+    @Override
     @Transactional(readOnly = true)
 	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoType type, int page,
 		int size) {
@@ -161,7 +161,7 @@ public class ReportServiceImpl implements ReportService {
 
         return reports.map(report -> ReportResDTO.ReportBrief.from(report, channel));
 
-	}
+    }
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
@@ -202,7 +202,7 @@ public class ReportServiceImpl implements ReportService {
         // HTTP 요청 보내기
         RestTemplate restTemplate = new RestTemplate();
         // url 설정
-		String url = UriComponentsBuilder
+        String url = UriComponentsBuilder
                 .fromHttpUrl(baseFastApiUrl+"/reports/v2")
                 .queryParam("video_id", videoId)
                 .toUriString();

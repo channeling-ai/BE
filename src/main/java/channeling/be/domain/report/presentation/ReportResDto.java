@@ -64,9 +64,9 @@ public class ReportResDto {
         @Schema(description = "개요-영상평가-컨셉일관성")
         Integer concept,
         @Schema(description = "개요-영상평가-seo구성")
-        Long seo,
+        Integer seo,
         @Schema(description = "개요-영상평가-재방문률")
-        Long revisit,
+        Integer revisit,
 
         @Schema(description = "개요-영상요약")
         String summary,
