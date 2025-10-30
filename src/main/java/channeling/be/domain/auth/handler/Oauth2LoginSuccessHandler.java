@@ -72,6 +72,11 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
 
+        // 로그인 시 마다 채널 컨셉과 트랜드 키워드에 대해 채널 맞춤형 키워드..??
+
+
+
+
         String accessToken = jwtUtil.createAccessToken(result.member());
 
         // 프론트 응답 생성
