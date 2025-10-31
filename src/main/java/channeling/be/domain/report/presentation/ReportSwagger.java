@@ -55,14 +55,6 @@ public interface ReportSwagger {
             @PathVariable("report-id") Long reportId,
             @Parameter(hidden = true) Member loginMember);
 
-    @Operation(summary = "리포트 아이디어 페이지 조회", description = "요청한 리포트의 아이디어 정보를 조회합니다.\n" +
-            "응답 필드의 상세정보는 아래 [ Shemas-IdeaReport ]를 참고해주세요. (ctrl + f)")
-    @GetMapping("/{report-id}/ideas")
-    ApiResponse<ReportResDto.IdeaReport> getReportIdea(
-            @Parameter(description = "요청 리포트 아이디", example = "1")
-            @PathVariable("report-id") Long reportId,
-            @Parameter(hidden = true) Member loginMember);
-
     @Operation(summary = "리포트 삭제", description = "요청한 리포트를 삭제합니다.")
     @DeleteMapping("/{report-id}")
     ApiResponse<ReportResDto.deleteReport> deleteReport(

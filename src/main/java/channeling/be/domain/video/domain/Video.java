@@ -2,13 +2,10 @@ package channeling.be.domain.video.domain;
 
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.Idea;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -53,10 +50,6 @@ public class Video extends BaseEntity {
     @Column
     private String thumbnail; // 썸네일 사진
 
-    @Column
+    @Column(length = 5000)
     private String description; // 영상 설명
-
-    @OneToMany(mappedBy = "video", fetch = FetchType.LAZY)
-    @BatchSize(size = 5)
-    private List<Idea> ideas;
 }

@@ -6,7 +6,7 @@ import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.presentation.ReportResDto;
 
-import org.springframework.data.domain.Page;;
+import org.springframework.data.domain.Page;
 
 import channeling.be.domain.report.presentation.dto.ReportResDTO;
 import channeling.be.domain.video.domain.VideoCategory;

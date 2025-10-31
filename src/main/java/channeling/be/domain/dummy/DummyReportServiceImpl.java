@@ -1,11 +1,11 @@
 package channeling.be.domain.dummy;
 
+import channeling.be.domain.comment.domain.repository.CommentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import channeling.be.domain.comment.domain.CommentType;
-import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.report.application.ReportService;
 import channeling.be.domain.report.domain.PageType;
@@ -28,29 +28,29 @@ public class DummyReportServiceImpl implements ReportService {
 	private final CommentRepository commentRepository;
 
 
-    @Override
-    @Transactional(readOnly = true)
-    public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long reportId) {
+	@Override
+	@Transactional(readOnly = true)
+	public ReportResDto.getReportAnalysisStatus getReportAnalysisStatus(Member member, Long reportId) {
 		return null;
-    }
+	}
 
 	@Override
-    @Transactional(readOnly = true)
-    public Report getReportByIdAndMember(Long reportId, Member member) {
+	@Transactional(readOnly = true)
+	public Report getReportByIdAndMember(Long reportId, Member member) {
 		return reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
 	}
 
 	@Override
-    @Transactional(readOnly = true)
-    public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
+	@Transactional(readOnly = true)
+	public ReportResDto.getCommentsByType getCommentsByType(Report report, CommentType commentType) {
 		return ReportConverter.toCommentsByType(commentType, commentRepository.findTop5ByReportAndCommentType(report, commentType));
 	}
 
-    @Override
-    public Report checkReport(Long reportId, PageType type, Member member) {
-        // TODO 태스크 삭제하지 않는다고 가정
+	@Override
+	public Report checkReport(Long reportId, PageType type, Member member) {
+		// TODO 태스크 삭제하지 않는다고 가정
 		return  reportRepository.findById(reportId).orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_FOUND));
-    }
+	}
 	@Override
 	@Transactional
 	public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
@@ -58,17 +58,17 @@ public class DummyReportServiceImpl implements ReportService {
 	}
 
 	@Override
-    @Transactional(readOnly = true)
+	@Transactional(readOnly = true)
 	public Page<ReportResDTO.ReportBrief> getChannelReportListByType(Long channelId, VideoType type, int page,
-		int size) {
+																	 int size) {
 		return null;
 
 	}
 
-    @Override
-    public ReportResDto.createReport createReport(Member member, Long videoId) {
+	@Override
+	public ReportResDto.createReport createReport(Member member, Long videoId) {
 		return null;
-    }
+	}
 
 
 }

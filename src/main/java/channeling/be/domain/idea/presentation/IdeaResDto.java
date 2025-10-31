@@ -2,6 +2,10 @@ package channeling.be.domain.idea.presentation;
 
 
 
+import channeling.be.domain.report.presentation.ReportResDto;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class IdeaResDto {
@@ -12,6 +16,14 @@ public class IdeaResDto {
 
     ) {
     }
+    public record IdeaCursorRes(
+            List<SingleIdeaRes> ideaList,
+            Long lastIdeaId,
+            LocalDateTime lastCursorTime,
+            boolean hasNextCursor
+    ) {
+    }
+
     public record GetBookmarkedIdeaListRes(
             Long total,
             int page,
@@ -21,6 +33,7 @@ public class IdeaResDto {
 
     ) {
     }
+
     public record SingleIdeaRes(
             Long ideaId,
             String title, // 제목
@@ -29,5 +42,4 @@ public class IdeaResDto {
             boolean isBookmarked
     ) {
     }
-
 }
