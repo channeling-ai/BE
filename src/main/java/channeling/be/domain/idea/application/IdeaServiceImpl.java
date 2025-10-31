@@ -13,6 +13,7 @@ import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.global.infrastructure.llm.LlmServerUtil;
 import channeling.be.response.exception.handler.IdeaHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +31,7 @@ import static channeling.be.response.code.status.ErrorStatus.*;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class IdeaServiceImpl implements IdeaService {
 
     private final IdeaRepository ideaRepository;
@@ -59,6 +61,14 @@ public class IdeaServiceImpl implements IdeaService {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Idea> ideaPage = ideaRepository.findIdeasByMemberId(loginMember.getId(), pageable);
         return IdeaConverter.toBookmarkedIdeaListRes(ideaPage, page, size);
+
+    }
+
+    @Override
+    @Transactional
+    public void deleteNotBookMarkedIdeas(Member loginMember) {
+        int deletedCount = ideaRepository.deleteAllByMemberWithoutBookmarked(loginMember.getId());
+        log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
 
     }
 
