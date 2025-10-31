@@ -1,15 +1,9 @@
 package channeling.be.domain.report.domain;
 
-import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
-import channeling.be.domain.comment.domain.Comment;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.task.domain.Task;
 import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -24,28 +18,6 @@ public class Report extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "video_id", nullable = false)
     private Video video;
-
-
-    @OneToMany(
-            mappedBy = "report",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Report 삭제 시 TrendKeyword도 같이 삭제
-            orphanRemoval = true             // Report에서 TrendKeyword 제거하면 DB에서도 삭제
-    )
-    @BatchSize(size = 20)                 // LAZY 로딩 시 20개 단위로 한 번에 가져오기
-    private List<TrendKeyword> trends;
-
-    @OneToMany(
-            mappedBy = "report",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Report 삭제 시 Comment도 같이 삭제
-            orphanRemoval = true             // Report에서 Comment 제거하면 DB에서도 삭제
-    )
-    private List<Comment> comments;
-
-
-    @OneToOne(mappedBy = "report", fetch = FetchType.LAZY)
-    private Task task;
 
     @Column
     private String title; // 영상 제목

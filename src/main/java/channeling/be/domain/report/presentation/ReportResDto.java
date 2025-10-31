@@ -1,11 +1,9 @@
 package channeling.be.domain.report.presentation;
 
-import channeling.be.domain.TrendKeyword.domain.TrendKeywordType;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.task.domain.TaskStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class ReportResDto {
@@ -91,29 +89,4 @@ public class ReportResDto {
         String optimization
     ) {}
 
-    public record IdeaReport (
-        @Schema(description = "리포트 ID (기본키)")
-        Long reportId,
-        @Schema(description = "리포트 - 아이디어")
-        List<IdeaInfo> idea,
-        @Schema(description = "리포트 - 트랜드 키워드")
-        List<TrendKeywordInfo> trend
-    ) {}
-
-    // 리포트 페이지 조회 응답 DTO - 아이디어 정보
-    public record IdeaInfo (
-        Long ideaId,
-        String title,
-        String content,
-        String hashTag,
-        Boolean isBookMarked
-    ) {}
-    // 리포트 페이지 조회 응답 DTO - 트렌드 키워드 정보
-    public record TrendKeywordInfo(
-        Long trendKeywordId,
-        TrendKeywordType keywordType,
-        String keyword,
-        Integer score,
-        LocalDateTime createdAt
-    ) {}
 }

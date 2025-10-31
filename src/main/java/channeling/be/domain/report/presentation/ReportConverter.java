@@ -1,13 +1,10 @@
 package channeling.be.domain.report.presentation;
 
-import channeling.be.domain.TrendKeyword.domain.TrendKeyword;
 import channeling.be.domain.comment.domain.Comment;
 import channeling.be.domain.comment.domain.CommentType;
-import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.task.domain.Task;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,39 +60,6 @@ public class ReportConverter {
                 report.getId(),
                 report.getLeaveAnalyze(),
                 report.getOptimization()
-        );
-    }
-
-    public static ReportResDto.IdeaReport toIdea(Report report) {
-        return new ReportResDto.IdeaReport(
-                report.getId(),
-                report.getVideo().getIdeas().stream()
-                        .map(ReportConverter::toResIdeaInfo)
-                        .sorted(Comparator.comparing(ReportResDto.IdeaInfo::isBookMarked))
-                        .collect(Collectors.toList()),
-                report.getTrends().stream()
-                        .map(ReportConverter::toResTrendKeywordInfo)
-                        .sorted(Comparator.comparing(ReportResDto.TrendKeywordInfo::score).reversed())
-                        .collect(Collectors.toList())
-        );
-    }
-    private static ReportResDto.IdeaInfo toResIdeaInfo(Idea idea) {
-        return new ReportResDto.IdeaInfo(
-                idea.getId(),
-                idea.getTitle(),
-                idea.getContent(),
-                idea.getHashTag(),
-                idea.getIsBookMarked()
-        );
-    }
-
-    private static ReportResDto.TrendKeywordInfo toResTrendKeywordInfo(TrendKeyword trendKeyword) {
-        return new ReportResDto.TrendKeywordInfo(
-                trendKeyword.getId(),
-                trendKeyword.getKeywordType(),
-                trendKeyword.getKeyword(),
-                trendKeyword.getScore(),
-                trendKeyword.getCreatedAt()
         );
     }
 }

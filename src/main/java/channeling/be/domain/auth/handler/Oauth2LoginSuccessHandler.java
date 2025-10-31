@@ -1,11 +1,10 @@
 package channeling.be.domain.auth.handler;
 
+import channeling.be.domain.TrendKeyword.service.TrendKeywordService;
 import channeling.be.domain.auth.application.MemberOauth2UserService;
 import channeling.be.domain.auth.application.MemberOauth2UserService.LoginResult;
 import channeling.be.domain.idea.application.IdeaService;
-import channeling.be.domain.member.application.MemberService;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;    // JWT 토큰 생성기
     private final IdeaService ideaService;
     private final MemberOauth2UserService memberOauth2UserService;
-
+    private final TrendKeywordService trendKeywordService;
     // 프론트 콜백
     @Value("${FRONT_URL:http://localhost:5173}")
     private String frontUrl;
@@ -72,6 +71,10 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         LoginResult result = memberOauth2UserService.executeGoogleLogin(attrs, googleAccessToken);
 
+        // 로그인시마다 체널 키워드 업데이트
+        trendKeywordService.updateChannelTrendKeyword(result.member());
+
+        // 서버 토큰 생성
         ideaService.deleteNotBookMarkedIdeas(result.member());
 
         String accessToken = jwtUtil.createAccessToken(result.member());

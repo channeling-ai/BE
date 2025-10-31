@@ -2,13 +2,10 @@ package channeling.be.domain.video.domain;
 
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.Idea;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Getter
@@ -25,14 +22,14 @@ public class Video extends BaseEntity {
     @JoinColumn(name = "channel_id", nullable = false)
     private Channel channel;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true)
     private String youtubeVideoId; // 영상 ID (유튜브 영상 ID)
 
     @Enumerated(EnumType.STRING)
     @Column
     private VideoCategory videoCategory; // long, short 여부
 
-    @Column(length = 100)
+    @Column
     private String title; // 영상 제목
 
     @Column
@@ -44,24 +41,15 @@ public class Video extends BaseEntity {
     @Column
     private Long commentCount; // 영상 댓글 수
 
-    @Column(length = 100)
+    @Column
     private String link; // 영상 링크
 
     @Column
     private LocalDateTime uploadDate; // 업로드 날짜
 
-    @Column(length = 100)
+    @Column
     private String thumbnail; // 썸네일 사진
 
     @Column(length = 5000)
     private String description; // 영상 설명
-
-    @OneToMany(
-            mappedBy = "video",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,       // Video 삭제 시 Idea도 같이 삭제
-            orphanRemoval = true             // Video에서 Idea 제거하면 DB에서도 삭제
-    )
-    @BatchSize(size = 5)
-    private List<Idea> ideas;
 }

@@ -58,15 +58,6 @@ public class ReportController implements ReportSwagger {
     }
 
     @Override
-    @GetMapping("/{report-id}/ideas")
-    public ApiResponse<ReportResDto.IdeaReport> getReportIdea(
-            @PathVariable("report-id") Long reportId,
-            @LoginMember Member loginMember) {
-        Report report = reportService.checkReport(reportId, PageType.IDEA, loginMember);
-        return ApiResponse.onSuccess(ReportConverter.toIdea(report));
-    }
-
-    @Override
     @PostMapping("/{video-id}")
     public ApiResponse<ReportResDto.createReport> createReport(
             @PathVariable("video-id") Long videoId,

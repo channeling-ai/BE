@@ -60,6 +60,7 @@ public class JwtUtilImpl implements JwtUtil {
     public String createAccessToken(Member member) {
         return JWT.create()
                 .withSubject(ACCESS_TOKEN_SUBJECT)
+                .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + accessExpiration * 1000))
                 .withClaim(USERID_CLAIM, member.getId())
                 .withClaim(GOOGLE_CLAIM, member.getGoogleId())
@@ -69,11 +70,14 @@ public class JwtUtilImpl implements JwtUtil {
 
     @Override
     public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(accessHeader)).filter(
-                accessToken -> accessToken.startsWith(BEARER)
-        ).map(accessToken -> accessToken.replace(BEARER, ""))
+        return Optional.ofNullable(request.getHeader(accessHeader))
                 .or(() -> {
-                    throw new JwtHandler("Access Token이 없거나 형식이 올바르지 않습니다.");
+                    throw new JwtHandler("Access Token 이 존재하지 않습니다.");
+                })
+                .filter(accessToken -> accessToken.startsWith(BEARER))
+                .map(accessToken -> accessToken.replace(BEARER, ""))
+                .or(() -> {
+                    throw new JwtHandler("Access Token 형식이 올바르지 않습니다.");
                 });
     }
 
@@ -81,7 +85,6 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public Optional<String> extractGoogleId(String accessToken) {
         try {
-
             return Optional.ofNullable(JWT.require(Algorithm.HMAC512(secret))
                     .build()
                     .verify(accessToken)
@@ -123,5 +126,17 @@ public class JwtUtilImpl implements JwtUtil {
         }
 
         return false;
+    }
+
+    public Date getIssuedAt(String token) {
+        try {
+            return JWT.require(Algorithm.HMAC512(secret))
+                    .build()
+                    .verify(token)
+                    .getIssuedAt();
+        } catch (Exception e) {
+            log.error("토큰에서 발행 시간을 추출하는데 실패했습니다: {}", e.getMessage());
+            throw e;
+        }
     }
 }
