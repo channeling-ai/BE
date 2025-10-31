@@ -31,6 +31,16 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
 """)
     Page<Idea> findIdeasByMemberId(@Param("memberId") Long memberId, Pageable pageable);
 
+
+    @Modifying
+    @Query("""
+    DELETE
+    FROM Idea i
+    WHERE i.channel.member.id = :memberId AND i.isBookMarked = false
+ """)
+    int deleteAllByMemberWithoutBookmarked(@Param("memberId")  Long memberId);
+
+
     @Query("""
     SELECT i
     FROM Idea i
@@ -50,3 +60,5 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
     List<Idea> findByIdeaAfterCursor(LocalDateTime loginTime, Long cursorId, LocalDateTime cursorTime, Pageable pageable);
 
 }
+
+
