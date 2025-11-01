@@ -19,7 +19,7 @@ public class Oauth2LoginFailureHandler implements AuthenticationFailureHandler {
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
 
-        log.error("로그인 실패");
+        log.error("로그인 실패 {}", exception);
         exception.getStackTrace();
 
         // 프론트 응답 생성
