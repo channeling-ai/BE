@@ -12,6 +12,10 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+  session:
+    store-type: redis   # 세션 저장소 Redis로 지정
+    timeout: 30m        # 세션 유지시간(옵션)
+
   data:
     redis:
       host: ${REDIS_HOST:localhost}
