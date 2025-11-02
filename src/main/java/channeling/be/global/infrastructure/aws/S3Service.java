@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
@@ -130,6 +131,28 @@ public class S3Service {
                 region + ".amazonaws.com/";
         return java.net.URLDecoder.decode(url.replace(prefix, ""), StandardCharsets.UTF_8);
     }
+
+
+    /**
+     * S3 객체 키를 이용해 private 객체를 바로 읽어 String으로 반환
+     *
+     * @param key S3 객체 키 (예: "dummies/reports/123/section.json")
+     * @return S3 객체 내용 (UTF-8)
+     */
+    public String getFileContent(String key) {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+
+        try (ResponseInputStream<GetObjectResponse> s3Object = s3Client.getObject(getObjectRequest)) {
+            return new String(s3Object.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new RuntimeException("S3 객체 읽기 실패: " + key, e);
+        }
+    }
 }
+
+
 
 

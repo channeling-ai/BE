@@ -9,6 +9,7 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -42,10 +43,13 @@ public interface IdeaSwagger {
                                                                @Parameter(hidden = true)
                                                                @LoginMember Member loginMember);
 
-    @Operation(summary = "아이디어 조회", description = "아이디어 페이지 - 채널 기반 아이디어 목록 조회")
+    @Operation(summary = "아이디어 조회", description = "아이디어 페이지 - [최근순] 채널 기반 아이디어 목록 조회 / cursorId (마지막 조회된 아이디), cursorTime (마지막 조회된 시간)")
     @GetMapping("")
     ApiResponse<IdeaResDto.IdeaCursorRes> getIdeas(
-            Long cursorId,
+            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
             LocalDateTime cursorTime,
             @Parameter(hidden = true) CustomUserDetails customUserDetails);
+
 }

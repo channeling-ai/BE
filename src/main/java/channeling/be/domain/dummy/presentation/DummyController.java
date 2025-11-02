@@ -4,18 +4,16 @@ import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.global.infrastructure.aws.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 
 @RestController
 @RequestMapping("/dummies")
 @RequiredArgsConstructor
 public class DummyController implements DummySwagger {
     private final S3Service s3Service;
-
+    private final S3Client s3Client;
     /**
      * GET /api/reports/{reportId}/{section}
      * reportId: 1,2
@@ -28,10 +26,9 @@ public class DummyController implements DummySwagger {
 
         // resources/dummies/reports/{reportId}/{section}.json
         String path = String.format("dummies/reports/%s/%s.json", reportId, section.toString().toLowerCase());
-        String url = s3Service.getUrl(path);
-        try (InputStream inputStream = new URL(url).openStream()) {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        System.out.println(path);
+        // S3에서 바로 읽어서 반환
+        return s3Service.getFileContent(path);
 
     }
 
@@ -43,10 +40,9 @@ public class DummyController implements DummySwagger {
 
         // resources/dummies/reports/{reportId}/{section}.json
         String path = String.format("dummies/reports/%s/comment_%s.json", reportId, commentType.toString().toLowerCase());
-        String url = s3Service.getUrl(path);
-        try (InputStream inputStream = new URL(url).openStream()) {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        System.out.println(path);
+        return s3Service.getFileContent(path);
+
 
 
     }
@@ -54,9 +50,7 @@ public class DummyController implements DummySwagger {
     @GetMapping("/videos")
     public String getDummyVideos() throws IOException {
         String path = "dummies/videos/list.json";
-        String url = s3Service.getUrl(path);
-        try (InputStream inputStream = new URL(url).openStream()) {
-            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-        }
+        return s3Service.getFileContent(path);
+
     }
 }

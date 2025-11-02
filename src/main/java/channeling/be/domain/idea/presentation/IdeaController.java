@@ -48,8 +48,8 @@ public class IdeaController implements IdeaSwagger {
     @Override
     @GetMapping("")
     public ApiResponse<IdeaResDto.IdeaCursorRes> getIdeas(
-            @Nullable Long cursorId,
-            @Nullable LocalDateTime cursorTime,
+            Long cursorId,
+            LocalDateTime cursorTime,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return ApiResponse.onSuccess(ideaService.getIdeas(
                 cursorId,
