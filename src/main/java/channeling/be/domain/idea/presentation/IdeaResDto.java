@@ -39,7 +39,8 @@ public class IdeaResDto {
             String title, // 제목
             String content, // 내용
             String hashTag, // 해시태그 Json 리스트
-            boolean isBookmarked
+            boolean isBookmarked,
+            LocalDateTime createdAt
     ) {
     }
 }
