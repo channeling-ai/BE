@@ -39,7 +39,7 @@ public class IdeaServiceImpl implements IdeaService {
     private final LlmServerUtil llmServerUtil;
 
     private final int IDEA_CURSOR_SIZE = 12;
-    private final ZoneId timeZone = ZoneId.systemDefault(); // TODO 타임존 확인 필요
+    private final ZoneId timeZone = ZoneId.of("Asia/Seoul"); // DB 시간 기준
 
     @Override
     @Transactional
