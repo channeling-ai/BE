@@ -41,6 +41,6 @@ public class IdeaConverter {
     }
 
     private static IdeaResDto.SingleIdeaRes toSingleIdeaRes(Idea idea) {
-        return new IdeaResDto.SingleIdeaRes(idea.getId(), idea.getTitle(), idea.getContent(), idea.getHashTag(), idea.getIsBookMarked());
+        return new IdeaResDto.SingleIdeaRes(idea.getId(), idea.getTitle(), idea.getContent(), idea.getHashTag(), idea.getIsBookMarked(), idea.getCreatedAt());
     }
 }
