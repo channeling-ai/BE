@@ -22,7 +22,7 @@ public class DummyController implements DummySwagger {
     @GetMapping("/{reportId}/{section}")
     public String getDummyReportSection(
             @PathVariable("reportId") String reportId,
-            @PathVariable("section") ReportSection section) throws IOException {
+            @PathVariable("section") ReportSection section) {
 
         // resources/dummies/reports/{reportId}/{section}.json
         String path = String.format("dummies/reports/%s/%s.json", reportId, section.toString().toLowerCase());
@@ -36,21 +36,27 @@ public class DummyController implements DummySwagger {
     @GetMapping("/{reportId}/comments")
     public String getDummyReportComments(
             @PathVariable("reportId") String reportId,
-            @RequestParam("commentType") CommentType commentType) throws IOException {
+            @RequestParam("commentType") CommentType commentType) {
 
         // resources/dummies/reports/{reportId}/{section}.json
         String path = String.format("dummies/reports/%s/comment_%s.json", reportId, commentType.toString().toLowerCase());
         System.out.println(path);
         return s3Service.getFileContent(path);
 
-
-
     }
 
     @GetMapping("/videos")
-    public String getDummyVideos() throws IOException {
+    public String getDummyVideos() {
         String path = "dummies/videos/list.json";
         return s3Service.getFileContent(path);
 
     }
+
+    @GetMapping("/videos/{videoId}")
+    public String getDummyVideo(
+            @PathVariable("videoId") String videoId) {
+        String path = String.format("dummies/videos/video_%s.json", videoId);
+        return s3Service.getFileContent(path);
+    }
+
 }
