@@ -35,10 +35,17 @@ public interface DummySwagger {
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("reportId") String reportId,
             @Parameter(description = "댓글 타입 (NEUTRAL, POSITIVE, NEGATIVE, ADVICE_OPINION,)", example = "NEUTRAL")
-            @RequestParam("commentType") CommentType commentType )throws IOException;
+            @RequestParam("commentType") CommentType commentType ) ;
 
 
     @Operation(summary = "더미 비디오 리스트 조회", description = "더미 JSON 파일에서 비디오 리스트를 반환합니다.")
     @GetMapping("/videos")
     String getDummyVideos() throws IOException;
+
+
+    @Operation(summary = "더미 비디오 단일 정보 조회", description = "더미 JSON 파일에서 비디오 정보를 반환합니다.")
+    @GetMapping("/videos/{videoId}")
+    String getDummyVideo(
+            @Parameter(description = "요청 영상 아이디", example = "1")
+            @PathVariable("videoId") String videoId);
 }

@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/dummies")
 @RequiredArgsConstructor
@@ -22,9 +20,10 @@ public class DummyController implements DummySwagger {
     @GetMapping("/{reportId}/{section}")
     public String getDummyReportSection(
             @PathVariable("reportId") String reportId,
-            @PathVariable("section") ReportSection section) throws IOException {
+            @PathVariable("section") ReportSection section) {
 
-        // resources/dummies/reports/{reportId}/{section}.json
+        checkPattern(reportId);
+
         String path = String.format("dummies/reports/%s/%s.json", reportId, section.toString().toLowerCase());
         System.out.println(path);
         // S3에서 바로 읽어서 반환
@@ -36,21 +35,34 @@ public class DummyController implements DummySwagger {
     @GetMapping("/{reportId}/comments")
     public String getDummyReportComments(
             @PathVariable("reportId") String reportId,
-            @RequestParam("commentType") CommentType commentType) throws IOException {
+            @RequestParam("commentType") CommentType commentType) {
 
-        // resources/dummies/reports/{reportId}/{section}.json
+        checkPattern(reportId);
+
         String path = String.format("dummies/reports/%s/comment_%s.json", reportId, commentType.toString().toLowerCase());
         System.out.println(path);
         return s3Service.getFileContent(path);
 
-
-
     }
 
     @GetMapping("/videos")
-    public String getDummyVideos() throws IOException {
+    public String getDummyVideos() {
         String path = "dummies/videos/list.json";
         return s3Service.getFileContent(path);
 
+    }
+
+    @GetMapping("/videos/{videoId}")
+    public String getDummyVideo(
+            @PathVariable("videoId") String videoId) {
+        checkPattern(videoId);
+        String path = String.format("dummies/videos/video_%s.json", videoId);
+        return s3Service.getFileContent(path);
+    }
+
+    private void checkPattern(String urlString) {
+        if (!urlString.matches("^[a-zA-Z0-9_-]+$")) {
+            throw new IllegalArgumentException("요청 값에 허용되지 않은 문자가 포함되어 있습니다.");
+        }
     }
 }
