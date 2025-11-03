@@ -35,7 +35,7 @@ public interface DummySwagger {
             @Parameter(description = "요청 리포트 아이디", example = "1")
             @PathVariable("reportId") String reportId,
             @Parameter(description = "댓글 타입 (NEUTRAL, POSITIVE, NEGATIVE, ADVICE_OPINION,)", example = "NEUTRAL")
-            @RequestParam("commentType") CommentType commentType )throws IOException;
+            @RequestParam("commentType") CommentType commentType ) ;
 
 
     @Operation(summary = "더미 비디오 리스트 조회", description = "더미 JSON 파일에서 비디오 리스트를 반환합니다.")
