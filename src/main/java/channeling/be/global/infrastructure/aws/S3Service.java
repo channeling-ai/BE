@@ -28,8 +28,11 @@ public class S3Service {
 
     private final S3Client s3Client;
 
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucketName;
+    @Value("${s3.private-bucket}")
+    private String privateBucketName;
+
+    @Value("${s3.public-bucket}")
+    private String publicBucketName;
 
     @Value("${cloud.aws.region.static}")
     private String region;
@@ -51,7 +54,7 @@ public class S3Service {
         /* 1‑2. PutObjectRequest + RequestBody */
         try {
             PutObjectRequest request = PutObjectRequest.builder()
-                    .bucket(bucketName)
+                    .bucket(publicBucketName)
                     .key(key)
                     .contentType(image.getContentType())
                     .build();
@@ -73,7 +76,7 @@ public class S3Service {
      * @return S3 객체의 public URL
      */
     public String getUrl(String key) {
-        return "https://" + bucketName
+        return "https://" + publicBucketName
                 + ".s3." + region
                 + ".amazonaws.com/" +
                 URLEncoder.encode(key, StandardCharsets.UTF_8);
@@ -91,7 +94,7 @@ public class S3Service {
 
         try {
             DeleteObjectRequest delReq = DeleteObjectRequest.builder()
-                    .bucket(bucketName)
+                    .bucket(publicBucketName)
                     .key(key)
                     .build();
             s3Client.deleteObject(delReq);
@@ -127,7 +130,7 @@ public class S3Service {
      * @return S3 객체 키
      */
     private String extractKeyFromUrl(String url) {
-        String prefix = "https://" + bucketName + ".s3." +
+        String prefix = "https://" + publicBucketName + ".s3." +
                 region + ".amazonaws.com/";
         return java.net.URLDecoder.decode(url.replace(prefix, ""), StandardCharsets.UTF_8);
     }
@@ -141,7 +144,7 @@ public class S3Service {
      */
     public String getFileContent(String key) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
+                .bucket(privateBucketName)
                 .key(key)
                 .build();
 
