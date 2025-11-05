@@ -49,8 +49,6 @@ public class LlmServerUtil {
         requestBody.put("keyword", dto.keyword());
         if (dto.videoType()!=null) requestBody.put("video_type", dto.videoType().toString());
 
-        log.info("아이디어 생성 요청형태!!!{}", requestBody);
-
         // 헤더 생성
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

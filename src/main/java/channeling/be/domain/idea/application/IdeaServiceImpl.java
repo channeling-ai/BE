@@ -74,6 +74,8 @@ public class IdeaServiceImpl implements IdeaService {
 
     @Override
     public List<LlmResDto.CreateIdeasResDto> createIdeas(IdeaReqDto.CreateIdeaReqDto dto, Member member) {
+        log.info("아이디어 생성 요청 내용: {}", dto);
+
         Channel channel = channelRepository.findByMember(member)
                 .orElseThrow(() -> new IdeaHandler(_CHANNEL_NOT_FOUND));
         return llmServerUtil.createIdeas(dto, channel);
@@ -86,12 +88,15 @@ public class IdeaServiceImpl implements IdeaService {
                                              LocalDateTime cursorTime,
                                              CustomUserDetails loginMember) {
 
+        Channel channel = channelRepository.findByMember(loginMember.getMember())
+                .orElseThrow(() -> new IdeaHandler(_CHANNEL_NOT_FOUND));
+
         LocalDateTime loginAt = convertToLocalDateTime(loginMember.getLoginTime());
         Pageable page = PageRequest.of(0, IDEA_CURSOR_SIZE);
 
         List<Idea> ideas = (cursorId == null || cursorTime == null)
-                ? ideaRepository.findByIdeaFirstCursor(loginAt, page)
-                : ideaRepository.findByIdeaAfterCursor(loginAt, cursorId, cursorTime, page);
+                ? ideaRepository.findByIdeaFirstCursor(loginAt, channel.getId(), page)
+                : ideaRepository.findByIdeaAfterCursor(loginAt, channel.getId(),cursorId, cursorTime, page);
 
         boolean hasNext = ideas.size() > IDEA_CURSOR_SIZE;
         if (hasNext) {
