@@ -44,20 +44,30 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
     @Query("""
     SELECT i
     FROM Idea i
+    JOIN i.channel c
     WHERE i.createdAt > :loginTime
+    AND c.id = :channelId
     ORDER BY i.createdAt DESC, i.id DESC
     """)
-    List<Idea> findByIdeaFirstCursor(LocalDateTime loginTime, Pageable pageable);
+    List<Idea> findByIdeaFirstCursor(@Param("loginTime") LocalDateTime loginTime,
+                                     @Param("channelId") Long channelId,
+                                     Pageable pageable);
 
     @Query("""
     SELECT i
     FROM Idea i
+    JOIN i.channel c
     WHERE i.createdAt > :loginTime
+    AND c.id = :channelId 
     AND (i.createdAt < :cursorTime 
         OR (i.createdAt = :cursorTime AND i.id < :cursorId))
     ORDER BY i.createdAt DESC, i.id DESC
     """)
-    List<Idea> findByIdeaAfterCursor(LocalDateTime loginTime, Long cursorId, LocalDateTime cursorTime, Pageable pageable);
+    List<Idea> findByIdeaAfterCursor(@Param("loginTime") LocalDateTime loginTime,
+                                     @Param("channelId") Long channelId,
+                                     @Param("cursorId") Long cursorId,
+                                     @Param("cursorTime") LocalDateTime cursorTime,
+                                     Pageable pageable);
 
 }
 
