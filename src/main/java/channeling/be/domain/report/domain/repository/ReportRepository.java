@@ -54,4 +54,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     WHERE t.id = :taskId
 """)
 	Optional<Report> findByTaskId(@Param("taskId") Long taskId);
+
+	@Query("SELECT COUNT(r) FROM Report r WHERE r.video.channel.member.id = :memberId")
+	long countByMemberId(@Param("memberId") Long memberId);
 }

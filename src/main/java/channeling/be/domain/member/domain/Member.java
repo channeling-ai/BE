@@ -3,6 +3,7 @@ package channeling.be.domain.member.domain;
 import channeling.be.domain.common.BaseEntity;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.MemberHandler;
+import channeling.be.response.exception.handler.ReportHandler;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -39,6 +40,11 @@ public class Member extends BaseEntity {
 
     @Column(length = 50)
     private String googleId; // 구글 아이디 (로그인 구별을 위한..)
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private SubscriptionPlan plan = SubscriptionPlan.FREE;
 
 
     private enum SnsPatterns {
@@ -77,5 +83,13 @@ public class Member extends BaseEntity {
 
     public void profileImage(String profileImage) {
         this.profileImage = profileImage;
+    }
+
+    public void checkCredit(long currentCount) {
+        int limit = plan.getReportLimit();
+
+        if (currentCount >= limit) {
+            throw new ReportHandler(ErrorStatus._REPORT_LIMIT_EXCEEDED);
+        }
     }
 }

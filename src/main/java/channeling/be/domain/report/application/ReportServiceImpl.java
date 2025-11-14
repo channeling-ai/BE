@@ -6,6 +6,7 @@ import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
@@ -162,6 +163,12 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
+        // 멤버가 분석한 리포트 개수 조회
+        if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
+            long currentCount = reportRepository.countByMemberId(member.getId());
+            member.checkCredit(currentCount);
+        }
+
         // 요청 영상 존재 여부 확인
         if (!videoRepository.existsById(videoId)) {
             throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
