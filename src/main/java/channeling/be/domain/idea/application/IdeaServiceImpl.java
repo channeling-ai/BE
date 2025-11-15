@@ -67,7 +67,12 @@ public class IdeaServiceImpl implements IdeaService {
     @Override
     @Transactional
     public void deleteNotBookMarkedIdeas(Member loginMember) {
-        int deletedCount = ideaRepository.deleteAllByMemberWithoutBookmarked(loginMember.getId());
+        List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
+        log.info("아이디어 {}", ideas);
+
+        ideaRepository.deleteAll(ideas);
+        int deletedCount = ideas.size();
+
         log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
 
     }
