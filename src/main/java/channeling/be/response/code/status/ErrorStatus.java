@@ -38,6 +38,7 @@ public enum ErrorStatus implements BaseErrorCode {
     //S3 관련 에러
     _FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "S3400", "파일 업로드에 실패했습니다."),
     _FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S3401", "파일 삭제에 실패했습니다."),
+    _IDEA_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "S3402", "아이디어 생성 한도를 초과했습니다."),
 
     //아이디어 관련 에러
     _IDEA_NOT_FOUND(HttpStatus.BAD_REQUEST, "IDEA400", "존재하지 않는 아이디어입니다."),

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +55,4 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
     WHERE t.id = :taskId
 """)
 	Optional<Report> findByTaskId(@Param("taskId") Long taskId);
-
-	@Query("SELECT COUNT(r) FROM Report r WHERE r.video.channel.member.id = :memberId")
-	long countByMemberId(@Param("memberId") Long memberId);
 }

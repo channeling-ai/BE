@@ -76,6 +76,17 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
                                      @Param("cursorTime") LocalDateTime cursorTime,
                                      Pageable pageable);
 
+    @Query("""
+	SELECT COUNT(i)
+	FROM Idea i
+	WHERE i.channel.member.id = :memberId
+	  AND i.createdAt >= :start
+	""")
+    long countMonthlyIdeas(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDateTime start
+    );
+
 }
 
 

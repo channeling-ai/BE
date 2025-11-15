@@ -85,11 +85,19 @@ public class Member extends BaseEntity {
         this.profileImage = profileImage;
     }
 
-    public void checkCredit(long currentCount) {
-        int limit = plan.getReportLimit();
+    public void checkReportCredit(long currentCount) {
+        int limit = plan.getReportLimit() - 1;
 
         if (currentCount >= limit) {
             throw new ReportHandler(ErrorStatus._REPORT_LIMIT_EXCEEDED);
+        }
+    }
+
+    public void checkIdeaCredit(long currentCount) {
+        int limit = plan.getIdeaLimit() - 1;
+
+        if (currentCount >= limit) {
+            throw new ReportHandler(ErrorStatus._IDEA_LIMIT_EXCEEDED);
         }
     }
 }

@@ -4,7 +4,7 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
-import channeling.be.domain.idea.domain.repository.IdeaRepository;
+import channeling.be.domain.log.ReportLogRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.domain.report.domain.PageType;
@@ -44,6 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -56,11 +58,11 @@ public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
     private final ReportRepository reportRepository;
     private final CommentRepository commentRepository;
-    private final IdeaRepository ideaRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
     private final ReportDeleteService reportDeleteService;
     private final ChannelRepository channelRepository;
+    private final ReportLogRepository reportLogRepository;
 
     //환경변수에서 FASTAPI_URL 환경변수 불러오기
     @Value("${FASTAPI_URL:http://localhost:8000}")
@@ -163,10 +165,11 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
-        // 멤버가 분석한 리포트 개수 조회
+        // 이번달 멤버가 분석한 리포트 개수 조회
         if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
-            long currentCount = reportRepository.countByMemberId(member.getId());
-            member.checkCredit(currentCount);
+            LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+            long currentCount = reportLogRepository.countMonthlyReports(member.getId(), startOfMonth);
+            member.checkReportCredit(currentCount);
         }
 
         // 요청 영상 존재 여부 확인

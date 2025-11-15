@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+
 
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
@@ -18,6 +20,7 @@ public class ReportLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDateTime loggedAt;
 
     private Long reportId;
     private Long videoId;
@@ -49,4 +52,7 @@ public class ReportLog {
 
     @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
+
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

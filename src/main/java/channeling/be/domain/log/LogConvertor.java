@@ -3,9 +3,12 @@ package channeling.be.domain.log;
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.report.domain.Report;
 
+import java.time.LocalDateTime;
+
 public class LogConvertor {
     public static ReportLog convertToReportLog(Report report) {
         return ReportLog.builder()
+                .loggedAt(LocalDateTime.now())
                 .reportId(report.getId())
                 .videoId(report.getVideo().getId())
                 .title(report.getTitle())
@@ -28,17 +31,22 @@ public class LogConvertor {
                 .negativeComment(report.getNegativeComment())
                 .leaveAnalyze(report.getLeaveAnalyze())
                 .optimization(report.getOptimization())
+                .createdAt(report.getCreatedAt())
+                .updatedAt(report.getUpdatedAt())
                 .build();
     }
 
     public static IdeaLog convertToIdeaLog(Idea idea) {
         return IdeaLog.builder()
                 .ideaId(idea.getId())
+                .loggedAt(LocalDateTime.now())
                 .channelId(idea.getChannel().getId())
                 .title(idea.getTitle())
                 .content(idea.getContent())
                 .hashTag(idea.getHashTag())
                 .isBookMarked(idea.getIsBookMarked())
+                .createdAt(idea.getCreatedAt())
+                .updateAt(idea.getCreatedAt())
                 .build();
     }
 }

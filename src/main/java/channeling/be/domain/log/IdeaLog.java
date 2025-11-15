@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -17,6 +19,7 @@ public class IdeaLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDateTime loggedAt;
 
     private Long ideaId;
 
@@ -33,4 +36,6 @@ public class IdeaLog {
 
     @Column(nullable = false)
     private Boolean isBookMarked; // 북마크 여부
+    private LocalDateTime createdAt;
+    private LocalDateTime updateAt;
 }
