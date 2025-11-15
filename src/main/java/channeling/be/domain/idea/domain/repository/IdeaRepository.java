@@ -40,6 +40,13 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
  """)
     int deleteAllByMemberWithoutBookmarked(@Param("memberId")  Long memberId);
 
+    @Query("""
+    SELECT i
+    FROM Idea i 
+    WHERE i.channel.member.id = :memberId AND i.isBookMarked = false
+    """)
+    List<Idea> findByMemberWithoutBookmarked(@Param("memberId") Long memberId);
+
 
     @Query("""
     SELECT i

@@ -1,8 +1,9 @@
 package channeling.be.domain.log;
 
+import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.report.domain.Report;
 
-public class ReportLogConvertor {
+public class LogConvertor {
     public static ReportLog convertToReportLog(Report report) {
         return ReportLog.builder()
                 .reportId(report.getId())
@@ -27,6 +28,17 @@ public class ReportLogConvertor {
                 .negativeComment(report.getNegativeComment())
                 .leaveAnalyze(report.getLeaveAnalyze())
                 .optimization(report.getOptimization())
+                .build();
+    }
+
+    public static IdeaLog convertToIdeaLog(Idea idea) {
+        return IdeaLog.builder()
+                .ideaId(idea.getId())
+                .channelId(idea.getChannel().getId())
+                .title(idea.getTitle())
+                .content(idea.getContent())
+                .hashTag(idea.getHashTag())
+                .isBookMarked(idea.getIsBookMarked())
                 .build();
     }
 }
