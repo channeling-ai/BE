@@ -85,11 +85,7 @@ public class IdeaServiceImpl implements IdeaService {
     public List<LlmResDto.CreateIdeasResDto> createIdeas(IdeaReqDto.CreateIdeaReqDto dto, Member member) {
 
         if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
-            LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-            long logCount = ideaLogRepository.countMonthlyIdeas(member.getId(), startOfMonth);
-            long ideaCount = ideaRepository.countMonthlyIdeas(member.getId(), startOfMonth);
-            long currentCount = logCount + ideaCount;
-
+            long currentCount = this.countMonthlyIdeas(member);
             member.checkIdeaCredit(currentCount);
         }
 
@@ -131,5 +127,12 @@ public class IdeaServiceImpl implements IdeaService {
         return date.toInstant()
                 .atZone(timeZone)
                 .toLocalDateTime();
+    }
+
+    private Long countMonthlyIdeas(Member member) {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        long logCount = ideaLogRepository.countMonthlyIdeas(member.getId(), startOfMonth);
+        long ideaCount = ideaRepository.countMonthlyIdeas(member.getId(), startOfMonth);
+        return logCount + ideaCount;
     }
 }

@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum SubscriptionPlan {
 
-    FREE(3, 10),
-    BASIC(10, 20),
-    ENTERPRISE(10, 20), // TODO : 추후 수정 필요
+    FREE(3, 12),
+    BASIC(10, 30),
+    ENTERPRISE(10, 30), // TODO : 추후 수정 필요
     ADMIN(Integer.MAX_VALUE, Integer.MAX_VALUE);
 
     private final int reportLimit;

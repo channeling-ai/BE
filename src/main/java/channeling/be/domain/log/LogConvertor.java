@@ -2,11 +2,12 @@ package channeling.be.domain.log;
 
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.report.domain.Report;
+import channeling.be.domain.task.domain.Task;
 
 import java.time.LocalDateTime;
 
 public class LogConvertor {
-    public static ReportLog convertToReportLog(Report report) {
+    public static ReportLog convertToReportLog(Report report, Task task) {
         return ReportLog.builder()
                 .loggedAt(LocalDateTime.now())
                 .reportId(report.getId())
@@ -33,6 +34,9 @@ public class LogConvertor {
                 .optimization(report.getOptimization())
                 .createdAt(report.getCreatedAt())
                 .updatedAt(report.getUpdatedAt())
+                // 상태값 추가
+                .overviewStatus(task.getOverviewStatus())
+                .analyzeStatus(task.getAnalysisStatus())
                 .build();
     }
 

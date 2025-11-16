@@ -9,14 +9,17 @@ import java.time.LocalDateTime;
 public interface ReportLogRepository extends JpaRepository<ReportLog, Long> {
 
 
-	@Query("""
-	SELECT r
-	FROM ReportLog r
-	JOIN Video v   ON r.videoId = v.id
-	JOIN Channel c ON v.channel.id = c.id
-	WHERE c.member.id = :memberId
-	  AND r.createdAt >= :start
-	""")
+	@Query(value = """
+    SELECT COUNT(r.*)
+    FROM report_log r
+    JOIN video v       ON r.video_id   = v.id
+    JOIN channel c     ON v.channel_id = c.id
+    LEFT JOIN task t   ON r.report_id  = t.report_id
+    WHERE c.member_id       = :memberId
+      AND r.created_at      >= :start
+      AND r.overview_status = 'COMPLETED'
+      AND r.analyze_status  = 'COMPLETED'
+    """, nativeQuery = true)
     long countMonthlyReports(
             @Param("memberId") Long memberId,
             @Param("start") LocalDateTime start

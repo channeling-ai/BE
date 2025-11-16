@@ -167,8 +167,7 @@ public class ReportServiceImpl implements ReportService {
     public ReportResDto.createReport createReport(Member member, Long videoId) {
         // 이번달 멤버가 분석한 리포트 개수 조회
         if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
-            LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
-            long currentCount = reportLogRepository.countMonthlyReports(member.getId(), startOfMonth);
+            long currentCount = this.countMonthlyReports(member);
             member.checkReportCredit(currentCount);
         }
 
@@ -240,6 +239,13 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
+    }
+
+    private Long countMonthlyReports(Member member) {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        long logCount = reportLogRepository.countMonthlyReports(member.getId(), startOfMonth);
+        long reportCount = reportRepository.countMonthlyReports(member.getId(), startOfMonth);
+        return logCount + reportCount;
     }
 
 }

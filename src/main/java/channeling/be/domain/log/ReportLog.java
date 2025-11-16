@@ -1,5 +1,6 @@
 package channeling.be.domain.log;
 
+import channeling.be.domain.task.domain.TaskStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,4 +56,9 @@ public class ReportLog {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    private TaskStatus overviewStatus;
+    @Enumerated(EnumType.STRING)
+    private TaskStatus analyzeStatus;
 }

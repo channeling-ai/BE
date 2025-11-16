@@ -86,7 +86,7 @@ public class Member extends BaseEntity {
     }
 
     public void checkReportCredit(long currentCount) {
-        int limit = plan.getReportLimit() - 1;
+        int limit = plan.getReportLimit();
 
         if (currentCount >= limit) {
             throw new ReportHandler(ErrorStatus._REPORT_LIMIT_EXCEEDED);

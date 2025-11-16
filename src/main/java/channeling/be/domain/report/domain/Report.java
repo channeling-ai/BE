@@ -5,7 +5,6 @@ import channeling.be.domain.video.domain.Video;
 import jakarta.persistence.*;
 import lombok.*;
 
-@EntityListeners(ReportEntityListener.class)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Getter
