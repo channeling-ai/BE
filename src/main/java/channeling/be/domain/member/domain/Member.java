@@ -94,7 +94,7 @@ public class Member extends BaseEntity {
     }
 
     public void checkIdeaCredit(long currentCount) {
-        int limit = plan.getIdeaLimit() - 1;
+        int limit = plan.getIdeaLimit();
 
         if (currentCount >= limit) {
             throw new ReportHandler(ErrorStatus._IDEA_LIMIT_EXCEEDED);

@@ -46,7 +46,7 @@ public class LogConvertor {
                 .hashTag(idea.getHashTag())
                 .isBookMarked(idea.getIsBookMarked())
                 .createdAt(idea.getCreatedAt())
-                .updateAt(idea.getCreatedAt())
+                .updateAt(idea.getUpdatedAt())
                 .build();
     }
 }

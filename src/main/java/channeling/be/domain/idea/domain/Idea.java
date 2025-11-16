@@ -2,7 +2,6 @@ package channeling.be.domain.idea.domain;
 
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.report.domain.ReportEntityListener;
 import jakarta.persistence.*;
 import lombok.*;
 
