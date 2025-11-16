@@ -40,6 +40,13 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
  """)
     int deleteAllByMemberWithoutBookmarked(@Param("memberId")  Long memberId);
 
+    @Query("""
+    SELECT i
+    FROM Idea i 
+    WHERE i.channel.member.id = :memberId AND i.isBookMarked = false
+    """)
+    List<Idea> findByMemberWithoutBookmarked(@Param("memberId") Long memberId);
+
 
     @Query("""
     SELECT i
@@ -68,6 +75,17 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
                                      @Param("cursorId") Long cursorId,
                                      @Param("cursorTime") LocalDateTime cursorTime,
                                      Pageable pageable);
+
+    @Query("""
+	SELECT COUNT(i)
+	FROM Idea i
+	WHERE i.channel.member.id = :memberId
+	  AND i.createdAt >= :start
+	""")
+    long countMonthlyIdeas(
+            @Param("memberId") Long memberId,
+            @Param("start") LocalDateTime start
+    );
 
 }
 

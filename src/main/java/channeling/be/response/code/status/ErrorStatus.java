@@ -38,6 +38,7 @@ public enum ErrorStatus implements BaseErrorCode {
     //S3 관련 에러
     _FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "S3400", "파일 업로드에 실패했습니다."),
     _FILE_DELETE_FAILED(HttpStatus.BAD_REQUEST, "S3401", "파일 삭제에 실패했습니다."),
+    _IDEA_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "S3402", "아이디어 생성 한도를 초과했습니다."),
 
     //아이디어 관련 에러
     _IDEA_NOT_FOUND(HttpStatus.BAD_REQUEST, "IDEA400", "존재하지 않는 아이디어입니다."),
@@ -56,6 +57,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _REPORT_NOT_IDEA(HttpStatus.BAD_REQUEST, "REPO400", "해당 리포트는 아이디어 생성이 완료되지 않았습니다."),
     _REPORT_NOT_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "REPORT500", "리포트 생성 중 오류가 발생하였습니다."),
     _REPORT_NOT_ALLOWED_DUMMY(HttpStatus.BAD_REQUEST, "REPO407", "더미데이터는 1 혹은 2로만 호출해주세요."),
+    _REPORT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "REPO403", "리포트 생성 한도를 초과했습니다."),
 
     //영상 관련 에러
     _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO400", "존재하지 않는 영상입니다."),

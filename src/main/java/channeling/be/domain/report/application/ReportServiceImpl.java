@@ -4,8 +4,9 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
-import channeling.be.domain.idea.domain.repository.IdeaRepository;
+import channeling.be.domain.log.ReportLogRepository;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
@@ -43,6 +44,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,11 +58,11 @@ public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
     private final ReportRepository reportRepository;
     private final CommentRepository commentRepository;
-    private final IdeaRepository ideaRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
     private final ReportDeleteService reportDeleteService;
     private final ChannelRepository channelRepository;
+    private final ReportLogRepository reportLogRepository;
 
     //환경변수에서 FASTAPI_URL 환경변수 불러오기
     @Value("${FASTAPI_URL:http://localhost:8000}")
@@ -162,6 +165,12 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
+        // 이번달 멤버가 분석한 리포트 개수 조회
+        if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
+            long currentCount = this.countMonthlyReports(member);
+            member.checkReportCredit(currentCount);
+        }
+
         // 요청 영상 존재 여부 확인
         if (!videoRepository.existsById(videoId)) {
             throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
@@ -230,6 +239,13 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
+    }
+
+    private Long countMonthlyReports(Member member) {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        long logCount = reportLogRepository.countMonthlyReports(member.getId(), startOfMonth);
+        long reportCount = reportRepository.countMonthlyReports(member.getId(), startOfMonth);
+        return logCount + reportCount;
     }
 
 }
