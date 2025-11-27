@@ -1,24 +1,29 @@
-package channeling.be.domain.idea.domain;
+package channeling.be.domain.log;
 
 import channeling.be.domain.channel.domain.Channel;
-import channeling.be.domain.common.BaseEntity;
-import channeling.be.domain.idea.domain.event.IdeaEntityHandler;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Entity
+import java.time.LocalDateTime;
+
 @Getter
-@Builder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class Idea extends BaseEntity {
+@Builder
+@Entity
+@Table(name = "idea_log")
+public class IdeaLog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private LocalDateTime loggedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "channel_id", nullable = false)
-    private Channel channel;
+    private Long ideaId;
+
+    private Long channelId;
 
     @Column(nullable = false, length = 100)
     private String title; // 제목
@@ -31,11 +36,6 @@ public class Idea extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean isBookMarked; // 북마크 여부
-
-    public Boolean switchBookMarked() {
-        this.isBookMarked = !this.isBookMarked;
-        return this.isBookMarked;
-    }
-
-
+    private LocalDateTime createdAt;
+    private LocalDateTime updateAt;
 }
