@@ -66,4 +66,14 @@ public class ReportLog {
     @Enumerated(EnumType.STRING)
     private DeleteType deleteType;  // 삭제 타입 확인(사용자 임의, 생성시)
 
+    // [로그에서만 추가] / 기준으로 모든 댓글 문자열 저장
+    @Column(length = 400)
+    private String positiveCommentContent;
+    @Column(length = 400)
+    private String negativeCommentContent;
+    @Column(length = 400)
+    private String neutralCommentContent;
+    @Column(length = 400)
+    private String adviceCommentContent;
+
 }

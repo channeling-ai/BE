@@ -1,5 +1,7 @@
 package channeling.be.domain.log;
 
+import channeling.be.domain.comment.domain.Comment;
+import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.idea.domain.Idea;
 import channeling.be.domain.log.domain.DeleteType;
 import channeling.be.domain.log.domain.IdeaLog;
@@ -8,9 +10,12 @@ import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.task.domain.Task;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class LogConvertor {
-    public static ReportLog convertToReportLog(Report report, Task task, DeleteType type) {
+    public static ReportLog convertToReportLog(DeleteType type, Report report, Task task, List<Comment> comments) {
+
         return ReportLog.builder()
                 .loggedAt(LocalDateTime.now())
                 .reportId(report.getId())
@@ -41,6 +46,11 @@ public class LogConvertor {
                 .overviewStatus(task.getOverviewStatus())
                 .analyzeStatus(task.getAnalysisStatus())
                 .deleteType(type)
+                // 코멘트 저장
+                .positiveCommentContent(joinComment(comments, CommentType.POSITIVE))
+                .negativeCommentContent(joinComment(comments, CommentType.NEGATIVE))
+                .neutralCommentContent(joinComment(comments, CommentType.NEUTRAL))
+                .adviceCommentContent(joinComment(comments, CommentType.ADVICE_OPINION))
                 .build();
     }
 
@@ -56,5 +66,12 @@ public class LogConvertor {
                 .createdAt(idea.getCreatedAt())
                 .updateAt(idea.getUpdatedAt())
                 .build();
+    }
+
+    private static String joinComment(List<Comment> comments, CommentType type) {
+        return comments.stream()
+                .filter(c -> c.getCommentType().equals(type))
+                .map(Comment::getContent)
+                .collect(Collectors.joining(" / "));
     }
 }
