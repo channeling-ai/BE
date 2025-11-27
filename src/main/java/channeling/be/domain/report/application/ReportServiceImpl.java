@@ -126,25 +126,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
-        // 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
-        Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
+        reportRepository.findByReportAndMember(reportId, member.getId())
+                .ifPresent(r -> {
+                    reportDeleteService.deleteExistingReport(r, r.getVideo(), member);
+                });
 
-		//존재한다면
-		if (optionalReport.isPresent()) {
-			Report report = optionalReport.get();
-			Video video = report.getVideo();
-			// TODO 리포트 삭제 시 아이디어 삭제 관련
-            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
-			//ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
-			// 연관된 댓글 리스트 삭제
-			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-			// 연관된 task 삭제
-			taskRepository.deleteTaskByReportId(report.getId());
-			// 리포트 삭제
-			reportRepository.deleteById(report.getId());
-		}
-		return new ReportResDto.deleteReport(reportId);
-	}
+        return new ReportResDto.deleteReport(reportId);
+    }
 
     @Override
     @Transactional(readOnly = true)
