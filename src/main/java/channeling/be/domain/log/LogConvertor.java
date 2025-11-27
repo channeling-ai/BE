@@ -1,13 +1,16 @@
 package channeling.be.domain.log;
 
 import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.log.domain.DeleteType;
+import channeling.be.domain.log.domain.IdeaLog;
+import channeling.be.domain.log.domain.ReportLog;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.task.domain.Task;
 
 import java.time.LocalDateTime;
 
 public class LogConvertor {
-    public static ReportLog convertToReportLog(Report report, Task task) {
+    public static ReportLog convertToReportLog(Report report, Task task, DeleteType type) {
         return ReportLog.builder()
                 .loggedAt(LocalDateTime.now())
                 .reportId(report.getId())
@@ -37,6 +40,7 @@ public class LogConvertor {
                 // 상태값 추가
                 .overviewStatus(task.getOverviewStatus())
                 .analyzeStatus(task.getAnalysisStatus())
+                .deleteType(type)
                 .build();
     }
 
