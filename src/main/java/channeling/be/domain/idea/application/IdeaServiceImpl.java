@@ -4,6 +4,7 @@ import channeling.be.domain.auth.domain.CustomUserDetails;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.idea.domain.event.IdeaDeletedEvent;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.idea.presentation.IdeaConverter;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
@@ -16,6 +17,7 @@ import channeling.be.global.infrastructure.llm.LlmServerUtil;
 import channeling.be.response.exception.handler.IdeaHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +43,7 @@ public class IdeaServiceImpl implements IdeaService {
     private final ChannelRepository channelRepository;
     private final LlmServerUtil llmServerUtil;
     private final IdeaLogRepository ideaLogRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final int IDEA_CURSOR_SIZE = 12;
     private final ZoneId timeZone = ZoneId.of("Asia/Seoul"); // DB 시간 기준
@@ -73,6 +76,10 @@ public class IdeaServiceImpl implements IdeaService {
     public void deleteNotBookMarkedIdeas(Member loginMember) {
         List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
         log.info("아이디어 {}", ideas);
+
+        ideas.stream().forEach(idea -> {
+            eventPublisher.publishEvent(new IdeaDeletedEvent(idea));
+        });
 
         ideaRepository.deleteAll(ideas);
         int deletedCount = ideas.size();

@@ -2,6 +2,7 @@ package channeling.be.domain.idea.domain;
 
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.common.BaseEntity;
+import channeling.be.domain.idea.domain.event.IdeaEntityHandler;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,6 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@EntityListeners(IdeaEntityListener.class)
 public class Idea extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
