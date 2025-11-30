@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,7 +86,18 @@ public class IdeaServiceImpl implements IdeaService {
         int deletedCount = ideas.size();
 
         log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
+    }
 
+    @Async
+    @Override
+    @Transactional
+    public void deleteNotBookMarkedIdeasAsync(Member loginMember) {
+        try {
+            int deletedCount = ideaRepository.deleteAllByMemberWithoutBookmarked(loginMember.getId());
+            log.info("비동기 삭제 완료 - {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
+        } catch (Exception e) {
+            log.error("비동기 아이디어 삭제 실패 - memberId: {}, error: {}", loginMember.getId(), e.getMessage(), e);
+        }
     }
 
     @Override
