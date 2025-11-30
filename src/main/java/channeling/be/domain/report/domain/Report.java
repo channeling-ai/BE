@@ -79,6 +79,8 @@ public class Report extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String optimization; // 알고리즘 최적화
 
+    @Column(length = 1000)
+    private String updateSummary; // 업데이트 요약
 
 
 }

@@ -76,7 +76,10 @@ public class ReportResDto {
         @Schema(description = "개요-댓글반응-긍정댓글수")
         Long positiveComment,
         @Schema(description = "개요-댓글반응-부정댓글수")
-        Long negativeComment
+        Long negativeComment,
+
+        @Schema(description = "업데이트 요약")
+        String updateSummary
 
     ) {}
 
