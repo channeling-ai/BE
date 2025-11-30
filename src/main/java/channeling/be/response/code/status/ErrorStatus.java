@@ -58,6 +58,7 @@ public enum ErrorStatus implements BaseErrorCode {
     _REPORT_NOT_CREATE(HttpStatus.INTERNAL_SERVER_ERROR, "REPORT500", "리포트 생성 중 오류가 발생하였습니다."),
     _REPORT_NOT_ALLOWED_DUMMY(HttpStatus.BAD_REQUEST, "REPO407", "더미데이터는 1 혹은 2로만 호출해주세요."),
     _REPORT_LIMIT_EXCEEDED(HttpStatus.FORBIDDEN, "REPO403", "리포트 생성 한도를 초과했습니다."),
+    _REPORT_ALREADY_GENERATING(HttpStatus.CONFLICT, "REPO409", "해당 영상의 리포트가 이미 생성 중입니다. 잠시 후 완료되면 다시 시도해주세요."),
 
     //영상 관련 에러
     _VIDEO_NOT_FOUND(HttpStatus.BAD_REQUEST, "VIDEO400", "존재하지 않는 영상입니다."),

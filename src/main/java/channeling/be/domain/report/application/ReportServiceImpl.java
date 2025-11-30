@@ -153,6 +153,9 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
+        // Redis를 이용한 중복 클릭(Race Condition) 방지 (5초 락)
+        checkRaceCondition(member.getId(), videoId);
+
         // 이번달 멤버가 분석한 리포트 개수 조회
         if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
             long currentCount = this.countMonthlyReports(member);
@@ -163,6 +166,7 @@ public class ReportServiceImpl implements ReportService {
         if (!videoRepository.existsById(videoId)) {
             throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
         }
+
         // 요청 영상의 주인인지 확인
         Video video = videoRepository.findByIdWithMemberId(videoId, member.getId())
                 .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
@@ -170,8 +174,11 @@ public class ReportServiceImpl implements ReportService {
         // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
-        //존재한다면 삭제
-        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member));
+        // 기존 리포트 존재 시 (1) 현재 생성 중 여부 확인 (2) 삭제
+        optionalReport.ifPresent(report -> {
+            checkPending(report);
+            reportDeleteService.deleteExistingReport(report, video, member);
+        });
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
@@ -236,4 +243,31 @@ public class ReportServiceImpl implements ReportService {
         return logCount + reportCount;
     }
 
+    private void checkRaceCondition(Long memberId, Long videoId) {
+        String lockKey = "REPORT_CREATE_LOCK:" + memberId + ":" + videoId;
+        if (redisUtil.existData(lockKey)) {
+            throw new ReportHandler(ErrorStatus._REPORT_ALREADY_GENERATING);
+        }
+        redisUtil.setDataExpire(lockKey, "LOCKED", 5L);
+    }
+
+    private void checkPending(Report report) {
+        // 기존 리포트가 존재한다면, 현재 생성 중(PENDING)인지 확인
+        Optional<Task> existingTaskOpt = taskRepository.findByReportId(report.getId());
+
+        if (existingTaskOpt.isPresent()) {
+            Task task = existingTaskOpt.get();
+            // Task 상태 중 하나라도 PENDING이면 생성 중으로 판단
+            if (isTaskInProgress(task)) {
+                log.warn("리포트 생성 중복 요청 거절 - Video: {}", report.getVideo().getId());
+                throw new ReportHandler(ErrorStatus._REPORT_ALREADY_GENERATING);
+            }
+        }
+    }
+
+    private boolean isTaskInProgress(Task task) {
+        return task.getOverviewStatus() == TaskStatus.PENDING ||
+                task.getAnalysisStatus() == TaskStatus.PENDING ||
+                task.getIdeaStatus() == TaskStatus.PENDING;
+    }
 }
