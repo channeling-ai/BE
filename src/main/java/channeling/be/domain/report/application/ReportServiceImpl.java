@@ -153,49 +153,57 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
+
         // Redis를 이용한 중복 클릭(Race Condition) 방지 (5초 락)
-        checkRaceCondition(member.getId(), videoId);
+        String lockKey = generateLockKey(member.getId(), videoId);
+        checkRaceCondition(lockKey);
 
-        // 이번달 멤버가 분석한 리포트 개수 조회
-        if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
-            long currentCount = this.countMonthlyReports(member);
-            member.checkReportCredit(currentCount);
+        try {
+            // 이번달 멤버가 분석한 리포트 개수 조회
+            if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
+                long currentCount = this.countMonthlyReports(member);
+                member.checkReportCredit(currentCount);
+            }
+
+            // 요청 영상 존재 여부 확인
+            if (!videoRepository.existsById(videoId)) {
+                throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
+            }
+
+            // 요청 영상의 주인인지 확인
+            Video video = videoRepository.findByIdWithMemberId(videoId, member.getId())
+                    .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
+
+            // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
+            Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
+
+            // 기존 리포트 존재 시 (1) 현재 생성 중 여부 확인 (2) 삭제
+            optionalReport.ifPresent(report -> {
+                checkPending(report);
+                reportDeleteService.deleteExistingReport(report, video, member);
+            });
+
+            // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
+            Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
+            log.info("리포트 분석 전, 구글 토큰 TTL (초): {}" , ttl);
+            if (ttl <= 120) {
+                throw new ReportHandler(ErrorStatus._TOKEN_EXPIRED);
+            }
+            String googleAccessToken = redisUtil.getGoogleAccessToken(member.getId());
+            log.info("구글 토큰 : {}" , googleAccessToken);
+
+            // fastapi 쪽에 요청 보내기
+            Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
+            // taskId로 리포트 조회
+            Report report = reportRepository.findByTaskId(taskId)
+                    .orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+
+            return new ReportResDto.createReport(report.getId(), video.getId());
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            redisUtil.deleteData(lockKey);
         }
-
-        // 요청 영상 존재 여부 확인
-        if (!videoRepository.existsById(videoId)) {
-            throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
-        }
-
-        // 요청 영상의 주인인지 확인
-        Video video = videoRepository.findByIdWithMemberId(videoId, member.getId())
-                .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
-
-        // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
-        Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
-
-        // 기존 리포트 존재 시 (1) 현재 생성 중 여부 확인 (2) 삭제
-        optionalReport.ifPresent(report -> {
-            checkPending(report);
-            reportDeleteService.deleteExistingReport(report, video, member);
-        });
-
-        // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
-        Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
-        log.info("리포트 분석 전, 구글 토큰 TTL (초): {}" , ttl);
-        if (ttl <= 120) {
-            throw new ReportHandler(ErrorStatus._TOKEN_EXPIRED);
-        }
-        String googleAccessToken = redisUtil.getGoogleAccessToken(member.getId());
-        log.info("구글 토큰 : {}" , googleAccessToken);
-        // fastapi 쪽에 요청 보내기
-        // 요청 바디에 보낼 객체 구성
-        Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
-        // taskId로 리포트 조회
-        Report report = reportRepository.findByTaskId(taskId)
-                .orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
-
-        return new ReportResDto.createReport(report.getId(), video.getId());
     }
 
     private Long sendPostToFastAPI(Long videoId, String googleAccessToken) {
@@ -243,16 +251,21 @@ public class ReportServiceImpl implements ReportService {
         return logCount + reportCount;
     }
 
-    private void checkRaceCondition(Long memberId, Long videoId) {
-        String lockKey = "REPORT_CREATE_LOCK:" + memberId + ":" + videoId;
+    // 레이스 컨디션 방지
+    private void checkRaceCondition(String lockKey) {
         if (redisUtil.existData(lockKey)) {
             throw new ReportHandler(ErrorStatus._REPORT_ALREADY_GENERATING);
         }
         redisUtil.setDataExpire(lockKey, "LOCKED", 5L);
     }
 
+    // lock key
+    private String generateLockKey(Long memberId, Long videoId) {
+        return "REPORT_CREATE_LOCK:" + memberId + ":" + videoId;
+    }
+
+    // 기존 리포트가 존재한다면, 현재 생성 중(PENDING)인지 확인
     private void checkPending(Report report) {
-        // 기존 리포트가 존재한다면, 현재 생성 중(PENDING)인지 확인
         Optional<Task> existingTaskOpt = taskRepository.findByReportId(report.getId());
 
         if (existingTaskOpt.isPresent()) {
@@ -265,6 +278,7 @@ public class ReportServiceImpl implements ReportService {
         }
     }
 
+    // task pending 확인
     private boolean isTaskInProgress(Task task) {
         return task.getOverviewStatus() == TaskStatus.PENDING ||
                 task.getAnalysisStatus() == TaskStatus.PENDING ||
