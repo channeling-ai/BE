@@ -4,7 +4,8 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
-import channeling.be.domain.log.ReportLogRepository;
+import channeling.be.domain.log.domain.DeleteType;
+import channeling.be.domain.log.repository.ReportLogRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.domain.report.domain.PageType;
@@ -128,7 +129,7 @@ public class ReportServiceImpl implements ReportService {
     public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
         reportRepository.findByReportAndMember(reportId, member.getId())
                 .ifPresent(r -> {
-                    reportDeleteService.deleteExistingReport(r, r.getVideo(), member);
+                    reportDeleteService.deleteExistingReport(r, r.getVideo(), member, DeleteType.USER_REQUEST);
                 });
 
         return new ReportResDto.deleteReport(reportId);
@@ -171,7 +172,7 @@ public class ReportServiceImpl implements ReportService {
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
         //존재한다면 삭제
-        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member));
+        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member, DeleteType.REPLACED));
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
