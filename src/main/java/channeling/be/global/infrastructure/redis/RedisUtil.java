@@ -99,4 +99,17 @@ public class RedisUtil {
         // TTL (Time To Live)을 초 단위로 가져옴
         return stringRedisTemplate.getExpire(key, TimeUnit.SECONDS);
     }
+
+    /**
+     * 원자적으로 key가 없을 때만 value를 설정하고 만료 시간을 지정 (Redis의 SET NX EX 명령을 활용)
+     *
+     * @param key Redis 키
+     * @param value 저장할 값
+     * @param duration 만료 시간 (초)
+     * @return 성공 시 true, 이미 존재하면 false
+     */
+    public Boolean setIfAbsent(String key, String value, Long duration) {
+        return stringRedisTemplate.opsForValue()
+                .setIfAbsent(key, value, Duration.ofSeconds(duration));
+    }
 }

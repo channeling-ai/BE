@@ -181,7 +181,7 @@ public class ReportServiceImpl implements ReportService {
             // 기존 리포트 존재 시 (1) 현재 생성 중 여부 확인 (2) 삭제
             optionalReport.ifPresent(report -> {
                 checkPending(report);
-                reportDeleteService.deleteExistingReport(report, video, member, DeleteType.REPLACED));
+                reportDeleteService.deleteExistingReport(report, video, member, DeleteType.REPLACED);
             });
 
             // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
@@ -200,8 +200,6 @@ public class ReportServiceImpl implements ReportService {
                     .orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
 
             return new ReportResDto.createReport(report.getId(), video.getId());
-        } catch (Exception e) {
-            throw e;
         } finally {
             redisUtil.deleteData(lockKey);
         }
@@ -254,10 +252,11 @@ public class ReportServiceImpl implements ReportService {
 
     // 레이스 컨디션 방지
     private void checkRaceCondition(String lockKey) {
-        if (redisUtil.existData(lockKey)) {
+        Boolean isLocked = redisUtil.setIfAbsent(lockKey, "LOCKED", 5L);
+
+        if (isLocked == null || !isLocked) {
             throw new ReportHandler(ErrorStatus._REPORT_ALREADY_GENERATING);
         }
-        redisUtil.setDataExpire(lockKey, "LOCKED", 5L);
     }
 
     // lock key
