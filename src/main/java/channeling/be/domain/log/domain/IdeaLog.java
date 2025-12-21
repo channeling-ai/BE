@@ -1,6 +1,5 @@
-package channeling.be.domain.log;
+package channeling.be.domain.log.domain;
 
-import channeling.be.domain.channel.domain.Channel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

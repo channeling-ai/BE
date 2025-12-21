@@ -9,7 +9,7 @@ import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.idea.presentation.IdeaConverter;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
-import channeling.be.domain.log.IdeaLogRepository;
+import channeling.be.domain.log.repository.IdeaLogRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.global.infrastructure.llm.LlmResDto;

@@ -1,5 +1,6 @@
-package channeling.be.domain.log;
+package channeling.be.domain.log.repository;
 
+import channeling.be.domain.log.domain.ReportLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

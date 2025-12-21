@@ -51,7 +51,9 @@ public class ReportConverter {
                 report.getNeutralComment(),
                 report.getAdviceComment(),
                 report.getPositiveComment(),
-                report.getNegativeComment()
+                report.getNegativeComment(),
+                // 업데이트 요약
+                report.getUpdateSummary()
         );
     }
 

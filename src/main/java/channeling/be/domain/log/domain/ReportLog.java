@@ -1,4 +1,4 @@
-package channeling.be.domain.log;
+package channeling.be.domain.log.domain;
 
 import channeling.be.domain.task.domain.TaskStatus;
 import jakarta.persistence.*;
@@ -57,8 +57,23 @@ public class ReportLog {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // [로그에서만 추가]
     @Enumerated(EnumType.STRING)
-    private TaskStatus overviewStatus;
+    private TaskStatus overviewStatus; // 개요 생성 상태
     @Enumerated(EnumType.STRING)
-    private TaskStatus analyzeStatus;
+    private TaskStatus analyzeStatus; // 분석 생성 상태
+
+    @Enumerated(EnumType.STRING)
+    private DeleteType deleteType;  // 삭제 타입 확인(사용자 임의, 생성시)
+
+    // [로그에서만 추가] / 기준으로 모든 댓글 문자열 저장
+    @Column(length = 400)
+    private String positiveCommentContent;
+    @Column(length = 400)
+    private String negativeCommentContent;
+    @Column(length = 400)
+    private String neutralCommentContent;
+    @Column(length = 400)
+    private String adviceCommentContent;
+
 }
