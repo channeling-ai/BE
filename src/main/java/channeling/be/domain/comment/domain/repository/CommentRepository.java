@@ -20,4 +20,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     WHERE cm.report.id = :reportId AND cm.report.video.channel.member.id = :memberId
 """)
     void deleteAllByReportAndMember(@Param("reportId") Long reportId, @Param("memberId") Long memberId);
+
+    List<Comment> findByReport(Report report);
 }

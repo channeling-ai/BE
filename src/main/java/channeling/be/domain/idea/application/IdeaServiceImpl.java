@@ -4,23 +4,29 @@ import channeling.be.domain.auth.domain.CustomUserDetails;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.idea.domain.Idea;
+import channeling.be.domain.idea.domain.event.IdeaDeletedEvent;
 import channeling.be.domain.idea.domain.repository.IdeaRepository;
 import channeling.be.domain.idea.presentation.IdeaConverter;
 import channeling.be.domain.idea.presentation.IdeaReqDto;
 import channeling.be.domain.idea.presentation.IdeaResDto;
+import channeling.be.domain.log.repository.IdeaLogRepository;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.global.infrastructure.llm.LlmResDto;
 import channeling.be.global.infrastructure.llm.LlmServerUtil;
 import channeling.be.response.exception.handler.IdeaHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -37,6 +43,8 @@ public class IdeaServiceImpl implements IdeaService {
     private final IdeaRepository ideaRepository;
     private final ChannelRepository channelRepository;
     private final LlmServerUtil llmServerUtil;
+    private final IdeaLogRepository ideaLogRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final int IDEA_CURSOR_SIZE = 12;
     private final ZoneId timeZone = ZoneId.of("Asia/Seoul"); // DB 시간 기준
@@ -67,17 +75,52 @@ public class IdeaServiceImpl implements IdeaService {
     @Override
     @Transactional
     public void deleteNotBookMarkedIdeas(Member loginMember) {
-        int deletedCount = ideaRepository.deleteAllByMemberWithoutBookmarked(loginMember.getId());
-        log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
+        List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
+        log.info("아이디어 {}", ideas);
 
+        ideas.stream().forEach(idea -> {
+            eventPublisher.publishEvent(new IdeaDeletedEvent(idea));
+        });
+
+        ideaRepository.deleteAll(ideas);
+        int deletedCount = ideas.size();
+
+        log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
+    }
+
+    @Async
+    @Override
+    @Transactional
+    public void deleteNotBookMarkedIdeasAsync(Member loginMember) {
+        try {
+            // 이벤트 발행을 위해 아이디어 먼저 조회
+            List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
+
+            // 각 아이디어에 대해 삭제 이벤트 발행
+            ideas.forEach(idea -> eventPublisher.publishEvent(new IdeaDeletedEvent(idea)));
+
+            // 아이디어 삭제
+            ideaRepository.deleteAll(ideas);
+
+            log.info("비동기 삭제 완료 - {} unbookmarked ideas for memberId={}", ideas.size(), loginMember.getId());
+        } catch (Exception e) {
+            log.error("비동기 아이디어 삭제 실패 - memberId: {}, error: {}", loginMember.getId(), e.getMessage(), e);
+        }
     }
 
     @Override
     public List<LlmResDto.CreateIdeasResDto> createIdeas(IdeaReqDto.CreateIdeaReqDto dto, Member member) {
-        log.info("아이디어 생성 요청 내용: {}", dto);
+
+        if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
+            long currentCount = this.countMonthlyIdeas(member);
+            member.checkIdeaCredit(currentCount);
+        }
 
         Channel channel = channelRepository.findByMember(member)
                 .orElseThrow(() -> new IdeaHandler(_CHANNEL_NOT_FOUND));
+
+        log.info("아이디어 생성 요청 내용: {}", dto);
+
         return llmServerUtil.createIdeas(dto, channel);
     }
 
@@ -96,7 +139,7 @@ public class IdeaServiceImpl implements IdeaService {
 
         List<Idea> ideas = (cursorId == null || cursorTime == null)
                 ? ideaRepository.findByIdeaFirstCursor(loginAt, channel.getId(), page)
-                : ideaRepository.findByIdeaAfterCursor(loginAt, channel.getId(),cursorId, cursorTime, page);
+                : ideaRepository.findByIdeaAfterCursor(loginAt, channel.getId(), cursorId, cursorTime, page);
 
         boolean hasNext = ideas.size() > IDEA_CURSOR_SIZE;
         if (hasNext) {
@@ -111,5 +154,12 @@ public class IdeaServiceImpl implements IdeaService {
         return date.toInstant()
                 .atZone(timeZone)
                 .toLocalDateTime();
+    }
+
+    private Long countMonthlyIdeas(Member member) {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        long logCount = ideaLogRepository.countMonthlyIdeas(member.getId(), startOfMonth);
+        long ideaCount = ideaRepository.countMonthlyIdeas(member.getId(), startOfMonth);
+        return logCount + ideaCount;
     }
 }

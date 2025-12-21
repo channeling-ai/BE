@@ -4,8 +4,10 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.comment.domain.CommentType;
 import channeling.be.domain.comment.domain.repository.CommentRepository;
-import channeling.be.domain.idea.domain.repository.IdeaRepository;
+import channeling.be.domain.log.domain.DeleteType;
+import channeling.be.domain.log.repository.ReportLogRepository;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.domain.report.domain.PageType;
 import channeling.be.domain.report.domain.Report;
 import channeling.be.domain.report.domain.repository.ReportRepository;
@@ -43,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -55,11 +59,11 @@ public class ReportServiceImpl implements ReportService {
     private final TaskRepository taskRepository;
     private final ReportRepository reportRepository;
     private final CommentRepository commentRepository;
-    private final IdeaRepository ideaRepository;
     private final VideoRepository videoRepository;
     private final RedisUtil redisUtil;
     private final ReportDeleteService reportDeleteService;
     private final ChannelRepository channelRepository;
+    private final ReportLogRepository reportLogRepository;
 
     //환경변수에서 FASTAPI_URL 환경변수 불러오기
     @Value("${FASTAPI_URL:http://localhost:8000}")
@@ -123,25 +127,13 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
-        // 멤버와 리포트으로 기존에 분석했던 리포트가 존재하는 지 조회
-        Optional<Report> optionalReport  = reportRepository.findByReportAndMember(reportId, member.getId());
+        reportRepository.findByReportAndMember(reportId, member.getId())
+                .ifPresent(r -> {
+                    reportDeleteService.deleteExistingReport(r, r.getVideo(), member, DeleteType.USER_REQUEST);
+                });
 
-		//존재한다면
-		if (optionalReport.isPresent()) {
-			Report report = optionalReport.get();
-			Video video = report.getVideo();
-			// TODO 리포트 삭제 시 아이디어 삭제 관련
-            // 연관된 북마크 하지 않은 아이디어 리스트 삭제
-			//ideaRepository.deleteAllByVideoWithoutBookmarked(video.getId(), member.getId());
-			// 연관된 댓글 리스트 삭제
-			commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-			// 연관된 task 삭제
-			taskRepository.deleteTaskByReportId(report.getId());
-			// 리포트 삭제
-			reportRepository.deleteById(report.getId());
-		}
-		return new ReportResDto.deleteReport(reportId);
-	}
+        return new ReportResDto.deleteReport(reportId);
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -162,6 +154,12 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public ReportResDto.createReport createReport(Member member, Long videoId) {
+        // 이번달 멤버가 분석한 리포트 개수 조회
+        if (!member.getPlan().equals(SubscriptionPlan.ADMIN)) {
+            long currentCount = this.countMonthlyReports(member);
+            member.checkReportCredit(currentCount);
+        }
+
         // 요청 영상 존재 여부 확인
         if (!videoRepository.existsById(videoId)) {
             throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
@@ -174,7 +172,7 @@ public class ReportServiceImpl implements ReportService {
         Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
         //존재한다면 삭제
-        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member));
+        optionalReport.ifPresent(report -> reportDeleteService.deleteExistingReport(report, video, member, DeleteType.REPLACED));
 
         // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
         Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
@@ -230,6 +228,13 @@ public class ReportServiceImpl implements ReportService {
         } catch (Exception e) {
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
+    }
+
+    private Long countMonthlyReports(Member member) {
+        LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+        long logCount = reportLogRepository.countMonthlyReports(member.getId(), startOfMonth);
+        long reportCount = reportRepository.countMonthlyReports(member.getId(), startOfMonth);
+        return logCount + reportCount;
     }
 
 }

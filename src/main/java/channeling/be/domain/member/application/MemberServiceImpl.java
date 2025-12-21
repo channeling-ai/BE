@@ -1,6 +1,7 @@
 package channeling.be.domain.member.application;
 
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.domain.member.domain.repository.MemberRepository;
 import channeling.be.domain.member.presentation.MemberConverter;
 import channeling.be.domain.member.presentation.MemberResDTO;
@@ -70,6 +71,7 @@ public class MemberServiceImpl implements MemberService {
 									.googleEmail(email)
 									.nickname(nickname)
 									.profileImage(profileImage)
+									.plan(SubscriptionPlan.FREE)
 									.build()
 					);
 					return  new MemberResult(newMember, true); // 신규 회원
