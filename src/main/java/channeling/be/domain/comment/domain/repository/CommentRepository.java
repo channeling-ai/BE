@@ -13,7 +13,7 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findTop5ByReportAndCommentType(Report report, CommentType commentType);
 
-    @Modifying
+    @Modifying(clearAutomatically = true)
     @Query("""
     DELETE
     FROM Comment cm

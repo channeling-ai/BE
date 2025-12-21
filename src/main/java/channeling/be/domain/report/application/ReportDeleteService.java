@@ -44,7 +44,6 @@ public class ReportDeleteService {
 
         // 연관된 댓글 리스트 삭제
         commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
-
         // 연관된 task 삭제
         taskRepository.deleteTaskByReportId(report.getId());
         // 리포트 삭제
