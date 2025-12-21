@@ -43,7 +43,8 @@ public class ReportDeleteService {
         reportLogRepository.save(log);
 
         // 연관된 댓글 리스트 삭제
-        commentRepository.deleteAll(comments);
+        commentRepository.deleteAllByReportAndMember(report.getId(), member.getId());
+
         // 연관된 task 삭제
         taskRepository.deleteTaskByReportId(report.getId());
         // 리포트 삭제
