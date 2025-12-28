@@ -18,7 +18,7 @@ public class FastApiScheduler {
     // 매일 오전 2시에 호출
     @Scheduled(cron = "0 0 2 * * ?")
     public void callFastApi() {
-        String url = baseFastApiUrl + "/trend-keywords"; // FastAPI 주소
+        String url = baseFastApiUrl + "/trend-keywords/real-time"; // FastAPI 주소
         try {
             String response = restTemplate.postForObject(url, null, String.class);
             System.out.println("FastAPI Response: " + response);
