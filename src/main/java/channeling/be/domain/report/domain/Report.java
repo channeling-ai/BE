@@ -16,7 +16,7 @@ public class Report extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "video_id", nullable = false)
+    @JoinColumn(name = "video_id", nullable = false, unique = true)
     private Video video;
 
     @Column
