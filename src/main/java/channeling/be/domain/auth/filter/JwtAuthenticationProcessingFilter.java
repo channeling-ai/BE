@@ -2,6 +2,7 @@ package channeling.be.domain.auth.filter;
 
 import channeling.be.domain.auth.application.CustomUserDetailsService;
 import channeling.be.domain.auth.domain.CustomUserDetails;
+import channeling.be.domain.member.domain.MemberStatus;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -97,6 +98,7 @@ public class JwtAuthenticationProcessingFilter extends OncePerRequestFilter {
                 .map(customUserDetailsService::loadUserByUsername)
                 .filter(CustomUserDetails.class::isInstance)
                 .map(CustomUserDetails.class::cast)
+                .filter(userDetails -> userDetails.getMember().getStatus() == MemberStatus.ACTIVE)
                 .ifPresent(userDetails -> {
                     userDetails.setLoginTime(loginAt);
                     saveAuthentication(userDetails);

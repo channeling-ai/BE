@@ -19,6 +19,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -91,7 +92,7 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
 
         // 탈퇴 회원 복구 처리 (한달 이내)
-        if (member.getStatus().equals(MemberStatus.WITHDRAWN)) {
+        if (member.getStatus().equals(MemberStatus.WITHDRAWN) && member.getDeletedAt().isAfter(LocalDateTime.now().minusDays(30))) {
             member.restore();
             log.info("회원 복구 처리 완료: memberId={}", member.getId());
         }
