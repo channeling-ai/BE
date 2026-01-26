@@ -22,6 +22,5 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
 
     Optional<Task> findByReportId(Long reportId);
 
-    @Modifying(clearAutomatically = true)
     void deleteTaskByReportId(Long id);
 }

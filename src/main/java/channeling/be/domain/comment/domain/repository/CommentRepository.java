@@ -22,4 +22,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     void deleteAllByReportAndMember(@Param("reportId") Long reportId, @Param("memberId") Long memberId);
 
     List<Comment> findByReport(Report report);
+
+    void deleteAllByReportId(Long reportId);
 }
