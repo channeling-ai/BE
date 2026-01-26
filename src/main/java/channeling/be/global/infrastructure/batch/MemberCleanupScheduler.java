@@ -92,13 +92,17 @@ public class MemberCleanupScheduler {
         channelRepository.findByMember(member).ifPresent(channel -> {
             Long channelId = channel.getId();
 
-            // 2. Report 관련 데이터 삭제 (Comment, Task)
+            // 2. Report 관련 데이터 삭제 (Comment, Task) - bulk delete로 N+1 문제 해결
             List<Report> reports = reportRepository.findAllByChannelId(channelId);
-            for (Report report : reports) {
-                // Comment 삭제
-                commentRepository.deleteAllByReportId(report.getId());
-                // Task 삭제
-                taskRepository.deleteTaskByReportId(report.getId());
+            if (!reports.isEmpty()) {
+                List<Long> reportIds = reports.stream()
+                        .map(Report::getId)
+                        .toList();
+
+                // Comment 일괄 삭제
+                commentRepository.deleteAllByReportIdIn(reportIds);
+                // Task 일괄 삭제
+                taskRepository.deleteAllByReportIdIn(reportIds);
             }
 
             // 3. Report 삭제
@@ -121,7 +125,7 @@ public class MemberCleanupScheduler {
         memberAgreeRepository.deleteAllByMemberId(memberId);
 
         // 9. Redis 데이터 삭제
-        redisUtil.deleteData("GOOGLE_AT_" + memberId);
+        redisUtil.deleteGoogleAccessToken(memberId);
 
         // 10. Member 삭제
         memberRepository.delete(member);

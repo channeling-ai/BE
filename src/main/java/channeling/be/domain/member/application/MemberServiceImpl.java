@@ -107,7 +107,7 @@ public class MemberServiceImpl implements MemberService {
 		member.withdraw();
 
 		// Google Access Token 삭제
-        redisUtil.deleteData("GOOGLE_AT_" + member.getId());
+		redisUtil.deleteGoogleAccessToken(member.getId());
 
         // 레디스 블랙리스트에 토큰 추가(인가에서 탈퇴한 유저 재사용 방지)
         String subAccessToken = accessToken.replaceFirst("(?i)Bearer ", "");

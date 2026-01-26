@@ -42,9 +42,6 @@ public class JwtUtilImpl implements JwtUtil {
     @Value("${jwt.access.header}")
     private String accessHeader;
 
-    public static String BLACKLIST_ACCESS_TOKEN_PREFIX = "BL_";
-
-
     /** JWT subject 값 - 액세스 토큰 구분용 */
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     /** JWT 클레임 키 - 구글 아이디 */
@@ -119,7 +116,7 @@ public class JwtUtilImpl implements JwtUtil {
     @Override
     public boolean isTokenInBlackList(String accessToken) {
         // Redis에서 블랙리스트로 저장된 토큰 확인
-        String blacklistToken = redisUtil.getData( BLACKLIST_ACCESS_TOKEN_PREFIX + accessToken);
+        String blacklistToken = redisUtil.getData(RedisUtil.BLACKLIST_TOKEN_PREFIX + accessToken);
 
         if (blacklistToken != null) {
             throw new JwtHandler("블랙리스트 처리 되었거나 로그아웃된 Token입니다.");

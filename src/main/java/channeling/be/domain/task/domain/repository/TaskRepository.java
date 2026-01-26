@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TaskRepository extends JpaRepository<Task, Long> {
@@ -23,4 +24,8 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByReportId(Long reportId);
 
     void deleteTaskByReportId(Long id);
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Task t WHERE t.report.id IN :reportIds")
+    void deleteAllByReportIdIn(@Param("reportIds") List<Long> reportIds);
 }

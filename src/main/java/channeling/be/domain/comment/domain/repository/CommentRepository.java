@@ -23,5 +23,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findByReport(Report report);
 
-    void deleteAllByReportId(Long reportId);
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Comment c WHERE c.report.id IN :reportIds")
+    void deleteAllByReportIdIn(@Param("reportIds") List<Long> reportIds);
 }
