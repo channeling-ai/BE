@@ -7,6 +7,8 @@ import channeling.be.response.exception.handler.ReportHandler;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
@@ -46,6 +48,13 @@ public class Member extends BaseEntity {
     @Builder.Default
     private SubscriptionPlan plan = SubscriptionPlan.FREE;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    @Builder.Default
+    private MemberStatus status = MemberStatus.ACTIVE;
+
+    @Column
+    private LocalDateTime deletedAt;
 
     private enum SnsPatterns {
         INSTAGRAM("^https?://(www\\.)?instagram\\.com/.*$"),
@@ -99,5 +108,25 @@ public class Member extends BaseEntity {
         if (currentCount >= limit) {
             throw new ReportHandler(ErrorStatus._IDEA_LIMIT_EXCEEDED);
         }
+    }
+
+    /**
+     * 회원 탈퇴 처리
+     * - 상태를 WITHDRAWN으로 변경
+     * - deletedAt에 현재 시간 기록
+     */
+    public void withdraw() {
+        this.status = MemberStatus.WITHDRAWN;
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 회원 복구 처리
+     * - 상태를 ACTIVE로 변경
+     * - deletedAt 초기화
+     */
+    public void restore() {
+        this.status = MemberStatus.ACTIVE;
+        this.deletedAt = null;
     }
 }

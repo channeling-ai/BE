@@ -6,10 +6,7 @@ import channeling.be.response.exception.handler.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "회원 API", description = "회원 관련 API입니다.")
 public interface MemberSwagger {
@@ -45,6 +42,15 @@ public interface MemberSwagger {
     )
     @GetMapping("")
     ApiResponse<MemberResDTO.getMemberInfo> getMemberInfo(
+            @Parameter(hidden = true)
+            @LoginMember Member member);
+
+    @Operation(
+            summary = "회원 탈퇴 API",
+            description = "회원 탈퇴를 처리합니다. 탈퇴 후 30일 이내에 복구가 가능합니다."
+    )
+    @PatchMapping("/withdraw")
+    ApiResponse<Void> withdrawMember(
             @Parameter(hidden = true)
             @LoginMember Member member);
 }

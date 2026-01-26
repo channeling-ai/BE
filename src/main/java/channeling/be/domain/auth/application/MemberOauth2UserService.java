@@ -5,6 +5,7 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.member.application.MemberService;
 import channeling.be.domain.member.domain.Member;
+import channeling.be.domain.member.domain.MemberStatus;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +89,12 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         );
         Member member = memberResult.member;
         redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
+
+        // 탈퇴 회원 복구 처리 (한달 이내)
+        if (member.getStatus().equals(MemberStatus.WITHDRAWN)) {
+            member.restore();
+            log.info("회원 복구 처리 완료: memberId={}", member.getId());
+        }
 
         // 기존 채널 조회
         Optional<Channel> channelOpt = channelRepository.findByMember(member);
