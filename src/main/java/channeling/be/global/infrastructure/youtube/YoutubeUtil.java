@@ -49,6 +49,7 @@ public class YoutubeUtil {
             YoutubeChannelResDTO youtubeResponse = mapper.readValue(response, YoutubeChannelResDTO.class);
             return youtubeResponse.getItems().get(0); // 채널 정보가 담긴 첫 번째 아이템 반환
         } catch (Exception e) {
+            log.error("🚨 YouTube 채널 정보 조회 실패 - 오류: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to fetch channel details: " + e.getMessage(), e);
         }
     }
@@ -77,6 +78,7 @@ public class YoutubeUtil {
                     ? Long.parseLong(String.valueOf(yt.getRows().get(0).get(0)))
                     : 0L;
         } catch (Exception e) {
+            log.error("🚨 YouTube Analytics 전체 공유 수 조회 실패 - URL: {}, 오류: {}", url, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch total shares: " + e.getMessage(), e);
         }
     }
@@ -151,6 +153,7 @@ public class YoutubeUtil {
             return objectMapper.readTree(response.body());
 
         } catch (Exception e) {
+            log.error("🚨 YouTube 비디오 정보 조회 실패 - videoId: {}, 오류: {}", videoId, e.getMessage(), e);
             throw new RuntimeException("Failed to fetch video details: " + e.getMessage(), e);
         }
     }
@@ -216,8 +219,7 @@ public class YoutubeUtil {
 
             } while (pageToken != null);
         } catch (Exception e) {
-            log.error("유튜브 플레이리스트 조회 중 에러 발생", e);
-
+            log.error("🚨 YouTube 플레이리스트 조회 실패 - playlistId: {}, 오류: {}", playlistId, e.getMessage(), e);
             throw new YoutubeHandler(ErrorStatus._YOUTUBE_PLAYLIST_PULLING_ERROR);
         }
         return videoList;
@@ -257,6 +259,7 @@ public class YoutubeUtil {
             }
             return videoDetails;
         } catch (Exception e) {
+            log.error("🚨 YouTube 비디오 상세정보 조회 실패 - videoIds 개수: {}, 오류: {}", videoIds.size(), e.getMessage(), e);
             throw new RuntimeException("Failed to fetch video details: " + e.getMessage(), e);
         }
     }

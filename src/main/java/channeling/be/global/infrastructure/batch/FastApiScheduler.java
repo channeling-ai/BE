@@ -1,11 +1,13 @@
 package channeling.be.global.infrastructure.batch;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class FastApiScheduler {
@@ -20,10 +22,11 @@ public class FastApiScheduler {
     public void callFastApi() {
         String url = baseFastApiUrl + "/trend-keywords/real-time"; // FastAPI 주소
         try {
+            log.info("FastAPI 스케줄러 시작 - URL: {}", url);
             String response = restTemplate.postForObject(url, null, String.class);
-            System.out.println("FastAPI Response: " + response);
+            log.info("FastAPI 스케줄러 성공 - Response: {}", response);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("FastAPI 스케줄러 실패 - URL: {}, 오류: {}", url, e.getMessage(), e);
         }
     }
 }

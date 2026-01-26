@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
+    <!-- Discord Webhook URL (application-prod.yml 에서 읽음) -->
+    <springProperty name="DISCORD_WEBHOOK_URL" source="logging.discord.webhook-url"/>
+
     <!-- 운영 환경: JSON 로깅 (Loki용) -->
     <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
@@ -22,10 +25,30 @@
         </encoder>
     </appender>
 
+    <!-- Discord Appender -->
+    <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+        <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss} [%thread] [%-5level] %logger{36} - %msg%n```%ex{10}```</pattern>
+        </layout>
+        <username>에러핑...</username>
+        <avatarUrl>https://jjal.today/data/file/gallery/1889155643_NZHvkRLz_e0292b65bb682075bfdb752a4d8f4062f0b7738a.png</avatarUrl>
+        <tts>false</tts>
+    </appender>
+
+    <!-- 비동기 + ERROR 이상만 -->
+    <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="DISCORD"/>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
     <!-- 운영 환경 (prod 프로파일) -->
     <springProfile name="prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE_JSON"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
         </root>
         <logger name="org.springframework.security" level="WARN"/>
         <logger name="org.springframework.web" level="WARN"/>
