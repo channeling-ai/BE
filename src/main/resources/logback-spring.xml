@@ -31,6 +31,7 @@
     <springProfile name="!prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
+<!--            <appender-ref ref="ASYNC_DISCORD"/>-->
         </root>
         <logger name="org.springframework.jdbc" level="DEBUG"/>
         <logger name="org.hibernate.SQL" level="DEBUG"/>
@@ -41,6 +42,8 @@
     <springProfile name="prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
+
         </root>
         <logger name="org.springframework.security" level="WARN"/>
         <logger name="org.springframework.web" level="WARN"/>
@@ -53,5 +56,28 @@
     <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="org.springframework.boot.autoconfigure" level="INFO"/>
     <logger name="org.springframework.boot.web.embedded" level="INFO"/>
+
+
+    <!-- Discord Webhook URL (application-prod.yml 에서 읽음) -->
+    <springProperty name="DISCORD_WEBHOOK_URL" source="logging.discord.webhook-url"/>
+
+    <!-- Discord Appender -->
+    <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+        <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss} [%thread] [%-5level] %logger{36} - %msg%n```%ex{10}```</pattern>
+        </layout>
+        <username>에러핑...</username>
+        <avatarUrl>https://jjal.today/data/file/gallery/1889155643_NZHvkRLz_e0292b65bb682075bfdb752a4d8f4062f0b7738a.png</avatarUrl>
+        <tts>false</tts>
+    </appender>
+
+    <!-- 비동기 + ERROR 이상만 -->
+    <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="DISCORD"/>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
 
 </configuration>
