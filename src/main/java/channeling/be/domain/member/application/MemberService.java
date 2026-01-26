@@ -11,5 +11,5 @@ public interface MemberService {
     MemberResDTO.updateSnsRes updateSns(Member loginMember, updateSnsReq updateSnsReq);
     MemberResDTO.updateProfileImageRes updateProfileImage(Member loginMember, ProfileImageUpdateReq updateProfileImageReq);
     MemberResDTO.getMemberInfo getMemberInfo(Member loginMember);
-    void withdrawMember(Member loginMember);
+    void withdrawMember(Member loginMember, String accessToken);
 }

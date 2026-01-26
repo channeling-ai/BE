@@ -99,7 +99,7 @@ public class MemberServiceImpl implements MemberService {
 
 	@Override
 	@Transactional
-	public void withdrawMember(Member loginMember) {
+	public void withdrawMember(Member loginMember, String accessToken) {
 		Member member = memberRepository.findById(loginMember.getId())
 				.orElseThrow(() -> new MemberHandler(ErrorStatus._MEMBER_NOT_FOUND));
 
@@ -107,7 +107,11 @@ public class MemberServiceImpl implements MemberService {
 		member.withdraw();
 
 		// Google Access Token 삭제
-		redisUtil.deleteData("GOOGLE_AT_" + member.getId());
+        redisUtil.deleteData("GOOGLE_AT_" + member.getId());
+
+        // 레디스 블랙리스트에 토큰 추가(인가에서 탈퇴한 유저 재사용 방지)
+        String subAccessToken = accessToken.replaceFirst("(?i)Bearer ", "");
+        redisUtil.addAccessTokenToBlackList(subAccessToken);
 
 		log.info("회원 탈퇴 처리 완료: memberId={}, googleId={}", member.getId(), member.getGoogleId());
 	}

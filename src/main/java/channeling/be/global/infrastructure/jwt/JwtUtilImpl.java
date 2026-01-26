@@ -42,7 +42,7 @@ public class JwtUtilImpl implements JwtUtil {
     @Value("${jwt.access.header}")
     private String accessHeader;
 
-    public static String BLACKLIST_ACCESS_TOKEN_PREFIX = "BL_AT_";
+    public static String BLACKLIST_ACCESS_TOKEN_PREFIX = "BL_";
 
 
     /** JWT subject 값 - 액세스 토큰 구분용 */

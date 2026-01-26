@@ -26,6 +26,9 @@ public class RedisUtil {
     /** Redis에 저장할 구글 액세스 토큰 키 접두사 */
     private final static String GOOGLE_ACCESS_TOKEN_PREFIX = "GOOGLE_AT_";
 
+    /** Redis에 저장할 블랙리스트 키 접두사 */
+    public static String BLACKLIST_TOKEN_PREFIX = "BL_";
+
 
     /**
      *  key로부터 value 조회
@@ -111,5 +114,19 @@ public class RedisUtil {
     public Boolean setIfAbsent(String key, String value, Long duration) {
         return stringRedisTemplate.opsForValue()
                 .setIfAbsent(key, value, Duration.ofSeconds(duration));
+    }
+
+    /**
+     *  입력받은 토큰을 블랙리스트에 넣습니다.
+     * @param token 블래리스트에 넣을 토큰 값
+     * @return 생성된 블랙리스트 토큰 문자열
+     */
+    public void addAccessTokenToBlackList(String token) {
+        String key = BLACKLIST_TOKEN_PREFIX + token;
+        stringRedisTemplate.opsForValue().set(
+                key,
+                String.valueOf(1),
+                Duration.ofSeconds(googleAccessExpiration)
+        );
     }
 }

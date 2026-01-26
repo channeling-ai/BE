@@ -49,8 +49,8 @@ public interface MemberSwagger {
             summary = "회원 탈퇴 API",
             description = "회원 탈퇴를 처리합니다. 탈퇴 후 30일 이내에 복구가 가능합니다."
     )
-    @PatchMapping("/withdraw")
+    @DeleteMapping("/withdraw")
     ApiResponse<Void> withdrawMember(
-            @Parameter(hidden = true)
-            @LoginMember Member member);
+            @Parameter(hidden = true) @LoginMember Member member,
+            @Parameter(hidden = true) String accessToken);
 }
