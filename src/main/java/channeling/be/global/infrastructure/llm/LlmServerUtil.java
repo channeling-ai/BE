@@ -55,7 +55,16 @@ public class LlmServerUtil {
 
         // 요청 생성
         HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, request, String.class);
+        
+        ResponseEntity<String> responseEntity;
+        try {
+            responseEntity = restTemplate.postForEntity(url, request, String.class);
+        } catch (Exception e) {
+            log.error("🚨 FastAPI 아이디어 생성 요청 실패 - HTTP 요청 오류, channelId: {}, URL: {}", 
+                    channel.getId(), url, e);
+            throw new RuntimeException("FastAPI 요청 실패", e);
+        }
+        
         String jsonBody = responseEntity.getBody();
 
         LlmResDto.ApiResDto<List<LlmResDto.CreateIdeasResDto>> apiResponse = null;
@@ -64,12 +73,13 @@ public class LlmServerUtil {
             apiResponse = om.readValue(jsonBody, new TypeReference<>() {});
 
             if (apiResponse == null || apiResponse.result() == null || !apiResponse.isSuccess()) {
-                log.error("FastAPI 요청 실패 응답 Body: {}", jsonBody);
+                log.error("🚨 FastAPI 요청 실패 응답 - channelId: {}, Body: {}", channel.getId(), jsonBody);
                 throw new RuntimeException("FastAPI 요청이 성공했으나, 아이디어 생성에 실패했습니다.");
             }
 
         } catch (Exception e) {
-            log.error("FastAPI 응답 JSON 파싱에 실패했습니다. Body: {}", jsonBody, e);
+            log.error("🚨 FastAPI 응답 JSON 파싱 실패 - channelId: {}, Body: {}", 
+                    channel.getId(), jsonBody, e);
             throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
 

@@ -1,57 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <!-- 로그 파일이 저장될 경로 설정 -->
-    <property name="LOG_PATH" value="logs"/>
-    <property name="LOG_FILE_NAME" value="channeling"/>
+    <!-- Discord Webhook URL (application-prod.yml 에서 읽음) -->
+    <springProperty name="DISCORD_WEBHOOK_URL" source="logging.discord.webhook-url"/>
 
-    <!-- 콘솔 출력 설정 -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+    <!-- 운영 환경: JSON 로깅 (Loki용) -->
+    <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>Asia/Seoul</timeZone>
+            <fieldNames>
+                <version>[ignore]</version>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+            </throwableConverter>
+        </encoder>
+    </appender>
+
+    <!-- 로컬 환경: 색상 로깅 (가독성) -->
+    <appender name="CONSOLE_PRETTY" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %cyan([%thread]) %highlight(%-5level) %yellow(%logger{36}) - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <!-- 파일 로그 (현재 비활성화됨)
-    <appender name="ALL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_PATH}/${LOG_FILE_NAME}-all.log</file>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_PATH}/${LOG_FILE_NAME}-all.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
-            <maxFileSize>50MB</maxFileSize>
-            <maxHistory>14</maxHistory>
-            <totalSizeCap>2GB</totalSizeCap>
-        </rollingPolicy>
+    <!-- Discord Appender -->
+    <appender name="DISCORD" class="com.github.napstr.logback.DiscordAppender">
+        <webhookUri>${DISCORD_WEBHOOK_URL}</webhookUri>
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{HH:mm:ss} [%thread] [%-5level] %logger{36} - %msg%n```%ex{10}```</pattern>
+        </layout>
+        <username>에러핑...</username>
+        <avatarUrl>https://jjal.today/data/file/gallery/1889155643_NZHvkRLz_e0292b65bb682075bfdb752a4d8f4062f0b7738a.png</avatarUrl>
+        <tts>false</tts>
     </appender>
-    -->
 
-    <!-- 개발 환경 설정 -->
+    <!-- 비동기 + ERROR 이상만 -->
+    <appender name="ASYNC_DISCORD" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="DISCORD"/>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <!-- 운영 환경 (prod 프로파일) -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_JSON"/>
+            <appender-ref ref="ASYNC_DISCORD"/>
+        </root>
+        <logger name="org.springframework.security" level="WARN"/>
+        <logger name="org.springframework.web" level="WARN"/>
+    </springProfile>
+
+    <!-- 로컬 환경 (기본) -->
     <springProfile name="!prod">
         <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="CONSOLE_PRETTY"/>
         </root>
         <logger name="org.springframework.jdbc" level="DEBUG"/>
         <logger name="org.hibernate.SQL" level="DEBUG"/>
         <logger name="org.hibernate.type" level="TRACE"/>
     </springProfile>
 
-    <!-- 운영 환경 설정 -->
-    <springProfile name="prod">
-        <root level="INFO">
-            <appender-ref ref="CONSOLE"/>
-        </root>
-        <logger name="org.springframework.security" level="WARN"/>
-        <logger name="org.springframework.web" level="WARN"/>
-    </springProfile>
-
     <!-- 애플리케이션 로거 설정 -->
     <logger name="channeling.be" level="INFO"/>
     <logger name="channeling.be.response.exception" level="DEBUG"/>
-    <logger name="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver" level="DEBUG"/>
-    <logger name="com.zaxxer.hikari" level="INFO"/>
-    <logger name="org.springframework.boot.autoconfigure" level="INFO"/>
-    <logger name="org.springframework.boot.web.embedded" level="INFO"/>
 
 </configuration>
