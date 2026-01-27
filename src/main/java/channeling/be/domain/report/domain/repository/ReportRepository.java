@@ -68,4 +68,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
 			@Param("memberId") Long memberId,
 			@Param("start") LocalDateTime start
 	);
+
+	@Query("SELECT r FROM Report r WHERE r.video.channel.id = :channelId")
+	List<Report> findAllByChannelId(@Param("channelId") Long channelId);
 }

@@ -87,6 +87,7 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
             @Param("start") LocalDateTime start
     );
 
+    void deleteAllByChannelId(Long channelId);
 }
 
 

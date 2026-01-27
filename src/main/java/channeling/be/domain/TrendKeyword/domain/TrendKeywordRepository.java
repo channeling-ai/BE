@@ -10,5 +10,7 @@ public interface TrendKeywordRepository extends JpaRepository<TrendKeyword, Long
     List<TrendKeyword> getTrendKeywordsByChannel(Channel channel);
     @Query("SELECT t FROM TrendKeyword t WHERE t.keywordType = 'REAL_TIME'")
     List<TrendKeyword> getRealTimeTrendKeywords();
+
+    void deleteAllByChannelId(Long channelId);
 }
 

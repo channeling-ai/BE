@@ -48,4 +48,11 @@ public class MemberController implements MemberSwagger{
         return ApiResponse.onSuccess(memberService.getMemberInfo(member));
     }
 
+    @Override
+    @DeleteMapping("/withdraw")
+    public ApiResponse<Void> withdrawMember(
+            @LoginMember Member member, @RequestHeader("Authorization") String accessToken) {
+        memberService.withdrawMember(member, accessToken);
+        return ApiResponse.onSuccess(null);
+    }
 }
