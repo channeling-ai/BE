@@ -57,4 +57,6 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 	Optional<Video> findByMemberAndYoutubeVideoId(@Param("memberId") Long memberId, @Param("youtubeVideoId") String youtubeVideoId);
 
 	List<Video> findByChannelId(Long channelId);
+
+	void deleteAllByChannelId(Long channelId);
 }

@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface MemberAgreeRepository extends JpaRepository<MemberAgree, Long> {
     Optional<MemberAgree> findByMemberId(@Param("memberId") Long memberId);
+
+    void deleteAllByMemberId(Long memberId);
 }
