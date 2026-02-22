@@ -43,7 +43,7 @@ public class YoutubeUtil {
                 .header("Authorization", "Bearer " + accessToken)
                 .build();
         try {
-            log.info("googleAccessToken: {}", accessToken);
+            log.info("[YouTube API] 채널 정보 요청 URL: {}", request.uri());
             String response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString()).body();
             log.info("Response: {}", response);
             YoutubeChannelResDTO youtubeResponse = mapper.readValue(response, YoutubeChannelResDTO.class);
@@ -63,6 +63,7 @@ public class YoutubeUtil {
                 .build().toUriString();
 
         try {
+            log.info("[YouTube API] Analytics 공유 수 요청 URL: {}", url);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Authorization", "Bearer " + accessToken)
@@ -71,7 +72,6 @@ public class YoutubeUtil {
 
             HttpResponse<String> response = HttpClient.newHttpClient()
                     .send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body()); // 먼저 원문 그대로 확인
 
             YoutubeAnalyticsResDTO yt = new ObjectMapper().readValue(response.body(), YoutubeAnalyticsResDTO.class);
             return yt.getRows() != null && !yt.getRows().isEmpty()
@@ -84,55 +84,6 @@ public class YoutubeUtil {
     }
 
 
-    // public static List<YoutubeVideoBriefResDTO> getVideoStatistics(String accessToken, LocalDateTime start, LocalDateTime end) {
-    // 	ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    // 	try {
-    // 		String url = UriComponentsBuilder.fromUriString("https://youtubeanalytics.googleapis.com/v2/reports")
-    // 			.queryParam("ids", "channel==MINE")
-    // 			.queryParam("startDate", start.toLocalDate().toString())
-    // 			.queryParam("endDate", end.toLocalDate().toString())
-    // 			.queryParam("metrics", "views,likes,comments,shares")
-    // 			.queryParam("dimensions", "video")
-    // 			.queryParam("sort", "-day")
-    // 			.queryParam("maxResults", "1000") // timeout시 나눠서 가져오기
-    // 			.build()
-    // 			.toUriString();
-    //
-    // 		HttpRequest request = HttpRequest.newBuilder()
-    // 			.uri(URI.create(url))
-    // 			.header("Authorization", "Bearer " + accessToken)
-    // 			.GET()
-    // 			.build();
-    //
-    // 		HttpResponse<String> response = HttpClient.newHttpClient()
-    // 			.send(request, HttpResponse.BodyHandlers.ofString());
-    // 		YoutubeAnalyticsResDTO ytResponse =
-    // 			objectMapper.readValue(response.body(), YoutubeAnalyticsResDTO.class);
-    //
-    // 		List<YoutubeVideoBriefResDTO> stats = new ArrayList<>();
-    // 		//rows 는 가져온 단일 비디오에 대한 통계 정보가 담겨있음
-    // 		for (List<Object> row : ytResponse.getRows()) {
-    // 			JsonNode videoNode = getVideo(row.get(0).toString(), accessToken);
-    // 			stats.add(new YoutubeVideoBriefResDTO(
-    // 				row.get(0).toString(), // videoId
-    // 				Integer.parseInt(row.get(1).toString()), // views
-    // 				Integer.parseInt(row.get(2).toString()), // likes
-    // 				Integer.parseInt(row.get(3).toString()),  // comments
-    // 				Integer.parseInt(row.get(4).toString()), // shares
-    // 				videoNode.path("items").get(0).path("snippet").path("thumbnails").path("default").path("url").asText(), // thumbnailUrl
-    // 				videoNode.path("items").get(0).path("snippet").path("title").asText(), // publishedAt
-    // 				videoNode.path("items").get(0).path("snippet").path("description").asText(), // description
-    // 				videoNode.path("items").get(0).path("snippet").path("publishedAt").asText() // uploadDate
-    // 			));
-    // 		}
-    //
-    // 		return stats;
-    //
-    // 	} catch (Exception e) {
-    // 		throw new RuntimeException("Failed to fetch YouTube stats: " + e.getMessage(), e);
-    // 	}
-    // }
-
     public static JsonNode getVideo(String videoId, String accessToken) {
         ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
         try {
@@ -142,6 +93,7 @@ public class YoutubeUtil {
                     .build()
                     .toUriString();
 
+            log.info("[YouTube API] 비디오 단건 조회 요청 URL: {}", url);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
                     .header("Authorization", "Bearer " + accessToken)
@@ -180,6 +132,7 @@ public class YoutubeUtil {
                 }
 
                 String url = builder.build().toUriString();
+                log.info("[YouTube API] 플레이리스트 조회 요청 URL: {}", url);
 
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(url))
@@ -187,7 +140,6 @@ public class YoutubeUtil {
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-				log.info("response: {}", response.body());
                 YoutubePlayListResDTO youtubeResponse = mapper.readValue(response.body(), YoutubePlayListResDTO.class);
 
                 for (YoutubePlayListResDTO.Item item : youtubeResponse.getItems()) {
@@ -227,35 +179,48 @@ public class YoutubeUtil {
 
     public static List<YoutubeVideoDetailDTO> getVideoDetailsByIds(String accessToken, List<String> videoIds) {
         // 유튜브 API를 호출하여 비디오의 상세 정보를 가져오는 메서드
+        // YouTube API는 한 번에 최대 50개의 video ID만 처리 가능
         HttpClient client = HttpClient.newHttpClient();
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
         List<YoutubeVideoDetailDTO> videoDetails = new ArrayList<>();
+        int batchSize = 50;
 
         try {
-            String ids = String.join(",", videoIds);
-            String url = UriComponentsBuilder.fromUriString(YOUTUBE_API_BASE_URL + "/videos")
-                    .queryParam("part", "snippet,statistics")
-                    .queryParam("id", ids)
-                    .build()
-                    .toUriString();
+            for (int i = 0; i < videoIds.size(); i += batchSize) {
+                List<String> batch = videoIds.subList(i, Math.min(i + batchSize, videoIds.size()));
+                String ids = String.join(",", batch);
+                String url = UriComponentsBuilder.fromUriString(YOUTUBE_API_BASE_URL + "/videos")
+                        .queryParam("part", "snippet,statistics")
+                        .queryParam("id", ids)
+                        .build()
+                        .toUriString();
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + accessToken)
-                    .build();
+                log.info("[YouTube API] 비디오 상세정보 배치 요청 URL: {} (batch {}/{})", url, (i / batchSize) + 1, (int) Math.ceil((double) videoIds.size() / batchSize));
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .header("Authorization", "Bearer " + accessToken)
+                        .build();
 
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            YoutubeVideoListResDTO youtubeVideoListResDTO = mapper.readValue(response.body(), YoutubeVideoListResDTO.class);
-            for (YoutubeVideoListResDTO.Item item : youtubeVideoListResDTO.getItems()) {
-                String description = item.getSnippet().getDescription();
-                String categoryId = item.getSnippet().getCategoryId();
-                Long viewCount = item.getStatistics().getViewCount();
-                Long likeCount = item.getStatistics().getLikeCount();
-                Long commentCount = item.getStatistics().getCommentCount();
+                HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                log.info("[YouTube API] 비디오 상세정보 응답 - batch {}/{}, 요청 ID: {}, 상태코드: {}", (i / batchSize) + 1, (int) Math.ceil((double) videoIds.size() / batchSize), batch, response.statusCode());
+                YoutubeVideoListResDTO youtubeVideoListResDTO = mapper.readValue(response.body(), YoutubeVideoListResDTO.class);
 
-                videoDetails.add(new YoutubeVideoDetailDTO(description, categoryId, viewCount, likeCount, commentCount));
+                if (youtubeVideoListResDTO.getItems() == null) {
+                    log.warn("YouTube 비디오 상세정보 응답에 items가 없음 - batch 시작 인덱스: {}, batch 크기: {}", i, batch.size());
+                    continue;
+                }
+
+                for (YoutubeVideoListResDTO.Item item : youtubeVideoListResDTO.getItems()) {
+                    String description = item.getSnippet().getDescription();
+                    String categoryId = item.getSnippet().getCategoryId();
+                    Long viewCount = item.getStatistics().getViewCount();
+                    Long likeCount = item.getStatistics().getLikeCount();
+                    Long commentCount = item.getStatistics().getCommentCount();
+
+                    videoDetails.add(new YoutubeVideoDetailDTO(description, categoryId, viewCount, likeCount, commentCount));
+                }
             }
             return videoDetails;
         } catch (Exception e) {
