@@ -204,6 +204,7 @@ public class YoutubeUtil {
                         .build();
 
                 HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+                log.info("[YouTube API] 비디오 상세정보 응답 - batch {}/{}, 요청 ID: {}, 상태코드: {}", (i / batchSize) + 1, (int) Math.ceil((double) videoIds.size() / batchSize), batch, response.statusCode());
                 YoutubeVideoListResDTO youtubeVideoListResDTO = mapper.readValue(response.body(), YoutubeVideoListResDTO.class);
 
                 if (youtubeVideoListResDTO.getItems() == null) {
