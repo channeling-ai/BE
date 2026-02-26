@@ -16,7 +16,7 @@ public class SwaggerConfig {
         Info info=new Info()
                 .title("channeling Spring API")
                 .description("channeling Spring API 명세서 입니다.")
-                .version("v1.0.0");
+                .version("v1.3.34");
 
         String jwtSchemeName="JWT TOKEN";
         SecurityRequirement securityRequirement = new SecurityRequirement().addList(jwtSchemeName);
