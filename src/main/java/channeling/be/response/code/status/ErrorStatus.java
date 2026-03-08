@@ -22,6 +22,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
     //유튜브 관련 에러
     _YOUTUBE_PLAYLIST_PULLING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "YOUTUBE500", "유튜브 플레이리스트를 가져오는 중 에러가 발생했습니다."),
+    _YOUTUBE_CHANNEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "YOUTUBE402", "연결된 유튜브 채널이 없습니다. 유튜브 채널을 먼저 생성해주세요."),
     _LINK_NOT_VALID(HttpStatus.BAD_REQUEST, "YOUTUBE400", "유효하지 않은 유튜브 URL 입니다"),
 
     //채널 관련 에러

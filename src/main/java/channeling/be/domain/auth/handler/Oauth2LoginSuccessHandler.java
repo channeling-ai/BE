@@ -6,6 +6,7 @@ import channeling.be.domain.auth.application.MemberOauth2UserService.LoginResult
 import channeling.be.domain.channel.application.ChannelSyncService;
 import channeling.be.domain.idea.application.IdeaService;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
+import channeling.be.response.exception.handler.YoutubeHandler;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -73,7 +74,20 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
          * ------------------------------------------------- */
 
         long loginStartTime = System.currentTimeMillis();
-        LoginResult result = memberOauth2UserService.executeGoogleLoginFast(attrs, googleAccessToken);
+        LoginResult result;
+        try {
+            result = memberOauth2UserService.executeGoogleLoginFast(attrs, googleAccessToken);
+        } catch (YoutubeHandler e) {
+            log.warn("채널 없는 계정 로그인 시도 - error: {}", e.getCode());
+            String targetUrl = UriComponentsBuilder.fromUriString(frontUrl + "/auth/callback")
+                    .queryParam("token", "")
+                    .queryParam("message", "Fail")
+                    .queryParam("error", "NO_CHANNEL")
+                    .build()
+                    .toUriString();
+            response.sendRedirect(targetUrl);
+            return;
+        }
         long loginEndTime = System.currentTimeMillis();
         log.info("[TIME] executeGoogleLoginFast (멤버/채널 처리): {}ms | 신규사용자: {}",
                 loginEndTime - loginStartTime, result.isNew());
