@@ -78,11 +78,9 @@ public class IdeaServiceImpl implements IdeaService {
         List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
         log.info("아이디어 {}", ideas);
 
-        ideas.stream().forEach(idea -> {
-            eventPublisher.publishEvent(new IdeaDeletedEvent(idea));
-        });
+        ideas.forEach(idea -> eventPublisher.publishEvent(new IdeaDeletedEvent(idea)));
 
-        ideaRepository.deleteAll(ideas);
+        ideaRepository.deleteAllByMemberWithoutBookmarked(loginMember.getId());
         int deletedCount = ideas.size();
 
         log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
@@ -99,8 +97,8 @@ public class IdeaServiceImpl implements IdeaService {
             // 각 아이디어에 대해 삭제 이벤트 발행
             ideas.forEach(idea -> eventPublisher.publishEvent(new IdeaDeletedEvent(idea)));
 
-            // 아이디어 삭제
-            ideaRepository.deleteAll(ideas);
+            // 아이디어 벌크 삭제
+            ideaRepository.deleteAllByMemberWithoutBookmarked(loginMember.getId());
 
             log.info("비동기 삭제 완료 - {} unbookmarked ideas for memberId={}", ideas.size(), loginMember.getId());
         } catch (Exception e) {
