@@ -1,7 +1,9 @@
 package channeling.be.domain.task.domain.repository;
 
 import channeling.be.domain.task.domain.Task;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +24,10 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     Optional<Task> findByIdFetchWithReportAndMember(@Param("taskId") Long taskId);
 
     Optional<Task> findByReportId(Long reportId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM Task t WHERE t.report.id = :reportId")
+    Optional<Task> findByReportIdWithLock(@Param("reportId") Long reportId);
 
     void deleteTaskByReportId(Long id);
 
