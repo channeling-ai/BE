@@ -191,7 +191,6 @@ public class ReportServiceImpl implements ReportService {
                 throw new ReportHandler(ErrorStatus._TOKEN_EXPIRED);
             }
             String googleAccessToken = redisUtil.getGoogleAccessToken(member.getId());
-            log.info("구글 토큰 : {}" , googleAccessToken);
 
             // fastapi 쪽에 요청 보내기
             Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
