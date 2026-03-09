@@ -129,6 +129,7 @@ public class ReportServiceImpl implements ReportService {
     public ReportResDto.deleteReport deleteReport(Member member, Long reportId) {
         reportRepository.findByReportAndMember(reportId, member.getId())
                 .ifPresent(r -> {
+                    checkPending(r);
                     reportDeleteService.deleteExistingReport(r, r.getVideo(), member, DeleteType.USER_REQUEST);
                 });
 
@@ -175,7 +176,7 @@ public class ReportServiceImpl implements ReportService {
             Video video = videoRepository.findByIdWithMemberId(videoId, member.getId())
                     .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
 
-            // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
+            // 멤버와 영상으로 기존에 분S석했던 리포트가 존재하는 지 조회
             Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
             // 기존 리포트 존재 시 (1) 현재 생성 중 여부 확인 (2) 삭제
@@ -191,7 +192,6 @@ public class ReportServiceImpl implements ReportService {
                 throw new ReportHandler(ErrorStatus._TOKEN_EXPIRED);
             }
             String googleAccessToken = redisUtil.getGoogleAccessToken(member.getId());
-            log.info("구글 토큰 : {}" , googleAccessToken);
 
             // fastapi 쪽에 요청 보내기
             Long taskId = sendPostToFastAPI(videoId, googleAccessToken);

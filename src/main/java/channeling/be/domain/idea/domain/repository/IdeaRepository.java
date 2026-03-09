@@ -42,7 +42,8 @@ public interface IdeaRepository extends JpaRepository<Idea, Long> {
 
     @Query("""
     SELECT i
-    FROM Idea i 
+    FROM Idea i
+    JOIN FETCH i.channel
     WHERE i.channel.member.id = :memberId AND i.isBookMarked = false
     """)
     List<Idea> findByMemberWithoutBookmarked(@Param("memberId") Long memberId);

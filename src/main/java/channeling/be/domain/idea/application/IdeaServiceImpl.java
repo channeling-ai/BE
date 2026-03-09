@@ -78,10 +78,7 @@ public class IdeaServiceImpl implements IdeaService {
         List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
         log.info("아이디어 {}", ideas);
 
-        ideas.stream().forEach(idea -> {
-            eventPublisher.publishEvent(new IdeaDeletedEvent(idea));
-        });
-
+        ideas.forEach(idea -> eventPublisher.publishEvent(new IdeaDeletedEvent(idea)));
         ideaRepository.deleteAll(ideas);
         int deletedCount = ideas.size();
 

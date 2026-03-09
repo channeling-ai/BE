@@ -35,7 +35,7 @@ public class ReportDeleteService {
         log.info("기존 리포트 삭제 시작 - reportId: {}", report.getId());
 
         // 리포트 로그 저장
-        Task task = taskRepository.findByReportId(report.getId())
+        Task task = taskRepository.findByReportIdWithLock(report.getId())
                 .orElseThrow(() -> new TaskHandler(ErrorStatus._TASK_NOT_FOUND));
         List<Comment> comments = commentRepository.findByReport(report);
 

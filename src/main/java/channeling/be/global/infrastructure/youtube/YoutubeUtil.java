@@ -47,7 +47,13 @@ public class YoutubeUtil {
             String response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString()).body();
             log.info("Response: {}", response);
             YoutubeChannelResDTO youtubeResponse = mapper.readValue(response, YoutubeChannelResDTO.class);
+            if (youtubeResponse.getItems() == null || youtubeResponse.getItems().isEmpty()) {
+                log.warn("유튜브 채널이 없는 계정으로 로그인 시도");
+                throw new YoutubeHandler(ErrorStatus._YOUTUBE_CHANNEL_NOT_FOUND);
+            }
             return youtubeResponse.getItems().get(0); // 채널 정보가 담긴 첫 번째 아이템 반환
+        } catch (YoutubeHandler e) {
+            throw e;
         } catch (Exception e) {
             log.error("🚨 YouTube 채널 정보 조회 실패 - 오류: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to fetch channel details: " + e.getMessage(), e);
