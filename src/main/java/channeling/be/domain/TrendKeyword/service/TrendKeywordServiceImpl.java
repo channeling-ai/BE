@@ -10,6 +10,7 @@ import channeling.be.domain.member.domain.Member;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TrendKeywordServiceImpl implements TrendKeywordService {
@@ -29,7 +31,6 @@ public class TrendKeywordServiceImpl implements TrendKeywordService {
     private final RestTemplate restTemplate;
 
     @Async // 비동기로 호출
-    @Transactional(readOnly = true)
     @Override
     public void updateChannelTrendKeyword(Member member) {
         Channel channel = channelRepository.findByMember(member).orElseThrow(() -> new ChannelHandler(ErrorStatus._MEMBER_NOT_FOUND));
@@ -39,9 +40,8 @@ public class TrendKeywordServiceImpl implements TrendKeywordService {
             String response = restTemplate.postForObject(url, null, String.class, channel.getId());
             System.out.println("FastAPI Response: " + response);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("트랜드 키워드 업데이트 오류 :", e);
         }
-
     }
 
     @Override
