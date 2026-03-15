@@ -3,3 +3,5 @@ spring:
     name: channeling-be
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:db,s3,oauth,jwt}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}

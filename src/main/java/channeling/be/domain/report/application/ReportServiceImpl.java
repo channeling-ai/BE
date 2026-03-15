@@ -27,8 +27,6 @@ import channeling.be.response.exception.handler.ChannelHandler;
 import channeling.be.response.exception.handler.ReportHandler;
 import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.response.exception.handler.VideoHandler;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,19 +34,12 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -64,10 +55,13 @@ public class ReportServiceImpl implements ReportService {
     private final ReportDeleteService reportDeleteService;
     private final ChannelRepository channelRepository;
     private final ReportLogRepository reportLogRepository;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
-    //환경변수에서 FASTAPI_URL 환경변수 불러오기
-    @Value("${FASTAPI_URL:http://localhost:8000}")
-    private String baseFastApiUrl;
+    @Value("${KAFKA_OVERVIEW_TOPIC:overview-topic-v2}")
+    private String overviewTopic;
+
+    @Value("${KAFKA_ANALYSIS_TOPIC:analysis-topic-v2}")
+    private String analysisTopic;
 
     @Override
     @Transactional(readOnly = true)
@@ -154,6 +148,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
+    @Transactional
     public ReportResDto.createReport createReport(Member member, Long videoId) {
 
         // Redis를 이용한 중복 클릭(Race Condition) 방지 (5초 락)
@@ -169,15 +164,15 @@ public class ReportServiceImpl implements ReportService {
 
             // 요청 영상 존재 여부 확인
             if (!videoRepository.existsById(videoId)) {
-                throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND) ;
+                throw new VideoHandler(ErrorStatus._VIDEO_NOT_FOUND);
             }
 
             // 요청 영상의 주인인지 확인
             Video video = videoRepository.findByIdWithMemberId(videoId, member.getId())
                     .orElseThrow(() -> new VideoHandler(ErrorStatus._VIDEO_NOT_MEMBER));
 
-            // 멤버와 영상으로 기존에 분S석했던 리포트가 존재하는 지 조회
-            Optional<Report> optionalReport  = reportRepository.findByVideoAndMember(video.getId(), member.getId());
+            // 멤버와 영상으로 기존에 분석했던 리포트가 존재하는 지 조회
+            Optional<Report> optionalReport = reportRepository.findByVideoAndMember(video.getId(), member.getId());
 
             // 기존 리포트 존재 시 (1) 현재 생성 중 여부 확인 (2) 삭제
             optionalReport.ifPresent(report -> {
@@ -187,59 +182,45 @@ public class ReportServiceImpl implements ReportService {
 
             // redis에서 구글 토큰 가져오기 -> 2분 보다 적으면 에러 반환
             Long ttl = redisUtil.getGoogleAccessTokenExpire(member.getId());
-            log.info("리포트 분석 전, 구글 토큰 TTL (초): {}" , ttl);
+            log.info("리포트 분석 전, 구글 토큰 TTL (초): {}", ttl);
             if (ttl <= 120) {
                 throw new ReportHandler(ErrorStatus._TOKEN_EXPIRED);
             }
             String googleAccessToken = redisUtil.getGoogleAccessToken(member.getId());
 
-            // fastapi 쪽에 요청 보내기
-            Long taskId = sendPostToFastAPI(videoId, googleAccessToken);
-            // taskId로 리포트 조회
-            Report report = reportRepository.findByTaskId(taskId)
-                    .orElseThrow(() -> new ReportHandler(ErrorStatus._REPORT_NOT_CREATE));
+            // Report, Task 생성 (DB 소유권 Spring)
+            Report report = reportRepository.save(Report.builder().video(video).build());
+            Task task = taskRepository.save(Task.builder()
+                    .report(report)
+                    .overviewStatus(TaskStatus.PENDING)
+                    .analysisStatus(TaskStatus.PENDING)
+                    .ideaStatus(TaskStatus.COMPLETED)
+                    .build());
+
+            // Kafka 메시지 발행 (기존 V2 토픽 사용)
+            ReportKafkaMessage overviewMessage = ReportKafkaMessage.builder()
+                    .taskId(task.getId())
+                    .reportId(report.getId())
+                    .step("overview")
+                    .googleAccessToken(googleAccessToken)
+                    .skipVectorSave(true)
+                    .build();
+
+            ReportKafkaMessage analysisMessage = ReportKafkaMessage.builder()
+                    .taskId(task.getId())
+                    .reportId(report.getId())
+                    .step("analysis")
+                    .googleAccessToken(googleAccessToken)
+                    .skipVectorSave(true)
+                    .build();
+
+            kafkaTemplate.send(overviewTopic, overviewMessage);
+            kafkaTemplate.send(analysisTopic, analysisMessage);
+            log.info("Kafka 메시지 발행 완료 - reportId: {}, taskId: {}", report.getId(), task.getId());
 
             return new ReportResDto.createReport(report.getId(), video.getId());
         } finally {
             redisUtil.deleteData(lockKey);
-        }
-    }
-
-    private Long sendPostToFastAPI(Long videoId, String googleAccessToken) {
-//
-        // HTTP 요청 보내기
-        RestTemplate restTemplate = new RestTemplate();
-        // url 설정
-        String url = UriComponentsBuilder
-                .fromHttpUrl(baseFastApiUrl+"/reports/v2")
-                .queryParam("video_id", videoId)
-                .toUriString();
-
-        // requestbody 생성
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("googleAccessToken", googleAccessToken);
-
-        // 헤더 생성
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        // 요청 생성
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-
-        // 응답 파싱 및 반환
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode root = objectMapper.readTree(response.getBody());
-
-            JsonNode resultNode = root.get("result");
-            if (resultNode != null && resultNode.has("task_id")) {
-                return resultNode.get("task_id").asLong();
-            } else {
-                throw new IllegalStateException("응답에 id가 없습니다.");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("FastAPI 응답 파싱 실패", e);
         }
     }
 
