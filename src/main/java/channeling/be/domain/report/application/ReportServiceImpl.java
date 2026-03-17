@@ -21,6 +21,7 @@ import channeling.be.domain.video.domain.Video;
 import channeling.be.domain.video.domain.VideoCategory;
 import channeling.be.domain.video.domain.VideoType;
 import channeling.be.domain.video.domain.repository.VideoRepository;
+import channeling.be.global.infrastructure.kafka.KafkaMessageProducer;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.ChannelHandler;
@@ -29,12 +30,10 @@ import channeling.be.response.exception.handler.TaskHandler;
 import channeling.be.response.exception.handler.VideoHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,13 +54,7 @@ public class ReportServiceImpl implements ReportService {
     private final ReportDeleteService reportDeleteService;
     private final ChannelRepository channelRepository;
     private final ReportLogRepository reportLogRepository;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
-
-    @Value("${KAFKA_OVERVIEW_TOPIC:overview-topic-v2}")
-    private String overviewTopic;
-
-    @Value("${KAFKA_ANALYSIS_TOPIC:analysis-topic-v2}")
-    private String analysisTopic;
+    private final KafkaMessageProducer kafkaMessageProducer;
 
     @Override
     @Transactional(readOnly = true)
@@ -197,26 +190,8 @@ public class ReportServiceImpl implements ReportService {
                     .ideaStatus(TaskStatus.COMPLETED)
                     .build());
 
-            // Kafka 메시지 발행 (기존 V2 토픽 사용)
-            ReportKafkaMessage overviewMessage = ReportKafkaMessage.builder()
-                    .taskId(task.getId())
-                    .reportId(report.getId())
-                    .step("overview")
-                    .googleAccessToken(googleAccessToken)
-                    .skipVectorSave(true)
-                    .build();
-
-            ReportKafkaMessage analysisMessage = ReportKafkaMessage.builder()
-                    .taskId(task.getId())
-                    .reportId(report.getId())
-                    .step("analysis")
-                    .googleAccessToken(googleAccessToken)
-                    .skipVectorSave(true)
-                    .build();
-
-            kafkaTemplate.send(overviewTopic, overviewMessage);
-            kafkaTemplate.send(analysisTopic, analysisMessage);
-            log.info("Kafka 메시지 발행 완료 - reportId: {}, taskId: {}", report.getId(), task.getId());
+            // Kafka 메시지 발행 — 트랜잭션 커밋 후 전송
+            kafkaMessageProducer.sendReportMessagesAfterCommit(task.getId(), report.getId(), googleAccessToken);
 
             return new ReportResDto.createReport(report.getId(), video.getId());
         } finally {

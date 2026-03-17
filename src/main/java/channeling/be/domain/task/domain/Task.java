@@ -34,4 +34,12 @@ public class Task extends BaseEntity {
     public void setReport(Report report) {
         this.report = report;
     }
+
+    public void failOverview() {
+        this.overviewStatus = TaskStatus.FAILED;
+    }
+
+    public void failAnalysis() {
+        this.analysisStatus = TaskStatus.FAILED;
+    }
 }

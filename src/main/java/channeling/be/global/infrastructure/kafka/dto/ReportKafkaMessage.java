@@ -1,5 +1,6 @@
-package channeling.be.domain.report.application;
+package channeling.be.global.infrastructure.kafka.dto;
 
+import channeling.be.domain.report.domain.ReportStep;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,8 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class
-ReportKafkaMessage {
+public class ReportKafkaMessage {
 
     @JsonProperty("task_id")
     private Long taskId;
@@ -20,7 +20,7 @@ ReportKafkaMessage {
     private Long reportId;
 
     @JsonProperty("step")
-    private String step;
+    private ReportStep step;
 
     @JsonProperty("google_access_token")
     private String googleAccessToken;
