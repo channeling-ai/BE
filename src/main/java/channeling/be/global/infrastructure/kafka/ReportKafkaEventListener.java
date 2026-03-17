@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -28,6 +29,7 @@ public class ReportKafkaEventListener {
     @Value("${KAFKA_ANALYSIS_TOPIC:analysis-topic-v2}")
     private String analysisTopic;
 
+    @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleReportKafkaEvent(ReportKafkaEvent event) {
         ReportKafkaMessage overviewMessage = ReportKafkaMessage.builder()
@@ -52,19 +54,27 @@ public class ReportKafkaEventListener {
     }
 
     private void sendWithFailureHandling(String topic, ReportKafkaMessage message, Long taskId, ReportStep step, Long userId) {
-        kafkaTemplate.send(topic, message).whenComplete((result, ex) -> {
-            if (ex != null) {
-                log.error("Kafka 전송 실패 - topic: {}, taskId: {}, step: {}", topic, taskId, step, ex);
-                try {
-                    switch (step) {
-                        case OVERVIEW -> taskRepository.failOverviewStatus(taskId);
-                        case ANALYSIS -> taskRepository.failAnalysisStatus(taskId);
-                    }
-                    redisUtil.publishFailure(userId, step.getValue());
-                } catch (Exception e) {
-                    log.error("Kafka 전송 실패 후처리 중 오류 - taskId: {}, step: {}", taskId, step, e);
+        try {
+            kafkaTemplate.send(topic, message).whenComplete((result, ex) -> {
+                if (ex != null) {
+                    handleFailure(topic, taskId, step, userId, ex);
                 }
+            });
+        } catch (Exception ex) {
+            handleFailure(topic, taskId, step, userId, ex);
+        }
+    }
+
+    private void handleFailure(String topic, Long taskId, ReportStep step, Long userId, Throwable ex) {
+        log.error("Kafka 전송 실패 - topic: {}, taskId: {}, step: {}", topic, taskId, step, ex);
+        try {
+            switch (step) {
+                case OVERVIEW -> taskRepository.failOverviewStatus(taskId);
+                case ANALYSIS -> taskRepository.failAnalysisStatus(taskId);
             }
-        });
+            redisUtil.publishFailure(userId, step.getValue());
+        } catch (Exception e) {
+            log.error("Kafka 전송 실패 후처리 중 오류 - taskId: {}, step: {}", taskId, step, e);
+        }
     }
 }
