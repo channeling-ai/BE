@@ -11,7 +11,7 @@ public class KafkaMessageProducer {
 
     private final ApplicationEventPublisher eventPublisher;
 
-    public void sendReportMessagesAfterCommit(Long taskId, Long reportId, String googleAccessToken) {
-        eventPublisher.publishEvent(new ReportKafkaEvent(taskId, reportId, googleAccessToken));
+    public void sendReportMessagesAfterCommit(Long taskId, Long reportId, String googleAccessToken, Long userId) {
+        eventPublisher.publishEvent(new ReportKafkaEvent(taskId, reportId, googleAccessToken, userId));
     }
 }

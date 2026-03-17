@@ -191,7 +191,7 @@ public class ReportServiceImpl implements ReportService {
                     .build());
 
             // Kafka 메시지 발행 — 트랜잭션 커밋 후 전송
-            kafkaMessageProducer.sendReportMessagesAfterCommit(task.getId(), report.getId(), googleAccessToken);
+            kafkaMessageProducer.sendReportMessagesAfterCommit(task.getId(), report.getId(), googleAccessToken, member.getId());
 
             return new ReportResDto.createReport(report.getId(), video.getId());
         } finally {
