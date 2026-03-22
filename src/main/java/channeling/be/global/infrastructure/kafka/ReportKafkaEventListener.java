@@ -48,20 +48,17 @@ public class ReportKafkaEventListener {
                 .skipVectorSave(true)
                 .build();
 
-        sendWithFailureHandling(overviewTopic, overviewMessage, event.taskId(), ReportStep.OVERVIEW, event.userId());
-        sendWithFailureHandling(analysisTopic, analysisMessage, event.taskId(), ReportStep.ANALYSIS, event.userId());
-        log.info("Kafka 메시지 발행 요청 완료 - reportId: {}, taskId: {}", event.reportId(), event.taskId());
-    }
-
-    private void sendWithFailureHandling(String topic, ReportKafkaMessage message, Long taskId, ReportStep step, Long userId) {
         try {
-            kafkaTemplate.send(topic, message).whenComplete((result, ex) -> {
-                if (ex != null) {
-                    handleFailure(topic, taskId, step, userId, ex);
-                }
+            kafkaTemplate.executeInTransaction(ops -> {
+                ops.send(overviewTopic, overviewMessage);
+                ops.send(analysisTopic, analysisMessage);
+                return null;
             });
+            log.info("Kafka 트랜잭션 메시지 발행 완료 - reportId: {}, taskId: {}", event.reportId(), event.taskId());
         } catch (Exception ex) {
-            handleFailure(topic, taskId, step, userId, ex);
+            log.error("Kafka 트랜잭션 발행 실패 - reportId: {}, taskId: {}", event.reportId(), event.taskId(), ex);
+            handleFailure(overviewTopic, event.taskId(), ReportStep.OVERVIEW, event.userId(), ex);
+            handleFailure(analysisTopic, event.taskId(), ReportStep.ANALYSIS, event.userId(), ex);
         }
     }
 

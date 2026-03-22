@@ -30,12 +30,11 @@ public class KafkaProducerConfig {
         // ── acks 설정 ───────────────────────────────────────────
         config.put(ProducerConfig.ACKS_CONFIG, "all");                                   // 리더 + 모든 ISR 저장 확인 후 ack
 
-        // ── retries 설정 ────────────────────────────────────────
-        config.put(ProducerConfig.RETRIES_CONFIG, 3);                                    // 전송 실패 시 최대 3회 재시도
+        // ── retries / timeout 설정 ─────────────────────────────────
+        // 트랜잭션 프로듀서를 사용하므로, 재시도 횟수 제거, 멱등성 기본값 true 설정
         config.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);                        // 재시도 간격 1초
-        config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 120000);                   // send()부터 최종 ack까지 최대 2분
-        config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 30000);                     // 단일 전송 요청 타임아웃 30초
-        config.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);                      // 중복 방지 + 재시도 시 순서 보장
+        config.put(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, 10000);                    // send()부터 최종 ack까지 최대 10초 (빠른 실패)
+        config.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, 5000);                      // 단일 전송 요청 타임아웃 5초
 
         // ── compression 설정 ────────────────────────────────────
         config.put(ProducerConfig.COMPRESSION_TYPE_CONFIG, "snappy");                    // 배치 단위 압축 (속도/압축률 균형)
@@ -45,7 +44,9 @@ public class KafkaProducerConfig {
         config.put(ProducerConfig.LINGER_MS_CONFIG, 5);                                  // 배치 미달 시 최대 5ms 대기 후 전송
         config.put(ProducerConfig.BUFFER_MEMORY_CONFIG, 33554432);                       // 미전송 메시지 대기 버퍼 32MB
 
-        return new DefaultKafkaProducerFactory<>(config);
+        DefaultKafkaProducerFactory<String, Object> factory = new DefaultKafkaProducerFactory<>(config);
+        factory.setTransactionIdPrefix("channeling-be-tx-");                             // 트랜잭션 프로듀서 활성화 (인스턴스별 고유 suffix 자동 부여)
+        return factory;
     }
 
     @Bean
