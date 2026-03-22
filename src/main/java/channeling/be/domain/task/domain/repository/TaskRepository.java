@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +36,14 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM Task t WHERE t.report.id IN :reportIds")
     void deleteAllByReportIdIn(@Param("reportIds") List<Long> reportIds);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Task t SET t.overviewStatus = 'FAILED' WHERE t.id = :id")
+    void failOverviewStatus(@Param("id") Long id);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Task t SET t.analysisStatus = 'FAILED' WHERE t.id = :id")
+    void failAnalysisStatus(@Param("id") Long id);
 }
