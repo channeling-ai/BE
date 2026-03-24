@@ -1,21 +1,17 @@
 package channeling.be.domain.channel.application;
 
-import channeling.be.domain.channel.application.model.Stats;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.channel.presentation.converter.ChannelConverter;
 import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.application.VideoService;
-import channeling.be.domain.video.domain.Video;
 import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
 import channeling.be.global.infrastructure.youtube.YoutubeUtil;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
 import channeling.be.response.exception.handler.ChannelHandler;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,10 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,14 +43,6 @@ public class ChannelServiceImpl implements ChannelService {
 	private final VideoService videoService;
 	private final RedisUtil redisUtil;
 	private final RestTemplate restTemplate;
-
-	@AllArgsConstructor
-	@Getter
-	private static class YoutubeChannelVideoData {
-		YoutubeChannelResDTO.Item item;
-		List<YoutubeVideoBriefDTO> briefs;
-		List<YoutubeVideoDetailDTO> details;
-	}
 
     @Override
     @Transactional
@@ -93,59 +80,131 @@ public class ChannelServiceImpl implements ChannelService {
         return channel;
     }
 
+	/**
+	 * 기존 호출처 호환을 위한 퍼사드.
+	 * 내부적으로 3단계(채널 생성/조회 → 영상 동기화 → 통계 업데이트)를 순차 호출한다.
+	 */
 	@Override
-	@Transactional
-	public void updateChannelVideos(Channel channel, String youtubeAccessToken) {
-		// List<YoutubeVideoBriefDTO> stats = YoutubeUtil.getVideoStatistics(youtubeAccessToken, channel.getJoinDate(),
-		// 	LocalDateTime.now());
-		// if (stats.isEmpty()) {
-		// 	log.warn("채널 {}의 비디오 통계가 없습니다.", channel.getName());
-		// 	return;
-		// }
-	}
-
-	@Override
-	@Transactional
 	public Channel updateOrCreateChannelByMember(Member member) {
-		Optional<Channel> channel = channelRepository.findByMember(member);
-		String googleAccessToken = redisUtil.getGoogleAccessToken(member.getId());
+		String token = redisUtil.getGoogleAccessToken(member.getId());
+		Channel channel = createOrGetBasicChannel(member, token);
+		syncVideos(channel, token);
+		updateChannelStats(channel, token);
+		return channel;
+	}
 
+	// ─── Step 4-1: 기본 채널 생성/조회 ───
 
-		// 유튜브 채널 정보 가져오기
-		YoutubeChannelResDTO.Item item = YoutubeUtil.getChannelDetails(
-			redisUtil.getGoogleAccessToken(member.getId()));
-        long shares=YoutubeUtil.getAllVideoShares(googleAccessToken, item.getSnippet().getPublishedAt(),LocalDateTime.now());
-		String playlistId = item.getContentDetails().getRelatedPlaylists().getUploads();
+	@Override
+	public Channel createOrGetBasicChannel(Member member, String googleAccessToken) {
+		Optional<Channel> existing = channelRepository.findByMember(member);
+		if (existing.isPresent()) {
+			return existing.get();
+		}
 
-		//유튜브 비디오 데이터 가져오기
-		YoutubeChannelVideoData data = fetchYoutubeVideoData(item, googleAccessToken, playlistId);
+		// YouTube API 1회 호출 (트랜잭션 밖)
+		YoutubeChannelResDTO.Item item = YoutubeUtil.getChannelDetails(googleAccessToken);
+		long shares = YoutubeUtil.getAllVideoShares(
+				googleAccessToken, item.getSnippet().getPublishedAt(), LocalDateTime.now());
+		String topCategoryId = "0"; // 신규 채널은 영상 동기화 전이므로 기본값
 
-		//유튜브 비디오 데이터(data.details)의 각 요소의 category id 의 count를 세서 가장 높은 카테고리 추출
-		String topCategoryId = getTopCategoryId(data);
+		return saveNewChannel(item, member, shares, topCategoryId);
+	}
 
-		//채널이 없으면 기본 1차 저장
-		Channel channelEntity = channel.orElseGet(() ->
-			channelRepository.save(ChannelConverter.toNewChannel(data.item, member,shares,topCategoryId))
+	@Transactional
+	protected Channel saveNewChannel(YoutubeChannelResDTO.Item item, Member member, long shares, String topCategoryId) {
+		return channelRepository.save(ChannelConverter.toNewChannel(item, member, shares, topCategoryId));
+	}
+
+	// ─── Step 4-2: 영상 동기화 ───
+
+	@Override
+	public void syncVideos(Channel channel, String googleAccessToken) {
+		String playlistId = channel.getYoutubePlaylistId();
+
+		// YouTube API N회 호출 (트랜잭션 밖)
+		List<YoutubeVideoBriefDTO> briefs = YoutubeUtil.getVideosBriefsByPlayListId(googleAccessToken, playlistId);
+		List<YoutubeVideoDetailDTO> details = YoutubeUtil.getVideoDetailsByIds(
+				googleAccessToken, briefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList());
+
+		// Shorts 판별 — thread-safe 구조 (ConcurrentHashMap으로 결과 수집)
+		ConcurrentHashMap<Integer, Boolean> shortsMap = new ConcurrentHashMap<>();
+		List<CompletableFuture<Void>> futures = new ArrayList<>();
+
+		for (int i = 0; i < briefs.size(); i++) {
+			final int index = i;
+			String videoId = briefs.get(i).getVideoId();
+
+			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+				if (isYoutubeShorts(videoId)) {
+					shortsMap.put(index, true);
+				}
+			});
+			futures.add(future);
+		}
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+		// Shorts 결과 반영
+		shortsMap.forEach((index, isShorts) -> details.get(index).updateCategoryId("42"));
+
+		// @Transactional — DB 저장만
+		saveVideos(briefs, details, channel);
+	}
+
+	@Transactional
+	protected void saveVideos(
+			List<YoutubeVideoBriefDTO> briefs,
+			List<YoutubeVideoDetailDTO> details,
+			Channel channel
+	) {
+		long likeCount = 0, commentCount = 0;
+
+		for (int i = 0; i < briefs.size(); i++) {
+			YoutubeVideoBriefDTO brief = briefs.get(i);
+			YoutubeVideoDetailDTO detail = details.get(i);
+			likeCount += detail.getLikeCount();
+			commentCount += detail.getCommentCount();
+			videoService.updateVideo(brief, detail, channel);
+		}
+
+		channel.updateChannelStats(likeCount, commentCount);
+		channelRepository.save(channel);
+	}
+
+	// ─── Step 4-3: 채널 통계 업데이트 ───
+
+	@Override
+	public void updateChannelStats(Channel channel, String googleAccessToken) {
+		// YouTube Analytics 호출 (트랜잭션 밖)
+		YoutubeChannelResDTO.Item item = YoutubeUtil.getChannelDetails(googleAccessToken);
+		long shares = YoutubeUtil.getAllVideoShares(
+				googleAccessToken, item.getSnippet().getPublishedAt(), LocalDateTime.now());
+
+		// @Transactional — DB 업데이트만
+		saveChannelStats(channel, item, shares);
+	}
+
+	@Transactional
+	protected void saveChannelStats(Channel channel, YoutubeChannelResDTO.Item item, long shares) {
+		channel.updateChannelInfo(
+				item.getSnippet().getTitle(),
+				item.getId(),
+				item.getContentDetails().getRelatedPlaylists().getUploads(),
+				item.getSnippet().getThumbnails().getDefaultThumbnail().getUrl(),
+				"https://www.youtube.com/channel/" + item.getId(),
+				item.getSnippet().getPublishedAt(),
+				item.getStatistics().getViewCount(),
+				item.getStatistics().getSubscriberCount(),
+				item.getStatistics().getVideoCount(),
+				channel.getLikeCount(),
+				channel.getComment(),
+				channel.getChannelHashTag() != null ? channel.getChannelHashTag().getId() : "0",
+				shares
 		);
-
-		Stats stats=updateVideosAndAccumulateStats(data.briefs, data.details, channelEntity);
-		ChannelConverter.updateChannel(channelEntity, data.item, topCategoryId,stats,shares);
-		return channelRepository.save(channelEntity);
-
+		channelRepository.save(channel);
 	}
 
-	private String getTopCategoryId(YoutubeChannelVideoData data) {
-		return data.details.stream()
-			.collect(Collectors.groupingBy(
-				YoutubeVideoDetailDTO::getCategoryId,
-				Collectors.counting()
-			))
-			.entrySet()
-			.stream()
-			.max(Map.Entry.comparingByValue())
-			.map(Map.Entry::getKey)
-			.orElse("0");
-	}
+	// ─── 기존 메서드 ───
 
 	@Override
 	public Channel getChannel(Long channelId, Member loggedInMember) {
@@ -157,75 +216,6 @@ public class ChannelServiceImpl implements ChannelService {
 		}
 
 		return channel;
-	}
-
-	private Stats updateVideosAndAccumulateStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
-		long likeCount = 0, commentCount = 0;
-
-		for (int i = 0; i < briefs.size(); i++) {
-			YoutubeVideoBriefDTO brief = briefs.get(i);
-			YoutubeVideoDetailDTO detail = details.get(i);
-			likeCount += detail.getLikeCount();
-			commentCount += detail.getCommentCount();
-			videoService.updateVideo(brief, detail, channel);
-		}
-		return new Stats(likeCount, commentCount);
-
-//		List<Video> dbVideos = videoService.findVideosByChannel(channel);
-//		Set<String> briefsVideoIds = briefs.stream()
-//			.map(YoutubeVideoBriefDTO::getVideoId)
-//			.collect(Collectors.toSet());
-//
-//		for (Video dbVideo : dbVideos) {
-//			if (briefsVideoIds.contains(dbVideo.getYoutubeVideoId())) {
-//				// briefs에서 해당 videoId의 brief와 detail을 찾아 update
-//				int idx = IntStream.range(0, briefs.size())
-//					.filter(i -> briefs.get(i).getVideoId().equals(dbVideo.getYoutubeVideoId()))
-//					.findFirst().orElse(-1);
-//				if (idx != -1) {
-//					videoService.updateVideo(briefs.get(idx), details.get(idx), channel);
-//					likeCount += details.get(idx).getLikeCount();
-//					commentCount += details.get(idx).getCommentCount();
-//				}
-//			} else {
-//				videoService.deleteVideo(dbVideo);
-//			}
-//		}
-
-//		return new Stats(likeCount, commentCount);
-	}
-
-
-	private YoutubeChannelVideoData fetchYoutubeVideoData(
-		YoutubeChannelResDTO.Item item,
-		String accessToken,
-		String uploadPlaylistId
-	) {
-		List<YoutubeVideoBriefDTO> videoBriefs = YoutubeUtil.getVideosBriefsByPlayListId(accessToken, uploadPlaylistId);
-		List<YoutubeVideoDetailDTO> videoDetails = YoutubeUtil.getVideoDetailsByIds(
-			accessToken, videoBriefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList());
-
-		// 비동기 작업을 담을 List 생성
-		List<CompletableFuture<Void>> futures = new ArrayList<>();
-
-		// Shorts 판별 후 categoryId 수정
-		for (int i = 0; i < videoDetails.size(); i++) {
-			final int index = i;
-			String videoId = videoBriefs.get(i).getVideoId();
-
-			// 각 비디오 확인 작업을 CompletableFuture로 감싸 비동기 실행
-			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
-				if (isYoutubeShorts(videoId)) {
-					// TODO: 스레드 안정성 확보 필요
-					videoDetails.get(index).updateCategoryId("42");
-				}
-			});
-			futures.add(future);
-		}
-		// 모든 비동기 작업이 완료될 때까지 대기
-		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-
-		return new YoutubeChannelVideoData(item, videoBriefs, videoDetails);
 	}
 
 	public boolean isYoutubeShorts(String videoId) {

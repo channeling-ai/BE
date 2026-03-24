@@ -24,23 +24,31 @@ public interface ChannelService {
 	Channel editChannelTarget(Long channelId, EditChannelTargetReqDto request, Member member);
 
 	/**
-	 * 채널의 비디오 정보를 업데이트합니다.
-	 *
-	 * @param channel 채널 객체
-	 * @param youtubeAccessToken 유튜브 액세스 토큰
+	 * 멤버에 해당하는 채널을 찾거나 생성합니다.
+	 * 내부적으로 createOrGetBasicChannel → syncVideos → updateChannelStats 순으로 호출합니다.
 	 */
-	void updateChannelVideos(Channel channel, String youtubeAccessToken);
+	Channel updateOrCreateChannelByMember(Member member);
 
 	/**
-	 * 멤버에 해당하는 채널을 찾거나 생성합니다.
-	 *
-	 * @param member 멤버 객체
-	 * @return 채널 객체
+	 * 기본 채널 정보를 조회하거나, 신규 사용자면 YouTube API로 채널을 생성합니다.
+	 * YouTube API 호출은 트랜잭션 밖에서, DB 저장은 @Transactional 안에서 수행합니다.
 	 */
-	Channel updateOrCreateChannelByMember(channeling.be.domain.member.domain.Member member);
-	/*
+	Channel createOrGetBasicChannel(Member member, String googleAccessToken);
+
+	/**
+	 * 채널의 영상을 YouTube API로 조회하여 동기화합니다.
+	 * YouTube API 호출은 트랜잭션 밖에서, DB 저장은 @Transactional 안에서 수행합니다.
+	 */
+	void syncVideos(Channel channel, String googleAccessToken);
+
+	/**
+	 * 채널의 통계(조회수, 구독자, 공유수 등)를 YouTube API로 갱신합니다.
+	 * YouTube API 호출은 트랜잭션 밖에서, DB 저장은 @Transactional 안에서 수행합니다.
+	 */
+	void updateChannelStats(Channel channel, String googleAccessToken);
+
+	/**
 	 * 채널 정보를 조회합니다.
 	 */
 	Channel getChannel(Long channelId, Member member);
-
 }
