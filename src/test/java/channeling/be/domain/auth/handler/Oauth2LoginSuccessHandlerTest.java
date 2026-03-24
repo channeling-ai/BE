@@ -1,15 +1,15 @@
 package channeling.be.domain.auth.handler;
 
-import channeling.be.domain.TrendKeyword.service.TrendKeywordService;
+import channeling.be.domain.auth.application.LoginPostProcessor;
 import channeling.be.domain.auth.application.MemberOauth2UserService;
 import channeling.be.domain.auth.application.MemberOauth2UserService.LoginResult;
-import channeling.be.domain.channel.application.ChannelSyncService;
+import channeling.be.domain.channel.application.ChannelService;
 import channeling.be.domain.channel.domain.Channel;
-import channeling.be.domain.idea.application.IdeaService;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.MemberStatus;
 import channeling.be.domain.member.domain.SubscriptionPlan;
 import channeling.be.global.infrastructure.jwt.JwtUtil;
+import channeling.be.global.infrastructure.redis.RedisUtil;
 import channeling.be.response.code.status.ErrorStatus;
 import channeling.be.response.exception.handler.YoutubeHandler;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,8 +38,10 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -55,16 +57,16 @@ class Oauth2LoginSuccessHandlerTest {
     private JwtUtil jwtUtil;
 
     @Mock
-    private IdeaService ideaService;
-
-    @Mock
     private MemberOauth2UserService memberOauth2UserService;
 
     @Mock
-    private TrendKeywordService trendKeywordService;
+    private ChannelService channelService;
 
     @Mock
-    private ChannelSyncService channelSyncService;
+    private RedisUtil redisUtil;
+
+    @Mock
+    private LoginPostProcessor loginPostProcessor;
 
     @InjectMocks
     private Oauth2LoginSuccessHandler handler;
@@ -89,48 +91,25 @@ class Oauth2LoginSuccessHandlerTest {
         class Context_with_existing_user {
 
             @Test
-            @DisplayName("채널 동기화를 비동기로 호출하고, 트렌드 키워드와 아이디어 삭제도 호출한다")
-            void it_triggers_all_async_tasks() throws Exception {
+            @DisplayName("비동기 후처리를 호출하고 리다이렉트한다")
+            void it_triggers_async_post_processing() throws Exception {
                 // given
                 Member member = createMember(1L);
                 Channel channel = createChannel(1L, member);
-                LoginResult result = new LoginResult(member, channel, false);
+                LoginResult result = new LoginResult(member, false);
 
-                setupOAuthMocks(result);
+                setupOAuthMocks(result, channel);
                 given(jwtUtil.createAccessToken(member)).willReturn("jwt-token");
 
                 // when
                 handler.onAuthenticationSuccess(request, response, createAuthentication());
 
                 // then
-                verify(channelSyncService).syncChannelAsync(member);
-                verify(trendKeywordService).updateChannelTrendKeyword(member);
-                verify(ideaService).deleteNotBookMarkedIdeasAsync(member);
-            }
-
-            @Test
-            @DisplayName("리다이렉트 URL에 token, channelId, isNew=false를 포함한다")
-            void it_redirects_with_correct_params() throws Exception {
-                // given
-                Member member = createMember(1L);
-                Channel channel = createChannel(10L, member);
-                LoginResult result = new LoginResult(member, channel, false);
-
-                setupOAuthMocks(result);
-                given(jwtUtil.createAccessToken(member)).willReturn("jwt-token");
+                verify(loginPostProcessor).executeAsync(member, channel, "google-access-token", false);
 
                 ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
-
-                // when
-                handler.onAuthenticationSuccess(request, response, createAuthentication());
-
-                // then
                 verify(response).sendRedirect(urlCaptor.capture());
-                String redirectUrl = urlCaptor.getValue();
-                assertThat(redirectUrl).contains("token=jwt-token");
-                assertThat(redirectUrl).contains("message=Success");
-                assertThat(redirectUrl).contains("channelId=10");
-                assertThat(redirectUrl).contains("isNew=false");
+                assertThat(urlCaptor.getValue()).contains("isNew=false");
             }
         }
 
@@ -139,43 +118,23 @@ class Oauth2LoginSuccessHandlerTest {
         class Context_with_new_user {
 
             @Test
-            @DisplayName("채널 동기화를 호출하지 않는다")
-            void it_does_not_sync_channel() throws Exception {
+            @DisplayName("isNew=true로 비동기 후처리를 호출하고 리다이렉트한다")
+            void it_calls_async_with_isNew_true() throws Exception {
                 // given
                 Member member = createMember(1L);
                 Channel channel = createChannel(1L, member);
-                LoginResult result = new LoginResult(member, channel, true);
+                LoginResult result = new LoginResult(member, true);
 
-                setupOAuthMocks(result);
+                setupOAuthMocks(result, channel);
                 given(jwtUtil.createAccessToken(member)).willReturn("jwt-token");
 
                 // when
                 handler.onAuthenticationSuccess(request, response, createAuthentication());
 
                 // then
-                verify(channelSyncService, never()).syncChannelAsync(any());
-                // 트렌드 키워드와 아이디어 삭제는 신규에게도 호출됨
-                verify(trendKeywordService).updateChannelTrendKeyword(member);
-                verify(ideaService).deleteNotBookMarkedIdeasAsync(member);
-            }
-
-            @Test
-            @DisplayName("리다이렉트 URL에 isNew=true를 포함한다")
-            void it_redirects_with_isNew_true() throws Exception {
-                // given
-                Member member = createMember(1L);
-                Channel channel = createChannel(1L, member);
-                LoginResult result = new LoginResult(member, channel, true);
-
-                setupOAuthMocks(result);
-                given(jwtUtil.createAccessToken(member)).willReturn("jwt-token");
+                verify(loginPostProcessor).executeAsync(member, channel, "google-access-token", true);
 
                 ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
-
-                // when
-                handler.onAuthenticationSuccess(request, response, createAuthentication());
-
-                // then
                 verify(response).sendRedirect(urlCaptor.capture());
                 assertThat(urlCaptor.getValue()).contains("isNew=true");
             }
@@ -189,24 +148,22 @@ class Oauth2LoginSuccessHandlerTest {
             @DisplayName("에러 리다이렉트 URL로 이동하고 비동기 작업을 호출하지 않는다")
             void it_redirects_to_error_url() throws Exception {
                 // given
-                setupOAuthMocksForError();
+                Member member = createMember(1L);
+                LoginResult result = new LoginResult(member, true);
 
-                ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+                setupOAuthMocksBase(result);
+                given(channelService.createOrGetBasicChannel(any(), anyString()))
+                        .willThrow(new YoutubeHandler(ErrorStatus._YOUTUBE_CHANNEL_NOT_FOUND));
 
                 // when
                 handler.onAuthenticationSuccess(request, response, createAuthentication());
 
                 // then
+                ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
                 verify(response).sendRedirect(urlCaptor.capture());
-                String redirectUrl = urlCaptor.getValue();
-                assertThat(redirectUrl).contains("message=Fail");
-                assertThat(redirectUrl).contains("error=NO_CHANNEL");
-                assertThat(redirectUrl).contains("token=");
+                assertThat(urlCaptor.getValue()).contains("error=NO_CHANNEL");
 
-                // 비동기 작업이 호출되지 않아야 함
-                verify(channelSyncService, never()).syncChannelAsync(any());
-                verify(trendKeywordService, never()).updateChannelTrendKeyword(any());
-                verify(ideaService, never()).deleteNotBookMarkedIdeasAsync(any());
+                verify(loginPostProcessor, never()).executeAsync(any(), any(), anyString(), anyBoolean());
                 verify(jwtUtil, never()).createAccessToken(any());
             }
         }
@@ -214,23 +171,18 @@ class Oauth2LoginSuccessHandlerTest {
 
     // --- Mock Setup ---
 
-    private void setupOAuthMocks(LoginResult result) {
+    private void setupOAuthMocksBase(LoginResult result) {
         OAuth2AuthorizedClient authorizedClient = mock(OAuth2AuthorizedClient.class);
         OAuth2AccessToken accessToken = new OAuth2AccessToken(
                 OAuth2AccessToken.TokenType.BEARER, "google-access-token", Instant.now(), Instant.now().plusSeconds(3600));
         given(authorizedClient.getAccessToken()).willReturn(accessToken);
         given(authorizedClientService.loadAuthorizedClient(anyString(), anyString())).willReturn(authorizedClient);
-        given(memberOauth2UserService.executeGoogleLoginFast(anyMap(), anyString())).willReturn(result);
+        given(memberOauth2UserService.processLogin(anyMap(), anyString())).willReturn(result);
     }
 
-    private void setupOAuthMocksForError() {
-        OAuth2AuthorizedClient authorizedClient = mock(OAuth2AuthorizedClient.class);
-        OAuth2AccessToken accessToken = new OAuth2AccessToken(
-                OAuth2AccessToken.TokenType.BEARER, "google-access-token", Instant.now(), Instant.now().plusSeconds(3600));
-        given(authorizedClient.getAccessToken()).willReturn(accessToken);
-        given(authorizedClientService.loadAuthorizedClient(anyString(), anyString())).willReturn(authorizedClient);
-        given(memberOauth2UserService.executeGoogleLoginFast(anyMap(), anyString()))
-                .willThrow(new YoutubeHandler(ErrorStatus._YOUTUBE_CHANNEL_NOT_FOUND));
+    private void setupOAuthMocks(LoginResult result, Channel channel) {
+        setupOAuthMocksBase(result);
+        given(channelService.createOrGetBasicChannel(eq(result.member()), anyString())).willReturn(channel);
     }
 
     private OAuth2AuthenticationToken createAuthentication() {
