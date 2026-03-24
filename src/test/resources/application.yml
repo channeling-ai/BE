@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: channeling-be-test
+  profiles:
+    active: test
+  kafka:
+    bootstrap-servers: localhost:9092
+
+  # Testcontainers PostgreSQL - dynamically configured
+  datasource:
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+    locations: classpath:db/migration
+    schemas: public
+
+  session:
+    store-type: none
+
+  data:
+    redis:
+      host: localhost
+      port: 16379
+
+  # Disable OAuth2 auto-config for tests
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            authorization-grant-type: authorization_code
+            scope: profile, email
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+jwt:
+  secret: test-jwt-secret-key-for-testing-purposes-only-minimum-256-bits-required-here
+  access:
+    expiration: 3600
+    header: Authorization
+  google:
+    access:
+      expiration: 3600
+
+# S3 mock
+cloud:
+  aws:
+    s3:
+      bucket: test-bucket
+
+logging:
+  level:
+    root: WARN
+    channeling.be: INFO
