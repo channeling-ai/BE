@@ -5,24 +5,23 @@ import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.MemberStatus;
 import channeling.be.domain.member.domain.SubscriptionPlan;
-import channeling.be.global.infrastructure.youtube.YoutubeUtil;
+import channeling.be.global.infrastructure.youtube.YouTubeApiService;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.function.Consumer;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,19 +30,22 @@ class ChannelStatsServiceTest {
     @Mock
     private ChannelRepository channelRepository;
 
+    @Mock
+    private YouTubeApiService youTubeApiService;
+
+    @Mock
+    private TransactionTemplate transactionTemplate;
+
     @InjectMocks
     private ChannelStatsService channelStatsService;
 
-    private MockedStatic<YoutubeUtil> youtubeUtilMock;
-
     @BeforeEach
     void setUp() {
-        youtubeUtilMock = mockStatic(YoutubeUtil.class);
-    }
-
-    @AfterEach
-    void tearDown() {
-        youtubeUtilMock.close();
+        doAnswer(invocation -> {
+            Consumer<org.springframework.transaction.TransactionStatus> action = invocation.getArgument(0);
+            action.accept(null);
+            return null;
+        }).when(transactionTemplate).executeWithoutResult(any());
     }
 
     @Test
@@ -53,16 +55,15 @@ class ChannelStatsServiceTest {
         Channel channel = createChannel(1L);
         YoutubeChannelResDTO.Item channelItem = createChannelItem();
 
-        youtubeUtilMock.when(() -> YoutubeUtil.getChannelDetails("token"))
-                .thenReturn(channelItem);
-        youtubeUtilMock.when(() -> YoutubeUtil.getAllVideoShares(eq("token"), any(), any()))
-                .thenReturn(200L);
+        given(youTubeApiService.fetchChannelDetails("token")).willReturn(channelItem);
+        given(youTubeApiService.fetchAllVideoShares(any(), any(), any())).willReturn(200L);
         given(channelRepository.save(any(Channel.class))).willReturn(channel);
 
         // when
         channelStatsService.updateChannelStats(channel, "token");
 
         // then
+        verify(youTubeApiService).fetchChannelDetails("token");
         verify(channelRepository).save(channel);
     }
 

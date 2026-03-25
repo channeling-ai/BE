@@ -23,7 +23,7 @@ public class LoginPostProcessor {
     private final TrendKeywordService trendKeywordService;
     private final RedisUtil redisUtil;
 
-    @Async
+    @Async("asyncExecutor")
     public void executeAsync(Member member, Channel channel,
                              String googleAccessToken, boolean isNew) {
         tryStep("syncVideos", member.getId(), () ->

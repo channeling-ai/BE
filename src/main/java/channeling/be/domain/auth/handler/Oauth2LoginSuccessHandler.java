@@ -47,12 +47,7 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // 1. 구글 토큰 추출
         OAuth2AuthenticationToken oauthToken = (OAuth2AuthenticationToken) authentication;
-        String googleAccessToken = authorizedClientService
-                .loadAuthorizedClient(
-                        oauthToken.getAuthorizedClientRegistrationId(),
-                        oauthToken.getName())
-                .getAccessToken()
-                .getTokenValue();
+        String googleAccessToken = extractGoogleAccessToken(oauthToken);
 
         OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
         Map<String, Object> attrs = oauthUser.getAttributes();
@@ -68,32 +63,47 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             channel = channelService.createOrGetBasicChannel(member, googleAccessToken);
         } catch (YoutubeHandler e) {
             log.warn("채널 없는 계정 로그인 시도 - error: {}", e.getCode());
-            String targetUrl = UriComponentsBuilder.fromUriString(frontUrl + "/auth/callback")
-                    .queryParam("token", "")
-                    .queryParam("message", "Fail")
-                    .queryParam("error", "NO_CHANNEL")
-                    .build()
-                    .toUriString();
-            response.sendRedirect(targetUrl);
+            response.sendRedirect(buildErrorRedirectUrl("NO_CHANNEL"));
             return;
         }
 
         // 4. JWT → redirect (응답 완료)
         String accessToken = jwtUtil.createAccessToken(member);
-        String targetUrl = UriComponentsBuilder.fromUriString(frontUrl + "/auth/callback")
-                .queryParam("token", accessToken)
-                .queryParam("message", "Success")
-                .queryParam("channelId", channel.getId())
-                .queryParam("isNew", isNew)
-                .build()
-                .toUriString();
 
         long totalTime = System.currentTimeMillis() - startTime;
         log.info("[TIME] ========== 로그인 프로세스 완료: 총 {}ms ==========", totalTime);
 
-        response.sendRedirect(targetUrl);
+        response.sendRedirect(buildSuccessRedirectUrl(accessToken, channel.getId(), isNew));
 
         // 5. 비동기 후처리 (응답 이후 백그라운드)
         loginPostProcessor.executeAsync(member, channel, googleAccessToken, isNew);
+    }
+
+    private String extractGoogleAccessToken(OAuth2AuthenticationToken oauthToken) {
+        return authorizedClientService
+                .loadAuthorizedClient(
+                        oauthToken.getAuthorizedClientRegistrationId(),
+                        oauthToken.getName())
+                .getAccessToken()
+                .getTokenValue();
+    }
+
+    private String buildSuccessRedirectUrl(String accessToken, Long channelId, boolean isNew) {
+        return UriComponentsBuilder.fromUriString(frontUrl + "/auth/callback")
+                .queryParam("token", accessToken)
+                .queryParam("message", "Success")
+                .queryParam("channelId", channelId)
+                .queryParam("isNew", isNew)
+                .build()
+                .toUriString();
+    }
+
+    private String buildErrorRedirectUrl(String errorCode) {
+        return UriComponentsBuilder.fromUriString(frontUrl + "/auth/callback")
+                .queryParam("token", "")
+                .queryParam("message", "Fail")
+                .queryParam("error", errorCode)
+                .build()
+                .toUriString();
     }
 }

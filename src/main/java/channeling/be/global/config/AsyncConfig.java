@@ -1,6 +1,7 @@
 package channeling.be.global.config;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +17,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class AsyncConfig implements AsyncConfigurer {
 
+    @Bean("asyncExecutor")
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -38,6 +40,16 @@ public class AsyncConfig implements AsyncConfigurer {
 
         executor.initialize();
         return executor;
+    }
+
+    @Bean("shortsCheckExecutor")
+    public ExecutorService shortsCheckExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(10);
+        executor.setMaxPoolSize(10);
+        executor.setThreadNamePrefix("shorts-check-");
+        executor.initialize();
+        return executor.getThreadPoolExecutor();
     }
 
     @Override

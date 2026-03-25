@@ -5,14 +5,14 @@ import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.channel.presentation.converter.ChannelConverter;
 import channeling.be.domain.channel.presentation.dto.request.ChannelRequestDto;
 import channeling.be.domain.member.domain.Member;
-import channeling.be.domain.video.application.VideoSyncService;
+import channeling.be.global.infrastructure.youtube.YouTubeApiService;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
-import channeling.be.global.infrastructure.youtube.YoutubeUtil;
 import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
@@ -27,8 +27,7 @@ import java.util.Optional;
 @Service
 public class ChannelServiceImpl implements ChannelService {
 	private final ChannelRepository channelRepository;
-	private final VideoSyncService videoSyncService;
-	private final ChannelStatsService channelStatsService;
+	private final YouTubeApiService youTubeApiService;
 
     @Override
     @Transactional
@@ -69,18 +68,20 @@ public class ChannelServiceImpl implements ChannelService {
 	// ─── 채널 생성/조회 ───
 
 	@Override
-	@Transactional
+	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public Channel createOrGetBasicChannel(Member member, String googleAccessToken) {
 		Optional<Channel> existing = channelRepository.findByMember(member);
 		if (existing.isPresent()) {
 			return existing.get();
 		}
 
-		YoutubeChannelResDTO.Item item = YoutubeUtil.getChannelDetails(googleAccessToken);
-		long shares = YoutubeUtil.getAllVideoShares(
+		// YouTube API 호출
+		YoutubeChannelResDTO.Item item = youTubeApiService.fetchChannelDetails(googleAccessToken);
+		long shares = youTubeApiService.fetchAllVideoShares(
 				googleAccessToken, item.getSnippet().getPublishedAt(), LocalDateTime.now());
 		String topCategoryId = "0";
 
+		// DB 저장
 		return channelRepository.save(ChannelConverter.toNewChannel(item, member, shares, topCategoryId));
 	}
 

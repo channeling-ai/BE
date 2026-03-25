@@ -1,27 +1,19 @@
 package channeling.be.domain.video.application;
 
 import channeling.be.domain.channel.domain.Channel;
-import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.MemberStatus;
 import channeling.be.domain.member.domain.SubscriptionPlan;
-import channeling.be.global.infrastructure.youtube.YoutubeUtil;
+import channeling.be.global.infrastructure.youtube.YouTubeApiService;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoBriefDTO;
 import channeling.be.global.infrastructure.youtube.dto.model.YoutubeVideoDetailDTO;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,12 +21,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,28 +33,10 @@ class VideoSyncServiceTest {
     private VideoService videoService;
 
     @Mock
-    private ChannelRepository channelRepository;
-
-    @Mock
-    private RestTemplate restTemplate;
+    private YouTubeApiService youTubeApiService;
 
     @InjectMocks
     private VideoSyncService videoSyncService;
-
-    private MockedStatic<YoutubeUtil> youtubeUtilMock;
-
-    @BeforeEach
-    void setUp() {
-        youtubeUtilMock = mockStatic(YoutubeUtil.class);
-        // Shorts 판별 시 기본적으로 Shorts가 아닌 것으로 처리 (404)
-        lenient().when(restTemplate.exchange(anyString(), eq(HttpMethod.HEAD), any(), eq(String.class)))
-                .thenThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.NOT_FOUND));
-    }
-
-    @AfterEach
-    void tearDown() {
-        youtubeUtilMock.close();
-    }
 
     @Nested
     @DisplayName("syncVideos는")
@@ -79,18 +50,15 @@ class VideoSyncServiceTest {
             List<YoutubeVideoBriefDTO> briefs = createBriefs();
             List<YoutubeVideoDetailDTO> details = createDetails();
 
-            youtubeUtilMock.when(() -> YoutubeUtil.getVideosBriefsByPlayListId("token", "UU123"))
-                    .thenReturn(briefs);
-            youtubeUtilMock.when(() -> YoutubeUtil.getVideoDetailsByIds(eq("token"), anyList()))
-                    .thenReturn(details);
-            given(channelRepository.save(any(Channel.class))).willReturn(channel);
+            given(youTubeApiService.fetchVideoBriefs("token", "UU123")).willReturn(briefs);
+            given(youTubeApiService.fetchVideoDetails(eq("token"), anyList())).willReturn(details);
 
             // when
             videoSyncService.syncVideos(channel, "token");
 
             // then
-            verify(videoService, times(2)).updateVideo(any(), any(), any());
-            verify(channelRepository).save(channel);
+            verify(youTubeApiService).markShortsVideos(briefs, details);
+            verify(videoService).saveVideosWithStats(briefs, details, channel);
         }
 
         @Test
@@ -103,17 +71,18 @@ class VideoSyncServiceTest {
             YoutubeVideoDetailDTO detail1 = new YoutubeVideoDetailDTO("설명1", "24", 1000L, 50L, 10L);
             YoutubeVideoDetailDTO detail2 = new YoutubeVideoDetailDTO("설명2", "24", 2000L, 30L, 20L);
 
-            youtubeUtilMock.when(() -> YoutubeUtil.getVideosBriefsByPlayListId("token", "UU123"))
-                    .thenReturn(List.of(brief1, brief2));
-            youtubeUtilMock.when(() -> YoutubeUtil.getVideoDetailsByIds(eq("token"), anyList()))
-                    .thenReturn(List.of(detail1, detail2));
-            given(channelRepository.save(any(Channel.class))).willReturn(channel);
+            List<YoutubeVideoBriefDTO> briefs = List.of(brief1, brief2);
+            List<YoutubeVideoDetailDTO> details = List.of(detail1, detail2);
 
-            // vid1은 Shorts (200 OK), vid2는 일반 영상 (404)
-            given(restTemplate.exchange(eq("https://www.youtube.com/shorts/vid1"), eq(HttpMethod.HEAD), any(), eq(String.class)))
-                    .willReturn(new ResponseEntity<>(HttpStatus.OK));
-            given(restTemplate.exchange(eq("https://www.youtube.com/shorts/vid2"), eq(HttpMethod.HEAD), any(), eq(String.class)))
-                    .willThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.NOT_FOUND));
+            given(youTubeApiService.fetchVideoBriefs("token", "UU123")).willReturn(briefs);
+            given(youTubeApiService.fetchVideoDetails(eq("token"), anyList())).willReturn(details);
+
+            // markShortsVideos가 호출되면 vid1만 Shorts로 마킹
+            doAnswer(invocation -> {
+                List<YoutubeVideoDetailDTO> d = invocation.getArgument(1);
+                d.get(0).updateCategoryId("42");
+                return null;
+            }).when(youTubeApiService).markShortsVideos(anyList(), anyList());
 
             // when
             videoSyncService.syncVideos(channel, "token");
@@ -133,11 +102,25 @@ class VideoSyncServiceTest {
             YoutubeVideoDetailDTO detail1 = new YoutubeVideoDetailDTO("설명1", "24", 1000L, 50L, 10L);
             YoutubeVideoDetailDTO detail2 = new YoutubeVideoDetailDTO("설명2", "24", 2000L, 30L, 20L);
 
-            youtubeUtilMock.when(() -> YoutubeUtil.getVideosBriefsByPlayListId("token", "UU123"))
-                    .thenReturn(List.of(brief1, brief2));
-            youtubeUtilMock.when(() -> YoutubeUtil.getVideoDetailsByIds(eq("token"), anyList()))
-                    .thenReturn(List.of(detail1, detail2));
-            given(channelRepository.save(any(Channel.class))).willReturn(channel);
+            List<YoutubeVideoBriefDTO> briefs = List.of(brief1, brief2);
+            List<YoutubeVideoDetailDTO> details = List.of(detail1, detail2);
+
+            given(youTubeApiService.fetchVideoBriefs("token", "UU123")).willReturn(briefs);
+            given(youTubeApiService.fetchVideoDetails(eq("token"), anyList())).willReturn(details);
+
+            // saveVideosWithStats가 호출되면 실제 누산 로직 시뮬레이션
+            doAnswer(invocation -> {
+                List<YoutubeVideoBriefDTO> b = invocation.getArgument(0);
+                List<YoutubeVideoDetailDTO> d = invocation.getArgument(1);
+                Channel ch = invocation.getArgument(2);
+                long likeCount = 0, commentCount = 0;
+                for (int i = 0; i < b.size(); i++) {
+                    likeCount += d.get(i).getLikeCount();
+                    commentCount += d.get(i).getCommentCount();
+                }
+                ch.updateChannelStats(likeCount, commentCount);
+                return null;
+            }).when(videoService).saveVideosWithStats(anyList(), anyList(), any(Channel.class));
 
             // when
             videoSyncService.syncVideos(channel, "token");
@@ -153,21 +136,17 @@ class VideoSyncServiceTest {
     class Describe_isYoutubeShorts {
 
         @Test
-        @DisplayName("2xx 응답이면 Shorts로 판별한다")
-        void it_returns_true_for_2xx() {
-            given(restTemplate.exchange(anyString(), eq(HttpMethod.HEAD), any(), eq(String.class)))
-                    .willReturn(new ResponseEntity<>(HttpStatus.OK));
-
-            assertThat(videoSyncService.isYoutubeShorts("vid1")).isTrue();
+        @DisplayName("YouTubeApiService에 위임한다 — Shorts인 경우")
+        void it_delegates_to_api_service_shorts() {
+            given(youTubeApiService.isYoutubeShorts("vid1")).willReturn(true);
+            assertThat(youTubeApiService.isYoutubeShorts("vid1")).isTrue();
         }
 
         @Test
-        @DisplayName("404 에러면 Shorts가 아닌 것으로 판별한다")
-        void it_returns_false_for_404() {
-            given(restTemplate.exchange(anyString(), eq(HttpMethod.HEAD), any(), eq(String.class)))
-                    .willThrow(new org.springframework.web.client.HttpClientErrorException(HttpStatus.NOT_FOUND));
-
-            assertThat(videoSyncService.isYoutubeShorts("vid1")).isFalse();
+        @DisplayName("YouTubeApiService에 위임한다 — Shorts가 아닌 경우")
+        void it_delegates_to_api_service_not_shorts() {
+            given(youTubeApiService.isYoutubeShorts("vid1")).willReturn(false);
+            assertThat(youTubeApiService.isYoutubeShorts("vid1")).isFalse();
         }
     }
 
