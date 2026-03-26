@@ -1,6 +1,5 @@
 package channeling.be.domain.channel.presentation.converter;
 
-import channeling.be.domain.channel.application.model.Stats;
 import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.video.domain.VideoCategory;
@@ -24,25 +23,6 @@ public class ChannelConverter {
                 .channelId(channel.getId())
                 .updatedTarget(channel.getTarget())
                 .build();
-    }
-
-    public static void updateChannel(Channel channel, YoutubeChannelResDTO.Item item,String topCategoryId ,Stats stats,long shares) {
-        channel.updateChannelInfo(
-            item.getSnippet().getTitle(),
-            item.getId(),
-            item.getContentDetails().getRelatedPlaylists().getUploads(),
-            item.getSnippet().getThumbnails().getDefaultThumbnail().getUrl(),
-            "https://www.youtube.com/channel/" + item.getId(),
-            item.getSnippet().getPublishedAt(),
-            item.getStatistics().getViewCount(),
-            item.getStatistics().getSubscriberCount(),
-            item.getStatistics().getVideoCount(),
-            stats.likeCount(),
-            stats.commentCount(),
-            topCategoryId,
-            shares
-        );
-        channel.updateChannelStats(stats.likeCount(), stats.commentCount());
     }
 
     public static Channel toNewChannel(YoutubeChannelResDTO.Item item, Member member,long shares,String topCategoryId) {

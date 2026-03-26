@@ -131,25 +131,6 @@ class VideoSyncServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("isYoutubeShorts는")
-    class Describe_isYoutubeShorts {
-
-        @Test
-        @DisplayName("YouTubeApiService에 위임한다 — Shorts인 경우")
-        void it_delegates_to_api_service_shorts() {
-            given(youTubeApiService.isYoutubeShorts("vid1")).willReturn(true);
-            assertThat(youTubeApiService.isYoutubeShorts("vid1")).isTrue();
-        }
-
-        @Test
-        @DisplayName("YouTubeApiService에 위임한다 — Shorts가 아닌 경우")
-        void it_delegates_to_api_service_not_shorts() {
-            given(youTubeApiService.isYoutubeShorts("vid1")).willReturn(false);
-            assertThat(youTubeApiService.isYoutubeShorts("vid1")).isFalse();
-        }
-    }
-
     // --- Fixture ---
 
     private Channel createChannel(Long id) {

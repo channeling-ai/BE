@@ -58,10 +58,11 @@ class ChannelServiceImplTest {
                 given(channelRepository.save(any(Channel.class))).willReturn(savedChannel);
 
                 // when
-                Channel result = channelService.createOrGetBasicChannel(member, "access-token");
+                ChannelService.ChannelCreationResult result = channelService.createOrGetBasicChannel(member, "access-token");
 
                 // then
-                assertThat(result).isNotNull();
+                assertThat(result.channel()).isNotNull();
+                assertThat(result.isChannelNew()).isTrue();
                 verify(youTubeApiService).fetchChannelDetails("access-token");
                 verify(channelRepository).save(any(Channel.class));
             }
@@ -81,10 +82,11 @@ class ChannelServiceImplTest {
                 given(channelRepository.findByMember(member)).willReturn(Optional.of(existingChannel));
 
                 // when
-                Channel result = channelService.createOrGetBasicChannel(member, "access-token");
+                ChannelService.ChannelCreationResult result = channelService.createOrGetBasicChannel(member, "access-token");
 
                 // then
-                assertThat(result).isEqualTo(existingChannel);
+                assertThat(result.channel()).isEqualTo(existingChannel);
+                assertThat(result.isChannelNew()).isFalse();
                 verify(channelRepository, never()).save(any(Channel.class));
                 verify(youTubeApiService, never()).fetchChannelDetails(any());
             }

@@ -118,21 +118,22 @@ class Oauth2LoginSuccessHandlerTest {
         class Context_with_new_user {
 
             @Test
-            @DisplayName("isNew=true로 비동기 후처리를 호출하고 리다이렉트한다")
+            @DisplayName("isNew=true를 redirect URL에 포함하고 isChannelNew를 비동기 후처리에 전달한다")
             void it_calls_async_with_isNew_true() throws Exception {
                 // given
                 Member member = createMember(1L);
                 Channel channel = createChannel(1L, member);
                 LoginResult result = new LoginResult(member, true);
 
+                // isChannelNew=false (기존 채널) — 멤버 신규 여부(isNew)와 채널 신규 여부(isChannelNew)는 독립
                 setupOAuthMocks(result, channel);
                 given(jwtUtil.createAccessToken(member)).willReturn("jwt-token");
 
                 // when
                 handler.onAuthenticationSuccess(request, response, createAuthentication());
 
-                // then
-                verify(loginPostProcessor).executeAsync(member, channel, "google-access-token", true);
+                // then: executeAsync에는 isChannelNew(=false) 전달, redirect URL에는 isNew(=true) 포함
+                verify(loginPostProcessor).executeAsync(member, channel, "google-access-token", false);
 
                 ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
                 verify(response).sendRedirect(urlCaptor.capture());
@@ -182,7 +183,8 @@ class Oauth2LoginSuccessHandlerTest {
 
     private void setupOAuthMocks(LoginResult result, Channel channel) {
         setupOAuthMocksBase(result);
-        given(channelService.createOrGetBasicChannel(eq(result.member()), anyString())).willReturn(channel);
+        given(channelService.createOrGetBasicChannel(eq(result.member()), anyString()))
+                .willReturn(new ChannelService.ChannelCreationResult(channel, false));
     }
 
     private OAuth2AuthenticationToken createAuthentication() {

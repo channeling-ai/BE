@@ -165,6 +165,10 @@ public class VideoServiceImpl implements VideoService {
 	@Override
 	@Transactional
 	public void saveVideosWithStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
+		// @Async 경계를 넘은 detached Channel 재조회
+		Channel freshChannel = channelRepository.findById(channel.getId())
+				.orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
 		// 배치 조회로 N+1 방지
 		List<String> videoIds = briefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList();
 		Map<String, Video> existingMap = videoRepository.findByYoutubeVideoIdIn(videoIds).stream()
@@ -183,12 +187,12 @@ public class VideoServiceImpl implements VideoService {
 				VideoConverter.toVideo(existing, brief, detail);
 				toSave.add(existing);
 			} else {
-				toSave.add(VideoConverter.toVideo(brief, detail, channel));
+				toSave.add(VideoConverter.toVideo(brief, detail, freshChannel));
 			}
 		}
 		videoRepository.saveAll(toSave);
-		channel.updateChannelStats(likeCount, commentCount);
-		channelRepository.save(channel);
+		freshChannel.updateChannelStats(likeCount, commentCount);
+		channelRepository.save(freshChannel);
 	}
 }
 

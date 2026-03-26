@@ -17,38 +17,43 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LoginPostProcessor {
 
+    private static final String STEP_SYNC_VIDEOS = "syncVideos";
+    private static final String STEP_UPDATE_STATS = "updateStats";
+    private static final String STEP_TREND_KEYWORD = "trendKeyword";
+    private static final String STEP_CLEANUP_IDEAS = "cleanupIdeas";
+
     private final VideoSyncService videoSyncService;
     private final ChannelStatsService channelStatsService;
     private final IdeaService ideaService;
     private final TrendKeywordService trendKeywordService;
-    private final RedisUtil redisUtil;
 
     @Async("asyncExecutor")
     public void executeAsync(Member member, Channel channel,
                              String googleAccessToken, boolean isNew) {
-        tryStep("syncVideos", member.getId(), () ->
+        tryStep(STEP_SYNC_VIDEOS, member.getId(), () ->
             videoSyncService.syncVideos(channel, googleAccessToken));
 
-        // 신규 채널은 생성 시 이미 통계가 세팅되므로 스킵
         if (!isNew) {
-            tryStep("updateStats", member.getId(), () ->
+            tryStep(STEP_UPDATE_STATS, member.getId(), () ->
                 channelStatsService.updateChannelStats(channel, googleAccessToken));
         }
 
-        tryStep("trendKeyword", member.getId(), () ->
+        tryStep(STEP_TREND_KEYWORD, member.getId(), () ->
             trendKeywordService.updateChannelTrendKeyword(member));
 
-        tryStep("cleanupIdeas", member.getId(), () ->
+        tryStep(STEP_CLEANUP_IDEAS, member.getId(), () ->
             ideaService.deleteNotBookMarkedIdeas(member));
     }
 
     private void tryStep(String step, Long userId, Runnable action) {
+        long startTime = System.currentTimeMillis();
         try {
             action.run();
-            log.info("{} 완료 - userId: {}", step, userId);
+            long elapsed = System.currentTimeMillis() - startTime;
+            log.info("{} 완료 - userId: {}, elapsed: {}ms", step, userId, elapsed);
         } catch (Exception e) {
-            log.error("{} 실패 - userId: {}", step, userId, e);
-            redisUtil.publishFailure(userId, step);
+            long elapsed = System.currentTimeMillis() - startTime;
+            log.error("{} 실패 - userId: {}, elapsed: {}ms", step, userId, elapsed, e);
         }
     }
 }

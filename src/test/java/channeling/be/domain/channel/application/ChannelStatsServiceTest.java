@@ -17,8 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
@@ -49,7 +51,7 @@ class ChannelStatsServiceTest {
     }
 
     @Test
-    @DisplayName("updateChannelStats는 YouTube API로 통계를 조회하고 DB에 저장한다")
+    @DisplayName("updateChannelStats는 채널을 재조회하여 통계를 갱신하고 저장한다")
     void it_fetches_stats_and_saves() {
         // given
         Channel channel = createChannel(1L);
@@ -57,14 +59,18 @@ class ChannelStatsServiceTest {
 
         given(youTubeApiService.fetchChannelDetails("token")).willReturn(channelItem);
         given(youTubeApiService.fetchAllVideoShares(any(), any(), any())).willReturn(200L);
-        given(channelRepository.save(any(Channel.class))).willReturn(channel);
+        // 재조회 stub: 같은 channel 객체 반환 → freshChannel == channel
+        given(channelRepository.findById(1L)).willReturn(Optional.of(channel));
 
         // when
         channelStatsService.updateChannelStats(channel, "token");
 
         // then
         verify(youTubeApiService).fetchChannelDetails("token");
-        verify(channelRepository).save(channel);
+        verify(channelRepository).findById(1L);
+        assertThat(channel.getName()).isEqualTo("테스트 채널");
+        assertThat(channel.getSubscribe()).isEqualTo(500L);
+        assertThat(channel.getShare()).isEqualTo(200L);
     }
 
     // --- Fixture ---

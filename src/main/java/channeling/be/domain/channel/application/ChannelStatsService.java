@@ -4,7 +4,10 @@ import channeling.be.domain.channel.domain.Channel;
 import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.global.infrastructure.youtube.YouTubeApiService;
 import channeling.be.global.infrastructure.youtube.dto.res.YoutubeChannelResDTO;
+import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
+
+import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -31,9 +34,11 @@ public class ChannelStatsService {
 		long shares = youTubeApiService.fetchAllVideoShares(
 				googleAccessToken, item.getSnippet().getPublishedAt(), LocalDateTime.now());
 
-		// DB 저장 — 트랜잭션 안
+		// DB 저장 — 트랜잭션 안에서 재조회 후 업데이트 (Detached Entity 방지)
 		transactionTemplate.executeWithoutResult(status -> {
-			channel.updateChannelInfo(
+			Channel freshChannel = channelRepository.findById(channel.getId())
+					.orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+			freshChannel.updateChannelInfo(
 					item.getSnippet().getTitle(),
 					item.getId(),
 					item.getContentDetails().getRelatedPlaylists().getUploads(),
@@ -43,12 +48,8 @@ public class ChannelStatsService {
 					item.getStatistics().getViewCount(),
 					item.getStatistics().getSubscriberCount(),
 					item.getStatistics().getVideoCount(),
-					channel.getLikeCount(),
-					channel.getComment(),
-					channel.getChannelHashTag() != null ? channel.getChannelHashTag().getId() : "0",
 					shares
 			);
-			channelRepository.save(channel);
 		});
 	}
 }

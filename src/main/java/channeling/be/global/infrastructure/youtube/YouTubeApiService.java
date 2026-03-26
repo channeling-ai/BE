@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 
 /**
  * YouTube API 호출 전담 서비스.
@@ -27,7 +27,7 @@ import java.util.concurrent.ExecutorService;
 public class YouTubeApiService {
 
 	private final RestTemplate restTemplate;
-	private final ExecutorService shortsCheckExecutor;
+	private final Executor shortsCheckExecutor;
 
 	public YoutubeChannelResDTO.Item fetchChannelDetails(String accessToken) {
 		return YoutubeUtil.getChannelDetails(accessToken);

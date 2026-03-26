@@ -68,24 +68,22 @@ public class ChannelServiceImpl implements ChannelService {
 	// ─── 채널 생성/조회 ───
 
 	@Override
-	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public Channel createOrGetBasicChannel(Member member, String googleAccessToken) {
+	@Transactional(propagation = Propagation.NEVER) // 외부 API 호출 포함, 트랜잭션 관리 직접
+	public ChannelCreationResult createOrGetBasicChannel(Member member, String googleAccessToken) {
 		Optional<Channel> existing = channelRepository.findByMember(member);
 		if (existing.isPresent()) {
-			return existing.get();
+			return new ChannelCreationResult(existing.get(), false);
 		}
 
 		// YouTube API 호출
 		YoutubeChannelResDTO.Item item = youTubeApiService.fetchChannelDetails(googleAccessToken);
 		long shares = youTubeApiService.fetchAllVideoShares(
 				googleAccessToken, item.getSnippet().getPublishedAt(), LocalDateTime.now());
-		String topCategoryId = "0";
 
-		// DB 저장
-		return channelRepository.save(ChannelConverter.toNewChannel(item, member, shares, topCategoryId));
+		// save()는 Repository 자체 @Transactional로 독립 write tx 실행
+		Channel newChannel = channelRepository.save(ChannelConverter.toNewChannel(item, member, shares, "0"));
+		return new ChannelCreationResult(newChannel, true);
 	}
-
-	// ─── 기존 메서드 ───
 
 	@Override
 	public Channel getChannel(Long channelId, Member loggedInMember) {

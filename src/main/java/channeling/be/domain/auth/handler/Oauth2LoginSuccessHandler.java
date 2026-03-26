@@ -58,14 +58,16 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         boolean isNew = result.isNew();
 
         // 3. 기본 채널 생성/조회 (동기 — YouTube API 최대 1회)
-        Channel channel;
+        ChannelService.ChannelCreationResult channelResult;
         try {
-            channel = channelService.createOrGetBasicChannel(member, googleAccessToken);
+            channelResult = channelService.createOrGetBasicChannel(member, googleAccessToken);
         } catch (YoutubeHandler e) {
             log.warn("채널 없는 계정 로그인 시도 - error: {}", e.getCode());
             response.sendRedirect(buildErrorRedirectUrl("NO_CHANNEL"));
             return;
         }
+        Channel channel = channelResult.channel();
+        boolean isChannelNew = channelResult.isChannelNew();
 
         // 4. JWT → redirect (응답 완료)
         String accessToken = jwtUtil.createAccessToken(member);
@@ -73,10 +75,12 @@ public class Oauth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         long totalTime = System.currentTimeMillis() - startTime;
         log.info("[TIME] ========== 로그인 프로세스 완료: 총 {}ms ==========", totalTime);
 
+        // isNew = 멤버 신규 여부 (프론트엔드 온보딩 분기용), isChannelNew = 채널 신규 여부 (후처리 중복 호출 방지용)
         response.sendRedirect(buildSuccessRedirectUrl(accessToken, channel.getId(), isNew));
 
         // 5. 비동기 후처리 (응답 이후 백그라운드)
-        loginPostProcessor.executeAsync(member, channel, googleAccessToken, isNew);
+        // isChannelNew 전달: 신규 채널은 createOrGetBasicChannel에서 이미 통계를 세팅했으므로 updateChannelStats 스킵
+        loginPostProcessor.executeAsync(member, channel, googleAccessToken, isChannelNew);
     }
 
     private String extractGoogleAccessToken(OAuth2AuthenticationToken oauthToken) {

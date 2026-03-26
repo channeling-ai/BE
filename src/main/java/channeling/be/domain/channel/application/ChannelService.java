@@ -25,9 +25,13 @@ public interface ChannelService {
 
 	/**
 	 * 기본 채널 정보를 조회하거나, 신규 사용자면 YouTube API로 채널을 생성합니다.
-	 * YouTube API 호출은 트랜잭션 밖에서, DB 저장은 @Transactional 안에서 수행합니다.
+	 * YouTube API 호출은 트랜잭션 밖에서, DB 저장은 TransactionTemplate 안에서 수행합니다.
+	 *
+	 * @return ChannelCreationResult(channel, isChannelNew) — isChannelNew는 채널 신규 여부
 	 */
-	Channel createOrGetBasicChannel(Member member, String googleAccessToken);
+	ChannelCreationResult createOrGetBasicChannel(Member member, String googleAccessToken);
+
+	record ChannelCreationResult(Channel channel, boolean isChannelNew) {}
 
 	/**
 	 * 채널 정보를 조회합니다.
