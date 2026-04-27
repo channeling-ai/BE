@@ -1,12 +1,15 @@
 package channeling.be.global.infrastructure.redis;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -14,10 +17,12 @@ import java.util.concurrent.TimeUnit;
  *    - 문자열(String) 타입 전용 StringRedisTemplate을 주입받아 사용
  *    - 기본 CRUD + 만료시간 설정 기능 제공
  */
+@Slf4j
 @RequiredArgsConstructor
 @Component
 public class RedisUtil {
     private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper;
 
     /** redis에 저장하는 구글 엑세스의 지속 시간 **/
     @Value("${jwt.google.access.expiration}")
@@ -142,5 +147,24 @@ public class RedisUtil {
                 String.valueOf(1),
                 Duration.ofSeconds(accessExpiration)
         );
+    }
+
+    // ── Redis Pub/Sub ──────────────────────────────────
+
+    private static final String COMPLETE_CHANNEL = "complete";
+
+    public void publishFailure(Long userId, String step) {
+        try {
+            String innerMessage = objectMapper.writeValueAsString(
+                    Map.of("status", "fail", "step", step)
+            );
+            String payload = objectMapper.writeValueAsString(
+                    Map.of("userId", String.valueOf(userId), "message", innerMessage)
+            );
+            stringRedisTemplate.convertAndSend(COMPLETE_CHANNEL, payload);
+            log.info("Redis 실패 알림 발행 - userId: {}, step: {}", userId, step);
+        } catch (Exception e) {
+            log.error("Redis Publish 실패 - userId: {}, step: {}", userId, step, e);
+        }
     }
 }

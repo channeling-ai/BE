@@ -3,3 +3,10 @@ spring:
     name: channeling-be
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:db,s3,oauth,jwt}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    topic:
+      overview: ${KAFKA_OVERVIEW_TOPIC:overview-topic-v2}
+      analysis: ${KAFKA_ANALYSIS_TOPIC:analysis-topic-v2}
+      partitions: ${KAFKA_TOPIC_PARTITIONS:1}
+      replicas: ${KAFKA_TOPIC_REPLICAS:1}
