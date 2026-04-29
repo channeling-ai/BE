@@ -96,8 +96,10 @@ public class Channel extends BaseEntity {
         this.channelUpdateAt = LocalDateTime.now();
     }
 
-    public void updateChannelInfo(String title, String channelId, String uploadPlaylistId, String profileImageUrl, String channelUrl, LocalDateTime publishedAt, Long viewCount, Long subscriberCount, Long videoCount,
-        long likeCount, long commentCount,String topCategoryId,long shares) {
+    public void updateChannelInfo(String title, String channelId, String uploadPlaylistId,
+                                   String profileImageUrl, String channelUrl,
+                                   LocalDateTime publishedAt, Long viewCount,
+                                   Long subscriberCount, Long videoCount, long shares) {
         this.name = title;
         this.youtubeChannelId = channelId;
         this.youtubePlaylistId = uploadPlaylistId;
@@ -107,10 +109,7 @@ public class Channel extends BaseEntity {
         this.view = viewCount;
         this.subscribe = subscriberCount;
         this.videoCount = videoCount;
-        this.likeCount = likeCount;
-        this.comment = commentCount;
+        this.share = shares;
         this.channelUpdateAt = LocalDateTime.now();
-        this.channelHashTag = VideoCategory.ofId(topCategoryId);
-        this.share=shares;
     }
 }

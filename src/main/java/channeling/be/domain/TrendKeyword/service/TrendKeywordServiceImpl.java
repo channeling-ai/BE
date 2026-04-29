@@ -12,7 +12,6 @@ import channeling.be.response.exception.handler.ChannelHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -30,7 +29,6 @@ public class TrendKeywordServiceImpl implements TrendKeywordService {
     private final ChannelRepository channelRepository;
     private final RestTemplate restTemplate;
 
-    @Async // 비동기로 호출
     @Override
     public void updateChannelTrendKeyword(Member member) {
         Channel channel = channelRepository.findByMember(member).orElseThrow(() -> new ChannelHandler(ErrorStatus._MEMBER_NOT_FOUND));

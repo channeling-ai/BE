@@ -34,4 +34,5 @@ public class Task extends BaseEntity {
     public void setReport(Report report) {
         this.report = report;
     }
+
 }

@@ -85,26 +85,6 @@ public class IdeaServiceImpl implements IdeaService {
         log.info("Deleted {} unbookmarked ideas for memberId={}", deletedCount, loginMember.getId());
     }
 
-    @Async
-    @Override
-    @Transactional
-    public void deleteNotBookMarkedIdeasAsync(Member loginMember) {
-        try {
-            // 이벤트 발행을 위해 아이디어 먼저 조회
-            List<Idea> ideas = ideaRepository.findByMemberWithoutBookmarked(loginMember.getId());
-
-            // 각 아이디어에 대해 삭제 이벤트 발행
-            ideas.forEach(idea -> eventPublisher.publishEvent(new IdeaDeletedEvent(idea)));
-
-            // 아이디어 삭제
-            ideaRepository.deleteAll(ideas);
-
-            log.info("비동기 삭제 완료 - {} unbookmarked ideas for memberId={}", ideas.size(), loginMember.getId());
-        } catch (Exception e) {
-            log.error("비동기 아이디어 삭제 실패 - memberId: {}, error: {}", loginMember.getId(), e.getMessage(), e);
-        }
-    }
-
     @Override
     public List<LlmResDto.CreateIdeasResDto> createIdeas(IdeaReqDto.CreateIdeaReqDto dto, Member member) {
 

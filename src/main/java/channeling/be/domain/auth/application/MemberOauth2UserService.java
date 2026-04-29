@@ -1,8 +1,5 @@
 package channeling.be.domain.auth.application;
 
-import channeling.be.domain.channel.application.ChannelService;
-import channeling.be.domain.channel.domain.Channel;
-import channeling.be.domain.channel.domain.repository.ChannelRepository;
 import channeling.be.domain.member.application.MemberService;
 import channeling.be.domain.member.domain.Member;
 import channeling.be.domain.member.domain.MemberStatus;
@@ -22,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -30,17 +26,13 @@ import java.util.Optional;
 public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final MemberService memberService;
-    private final ChannelService channelService;
-    private final ChannelRepository channelRepository;
     private final RedisUtil redisUtil;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        // 로그인 진행 시 키값 (sub)
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
-        // oauth user 정보
         OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
         Map<String, Object> memberAttribute = oAuth2User.getAttributes();
@@ -53,33 +45,12 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
                 userNameAttributeName);
     }
 
-    @Transactional
-    public LoginResult executeGoogleLogin(Map<String, Object> attrs, String googleAccessToken) {
-        MemberResult memberResult = memberService.findOrCreateMember(
-            attrs.get("sub").toString(),
-            attrs.get("email").toString(),
-            attrs.get("name").toString(),
-            attrs.get("picture").toString()
-
-        );
-        Member member = memberResult.member;
-        redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
-
-        Channel channel = channelService.updateOrCreateChannelByMember(member);
-
-        return new LoginResult(member, channel, memberResult.isNew);
-    }
-
     /**
-     * 빠른 로그인 처리 - 기존 사용자는 채널 동기화 없이 즉시 반환.
-     * 채널 동기화는 비동기로 별도 처리됩니다.
-     *
-     * @param attrs Google OAuth2 사용자 속성
-     * @param googleAccessToken Google Access Token
-     * @return 로그인 결과 (기존 사용자: isNew=false, 신규 사용자: isNew=true)
+     * 멤버 찾기/생성 + 탈퇴 회원 복구 + Google 토큰 저장.
+     * 채널 관련 로직은 포함하지 않습니다.
      */
     @Transactional
-    public LoginResult executeGoogleLoginFast(Map<String, Object> attrs, String googleAccessToken) {
+    public LoginResult processLogin(Map<String, Object> attrs, String googleAccessToken) {
         MemberResult memberResult = memberService.findOrCreateMember(
             attrs.get("sub").toString(),
             attrs.get("email").toString(),
@@ -89,28 +60,17 @@ public class MemberOauth2UserService implements OAuth2UserService<OAuth2UserRequ
         Member member = memberResult.member;
         redisUtil.saveGoogleAccessToken(member.getId(), googleAccessToken);
 
-        // 탈퇴 회원 복구 처리 (한달 이내)
-        if (member.getStatus().equals(MemberStatus.WITHDRAWN) && member.getDeletedAt().isAfter(LocalDateTime.now().minusDays(30))) {
+        // 탈퇴 회원 복구 처리 (30일 이내)
+        if (member.getStatus().equals(MemberStatus.WITHDRAWN)
+                && member.getDeletedAt() != null
+                && member.getDeletedAt().isAfter(LocalDateTime.now().minusDays(30))) {
             member.restore();
             log.info("회원 복구 처리 완료: memberId={}", member.getId());
         }
 
-        // 기존 채널 조회
-        Optional<Channel> channelOpt = channelRepository.findByMember(member);
-
-        if (channelOpt.isPresent()) {
-            // 기존 사용자: 기존 채널 반환 (비동기로 업데이트 예정)
-            log.info("기존 사용자 빠른 로그인 - memberId: {}", member.getId());
-            return new LoginResult(member, channelOpt.get(), false);
-        } else {
-            // 신규 사용자: 동기로 채널 생성 (YouTube API 호출 필수)
-            log.info("신규 사용자 채널 생성 시작 - memberId: {}", member.getId());
-            Channel channel = channelService.updateOrCreateChannelByMember(member);
-            return new LoginResult(member, channel, true);
-        }
+        return new LoginResult(member, memberResult.isNew);
     }
 
-    public record LoginResult(Member member, Channel channel, boolean isNew) {}
+    public record LoginResult(Member member, boolean isNew) {}
     public record MemberResult(Member member, boolean isNew) {}
-
 }

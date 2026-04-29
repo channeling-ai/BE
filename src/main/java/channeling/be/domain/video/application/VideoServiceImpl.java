@@ -22,10 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_FOUND;
 import static channeling.be.response.code.status.ErrorStatus._CHANNEL_NOT_MEMBER;
@@ -156,6 +160,39 @@ public class VideoServiceImpl implements VideoService {
 	@Transactional
 	public void deleteVideo(Video dbVideo) {
 		videoRepository.delete(dbVideo);
+	}
+
+	@Override
+	@Transactional
+	public void saveVideosWithStats(List<YoutubeVideoBriefDTO> briefs, List<YoutubeVideoDetailDTO> details, Channel channel) {
+		// @Async 경계를 넘은 detached Channel 재조회
+		Channel freshChannel = channelRepository.findById(channel.getId())
+				.orElseThrow(() -> new ChannelHandler(_CHANNEL_NOT_FOUND));
+
+		// 배치 조회로 N+1 방지
+		List<String> videoIds = briefs.stream().map(YoutubeVideoBriefDTO::getVideoId).toList();
+		Map<String, Video> existingMap = videoRepository.findByYoutubeVideoIdIn(videoIds).stream()
+				.collect(Collectors.toMap(Video::getYoutubeVideoId, Function.identity()));
+
+		long likeCount = 0, commentCount = 0;
+		List<Video> toSave = new ArrayList<>();
+		for (int i = 0; i < briefs.size(); i++) {
+			YoutubeVideoBriefDTO brief = briefs.get(i);
+			YoutubeVideoDetailDTO detail = details.get(i);
+			likeCount += detail.getLikeCount();
+			commentCount += detail.getCommentCount();
+
+			Video existing = existingMap.get(brief.getVideoId());
+			if (existing != null) {
+				VideoConverter.toVideo(existing, brief, detail);
+				toSave.add(existing);
+			} else {
+				toSave.add(VideoConverter.toVideo(brief, detail, freshChannel));
+			}
+		}
+		videoRepository.saveAll(toSave);
+		freshChannel.updateChannelStats(likeCount, commentCount);
+		channelRepository.save(freshChannel);
 	}
 }
 

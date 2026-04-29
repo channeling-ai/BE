@@ -27,6 +27,8 @@ public interface VideoRepository extends JpaRepository<Video, Long> {
 
 	Optional<Video> findByYoutubeVideoId(String youtubeVideoId);
 
+	List<Video> findByYoutubeVideoIdIn(List<String> youtubeVideoIds);
+
 	@Query("""
     SELECT v
     FROM Video v
